@@ -53,7 +53,7 @@ Cualquier otro permiso requiere ADR.
 - Solicitar `ACTION_APPWIDGET_BIND` por widget; manejar `configure` del proveedor.
 
 ### 3.5 Componentes exportados
-- Solo: `HomeActivity` (HOME), `SettingsActivity` (LAUNCHER), servicios protegidos por permiso de sistema. Ningún `ContentProvider` ni `BroadcastReceiver` exportado sin protección.
+- Solo: `HomeActivity` (HOME y LAUNCHER, ADR-014) y servicios protegidos por permiso de sistema. `SettingsActivity` es `exported="false"`. Ningún `ContentProvider` ni `BroadcastReceiver` exportado sin protección.
 
 ### 3.6 `PendingIntent`
 - `FLAG_IMMUTABLE` por defecto. Las respuestas inline de notificación usan los `PendingIntent` de la propia notificación (no creamos `MUTABLE` propios).

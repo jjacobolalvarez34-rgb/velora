@@ -20,6 +20,10 @@ naming:
     constantPattern: '[A-Z][A-Za-z0-9_]*'
 
 style:
+  # Las cláusulas de guarda al inicio (`?: return`, `if (...) return`) no cuentan.
+  ReturnCount:
+    max: 2
+    excludeGuardClauses: true
   MagicNumber:
     # Los tokens de diseño son, por definición, números con nombre.
     excludes: ['**/core/designsystem/**', '**/test/**', '**/androidTest/**', '**/*.kts']

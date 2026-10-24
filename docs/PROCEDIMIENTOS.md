@@ -38,20 +38,20 @@
         <category android:name="android.intent.category.HOME" />
         <category android:name="android.intent.category.DEFAULT" />
     </intent-filter>
-</activity>
-
-<!-- Entrada aparte para abrir los ajustes desde cualquier launcher -->
-<activity
-    android:name=".feature.settings.SettingsActivity"
-    android:exported="true"
-    android:label="@string/settings_launcher_label">
+    <!-- Tocar el ícono de Velora abre el inicio (ADR-014). -->
     <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
     </intent-filter>
 </activity>
+
+<!-- Interna: se abre manteniendo presionado el inicio. -->
+<activity
+    android:name=".feature.settings.SettingsActivity"
+    android:exported="false"
+    android:label="@string/settings_launcher_label" />
 ```
-La `SettingsActivity` con `LAUNCHER` permite configurar Velora aunque todavía no sea el launcher predeterminado (y aparece como "Ajustes de Velora" en la propia lista). `Theme.Velora.Home` debe tener `android:windowShowWallpaper=true` y `android:windowBackground=@android:color/transparent`.
+El ícono de Velora abre el inicio aunque todavía no sea el predeterminado; en ese caso aparece primero la landing, que ofrece hacerlo predeterminado. Velora no aparece en su propia lista. `Theme.Velora.Home` debe tener `android:windowShowWallpaper=true` y `android:windowBackground=@android:color/transparent`.
 
 ## P-03. Flujo de una tarea (feature o fix)
 

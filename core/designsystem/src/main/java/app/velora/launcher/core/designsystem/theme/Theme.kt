@@ -43,7 +43,7 @@ fun VeloraTheme(
     CompositionLocalProvider(
         LocalVeloraMotion provides motion,
     ) {
-        MaterialTheme(colorScheme = colorScheme, content = content)
+        MaterialTheme(colorScheme = colorScheme, typography = VeloraMaterialTypography, content = content)
     }
 }
 

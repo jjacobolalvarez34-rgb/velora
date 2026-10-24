@@ -21,18 +21,20 @@ Anti-palabras: *ruidoso, recargado, gamer, neón*.
 
 ## 3. Tipografía
 
-- Fuente por defecto: la del sistema (rápida, sin peso extra en el APK). Fuente propia opcional en Fase 3 (descargable vía Google Fonts provider, no empaquetada).
+- Fuente: **Manrope** (ADR-015), variable y empaquetada en `core/designsystem` (~87 KB, recortada a latino) para que el texto nunca "salte" en el primer frame. Idiomas no latinos usan la fuente del sistema. Pendiente: opción "Fuente del sistema" en Ajustes.
 - Escala (sp), siempre respetando el tamaño de fuente del sistema:
 
 | Token | Uso | Tamaño | Peso |
 |---|---|---|---|
-| `clock` | Hora en inicio | 56 | Light |
+| `clock` | Hora en inicio | 56 | ExtraLight |
 | `date` | Fecha bajo la hora | 16 | Regular |
 | `favorite` | Nombre de favorito | 22 | Regular |
 | `appRow` | Fila de lista completa | 18 | Regular |
 | `letter` | Alfabeto ola | 13 | Medium |
 | `letterActive` | Letra bajo el dedo | 28 | SemiBold |
-| `caption` | Notificación resumida | 14 | Regular |
+| `caption` | Notificación resumida, pistas | 14 | Regular |
+| `sectionHeader` | Letra de sección en la lista | 13 | SemiBold |
+| `brandTitle` | "Velora" en la landing | 44 | Light, espaciado 2 sp |
 
 ## 4. Espaciado, forma y layout
 

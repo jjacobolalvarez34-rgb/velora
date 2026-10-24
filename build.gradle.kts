@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.androidx.baselineprofile) apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.room) apply false
 }
 
 // detekt y ktlint corren como CLI con su propio classpath (ver docs/DECISIONES.md, ADR-012).

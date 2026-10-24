@@ -1,12 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Velora</string>
+    <string name="brand_name" translatable="false">Velora</string>
     <string name="settings_launcher_label">Ajustes de Velora</string>
 
-    <string name="home_open_settings">Abrir ajustes de Velora</string>
+    <!-- Bienvenida -->
+    <string name="welcome_tagline">Tu inicio, en calma y a una mano.</string>
+    <string name="welcome_point_list">Todas tus apps en una lista, a un deslizamiento.</string>
+    <string name="welcome_point_alphabet">Desliza el pulgar por el alfabeto para saltar a cualquier letra.</string>
+    <string name="welcome_point_privacy">Nada sale de tu teléfono.</string>
+    <string name="welcome_set_default">Usar Velora como inicio</string>
+    <string name="welcome_not_now">Ahora no</string>
 
+    <!-- Inicio -->
+    <string name="home_open_settings">Abrir ajustes de Velora</string>
+    <string name="home_open_all_apps">Ver todas las apps</string>
+    <string name="home_favorites_empty">Desliza hacia arriba para ver tus apps. Mantén presionada una para fijarla aquí.</string>
+    <string name="favorites_full">Ya tienes 12 favoritos. Quita uno para agregar otro.</string>
+
+    <!-- Lista completa -->
+    <string name="drawer_search_hint">Buscar apps</string>
+    <string name="drawer_no_results">No hay apps con «%1$s».</string>
+    <string name="alphabet_letter">Ir a la letra %1$s</string>
+    <string name="alphabet_symbols">Ir a números y símbolos</string>
+    <string name="app_work_profile_description">%1$s, perfil de trabajo</string>
+
+    <!-- Menú de app -->
+    <string name="app_menu_add_favorite">Agregar a favoritos</string>
+    <string name="app_menu_remove_favorite">Quitar de favoritos</string>
+    <string name="app_menu_info">Información de la app</string>
+    <string name="app_menu_uninstall">Desinstalar</string>
+
+    <!-- Ajustes -->
     <string name="settings_title">Ajustes</string>
     <string name="settings_home_app_title">App de inicio</string>
     <string name="settings_home_app_summary">Elige Velora o vuelve a tu launcher anterior.</string>
+
+    <!-- Errores -->
     <string name="error_open_system_settings">No se pudieron abrir los ajustes del sistema.</string>
+    <string name="error_app_launch">No se pudo abrir %1$s.</string>
+    <string name="error_work_profile_paused">Tu perfil de trabajo está en pausa.</string>
 </resources>

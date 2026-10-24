@@ -54,6 +54,20 @@ _`compileSdk` actualizado a 37 por ADR-013; `minSdk` y `targetSdk` siguen vigent
 **Por qué:** `compileSdk` solo cambia qué APIs se pueden *referenciar*; el comportamiento en ejecución lo fija `targetSdk`. Usar una API de 37 sigue requiriendo `Build.VERSION.SDK_INT` (REGLAS §9).
 **Consecuencias:** subir `targetSdk` a 37 es una decisión aparte (cambios de comportamiento de Android 17), con su propio ADR.
 
+## ADR-014 · El ícono abre el inicio; los ajustes son internos — Aceptada (2026-10-23)
+**Contexto:** con P-02 original, el único ícono en el cajón de otros launchers era "Ajustes de Velora"; el autor lo tocó esperando ver el inicio.
+**Opciones:** A) dos íconos (Velora + Ajustes). B) Un ícono que abre `HomeActivity`; ajustes por pulsación larga.
+**Decisión:** B. `HomeActivity` tiene también `MAIN/LAUNCHER`; `SettingsActivity` queda `exported="false"`, sin `LAUNCHER`.
+**Por qué:** un solo punto de entrada, claro. Abrir el inicio sin ser predeterminado muestra la landing (PENDIENTES §1), que ofrece hacerlo predeterminado. Un componente exportado menos (SEGURIDAD §3.5).
+**Consecuencias:** Velora se excluye de su propia lista de apps. Si los ajustes crecen, considerar un acceso visible en el inicio.
+
+## ADR-015 · Fuente Manrope empaquetada — Aceptada (2026-10-23)
+**Contexto:** el autor pidió una fuente "elegante, bonita". ESTILO §3 decía "fuente del sistema; propia opcional y descargable en Fase 3".
+**Opciones:** A) fuente del sistema. B) Manrope descargable (Google Fonts provider). C) Manrope empaquetada.
+**Decisión:** C. Manrope variable (eje `wght` 200–800), recortada a latino con `fontTools` (~87 KB), en `core/designsystem/src/main/res/font/manrope.ttf`. Licencia SIL OFL 1.1 (`docs/licencias/OFL-Manrope.txt`, `THIRD_PARTY_NOTICES.md`).
+**Por qué:** una fuente descargable llega después del primer frame y el texto "salta": inaceptable en un launcher. Una sola fuente variable cubre todos los pesos. Pesa poco frente al presupuesto de 8 MB.
+**Consecuencias:** idiomas no latinos (cirílico, griego, CJK) caen a la fuente del sistema. Pendiente: opción "Fuente del sistema" en Ajustes.
+
 ---
 
 ## Plantilla

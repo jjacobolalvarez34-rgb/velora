@@ -1,7 +1,7 @@
 # Roadmap
 
 > Fase actual: **Fase 0**. Cada fase cierra con la definición de "Hecho" de `VERIFICACIONES.md` §7.
-> Marcar `[x]` al completar y anotar la fecha.
+> Marcar `[x]` al completar y anotar la fecha. `[~]` = código hecho, falta verificar en dispositivo.
 
 ## Fase 0 — Cimientos (1–2 semanas)
 - [x] Proyecto creado con módulos y `libs.versions.toml` (P-01) — 2026-10-23
@@ -17,22 +17,25 @@
 
 ## Fase 1 — MVP usable (4–6 semanas)
 
-> **Siguiente sesión:** ver `PENDIENTES.md` §1. Primero el ícono que abre el inicio, luego la landing y la fuente Manrope, después la lista de apps.
-- [ ] `AppsRepository` con `LauncherApps`, perfiles, caché Room y callbacks (B-008, B-009)
-- [ ] `IconRepository` con caché memoria+disco
-- [ ] Inicio: reloj/fecha + favoritos abajo
-- [ ] Lista completa con secciones por letra
-- [ ] **Alfabeto ola** (ESTILO §6) — el ítem más importante; iterar hasta que se sienta perfecto
-- [ ] Búsqueda sin tildes
-- [ ] Abrir apps con animación desde la fila
-- [ ] Menú de pulsación larga: info, desinstalar, ocultar, favorito, atajos (B-018)
+> Estado al 2026-10-23: el código de los ítems marcados `[~]` está hecho, compila y tiene pruebas en la JVM, pero **falta probarlo en el teléfono** (VERIFICACIONES §1). Lo que sigue está en `PENDIENTES.md`.
+
+- [~] `AppsRepository` con `LauncherApps`, perfiles y callbacks (B-008, B-009). _Falta: caché de apps en Room para el primer frame._
+- [~] `IconRepository` con caché en memoria. _Falta: caché en disco._
+- [~] Inicio: reloj/fecha + favoritos abajo (Room)
+- [~] Lista completa con secciones por letra
+- [~] **Alfabeto ola** (ESTILO §6), primera versión: un solo `Canvas`, háptica por letra, alternativa con TalkBack. _Iterar en el teléfono hasta que se sienta perfecto._
+- [~] Búsqueda sin tildes
+- [~] Abrir apps con animación desde la fila
+- [~] Menú de pulsación larga: info, desinstalar, favorito. _Faltan: ocultar y atajos (B-018)._
 - [ ] Apps ocultas
-- [ ] Ajustes: zurdo, íconos sí/no, tamaño de texto, reordenar favoritos
-- [ ] Onboarding: elegir favoritos + "establecer como predeterminado"
-- [ ] Back predictivo y `onNewIntent(HOME)` (B-010, B-011)
-- [ ] Prevención B-001, B-005, B-012, B-013, B-014
+- [ ] Ajustes: zurdo, íconos sí/no, tamaño de texto, reordenar favoritos, fuente del sistema
+- [~] Onboarding: landing con "establecer como predeterminado". _Falta: elegir favoritos._
+- [~] Back y `onNewIntent(HOME)` (B-010, B-011). _Falta: animación de back predictivo._
+- [~] Prevención B-001, B-005, B-012, B-013, B-014
 - [ ] Baseline Profile de flujos críticos; presupuestos de RENDIMIENTO cumplidos
-- [ ] Strings es/en
+- [~] Strings es/en
+- [~] Fuente Manrope (ADR-015)
+- [~] El ícono abre el inicio (ADR-014)
 
 **Salida:** usarlo 7 días como launcher principal.
 

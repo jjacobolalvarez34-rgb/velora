@@ -2,10 +2,40 @@
 <resources>
     <string name="settings_launcher_label">Velora settings</string>
 
-    <string name="home_open_settings">Open Velora settings</string>
+    <!-- Welcome -->
+    <string name="welcome_tagline">Your home screen, calm and one-handed.</string>
+    <string name="welcome_point_list">All your apps in one list, a swipe away.</string>
+    <string name="welcome_point_alphabet">Slide your thumb along the alphabet to jump to any letter.</string>
+    <string name="welcome_point_privacy">Nothing leaves your phone.</string>
+    <string name="welcome_set_default">Use Velora as home screen</string>
+    <string name="welcome_not_now">Not now</string>
 
+    <!-- Home -->
+    <string name="home_open_settings">Open Velora settings</string>
+    <string name="home_open_all_apps">Show all apps</string>
+    <string name="home_favorites_empty">Swipe up to see your apps. Long-press one to pin it here.</string>
+    <string name="favorites_full">You already have 12 favorites. Remove one to add another.</string>
+
+    <!-- App list -->
+    <string name="drawer_search_hint">Search apps</string>
+    <string name="drawer_no_results">No apps match “%1$s”.</string>
+    <string name="alphabet_letter">Go to letter %1$s</string>
+    <string name="alphabet_symbols">Go to numbers and symbols</string>
+    <string name="app_work_profile_description">%1$s, work profile</string>
+
+    <!-- App menu -->
+    <string name="app_menu_add_favorite">Add to favorites</string>
+    <string name="app_menu_remove_favorite">Remove from favorites</string>
+    <string name="app_menu_info">App info</string>
+    <string name="app_menu_uninstall">Uninstall</string>
+
+    <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_home_app_title">Home app</string>
     <string name="settings_home_app_summary">Choose Velora or go back to your previous launcher.</string>
+
+    <!-- Errors -->
     <string name="error_open_system_settings">Couldn\'t open system settings.</string>
+    <string name="error_app_launch">Couldn\'t open %1$s.</string>
+    <string name="error_work_profile_paused">Your work profile is paused.</string>
 </resources>

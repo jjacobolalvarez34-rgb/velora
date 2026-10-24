@@ -61,6 +61,10 @@ data class OnWallpaperColors(
     val contentVariant: Color,
     val scrimTop: Color,
     val scrimBottom: Color,
+    /** Velo de la lista completa: oscurece todo el wallpaper. */
+    val drawerScrim: Color,
+    /** Fondo del buscador y de elementos elevados sobre el velo. */
+    val surface: Color,
 )
 
 internal val DefaultOnWallpaperColors = OnWallpaperColors(
@@ -68,4 +72,13 @@ internal val DefaultOnWallpaperColors = OnWallpaperColors(
     contentVariant = Color(0xD9FFFFFF),
     scrimTop = Color(0x66000000),
     scrimBottom = Color(0x8C000000),
+    drawerScrim = Color(0xC7000000),
+    surface = Color(0x24FFFFFF),
 )
+
+/** Colores de marca (landing), tomados del logo: cinta plateada sobre negro. */
+object BrandColors {
+    val background = Color(0xFF000000)
+    val silver = Color(0xFFE8EAED)
+    val silverMuted = Color(0xA6E8EAED)
+}

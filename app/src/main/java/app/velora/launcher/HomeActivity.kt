@@ -1,6 +1,7 @@
 package app.velora.launcher
 
 import android.content.BroadcastReceiver
+import android.content.ComponentCallbacks2
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -11,13 +12,27 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import app.velora.launcher.core.designsystem.theme.Sizes
 import app.velora.launcher.feature.settings.SettingsActivity
 import app.velora.launcher.ui.VeloraApp
+import kotlin.math.roundToInt
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 /**
  * La pantalla de inicio. Única Activity del launcher (ADR-003); ciclo de vida en ARQUITECTURA §5.
+ * También es la entrada del ícono de la app (ADR-014).
  */
 class HomeActivity : ComponentActivity() {
+
+    private val container by lazy { (application as VeloraApplication).container }
+
+    /** true = ya estábamos en el inicio y hay que animar el regreso al estado raíz. */
+    private val homePresses = MutableSharedFlow<Boolean>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
 
     // B-001: si otra app enciende la pantalla, la Activity puede no enterarse de que volvió al frente.
     private val userPresentReceiver = object : BroadcastReceiver() {
@@ -37,14 +52,15 @@ class HomeActivity : ComponentActivity() {
             IntentFilter(Intent.ACTION_USER_PRESENT),
             ContextCompat.RECEIVER_NOT_EXPORTED,
         )
-
-        val container = (application as VeloraApplication).container
         setContent {
-            VeloraApp(
-                container = container,
-                onOpenSettings = ::openSettings,
-            )
+            VeloraApp(container = container, homePresses = homePresses, onOpenSettings = ::openSettings)
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // Si veníamos de otra app no se anima: solo se deja el estado raíz (ARQUITECTURA §5).
+        homePresses.tryEmit(lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
     }
 
     override fun onDestroy() {
@@ -60,6 +76,15 @@ class HomeActivity : ComponentActivity() {
     override fun onTopResumedActivityChanged(isTopResumedActivity: Boolean) {
         super.onTopResumedActivityChanged(isTopResumedActivity)
         if (isTopResumedActivity) refreshWindow()
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        // Se sueltan los íconos de la lista; los de favoritos se quedan (RENDIMIENTO §5).
+        if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+            val favoritePx = (Sizes.favoriteIcon.value * resources.displayMetrics.density).roundToInt()
+            container.iconRepository.trimExcept(favoritePx)
+        }
     }
 
     /** Fuerza un redibujado para no quedar con la UI congelada tras el keyguard (B-001). */
