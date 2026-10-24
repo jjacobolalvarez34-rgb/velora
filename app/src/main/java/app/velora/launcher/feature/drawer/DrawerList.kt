@@ -37,12 +37,14 @@ sealed interface DrawerItem {
  *
  * @property letters letras presentes, en el orden de la lista (alimenta el alfabeto ola).
  * @property letterIndex posición del encabezado de cada letra, para saltar sin buscar.
+ * @property byLetter apps de cada letra, para la vista "solo la letra elegida".
  */
 @Immutable
 data class DrawerList(
     val items: List<DrawerItem> = emptyList(),
     val letters: List<String> = emptyList(),
     val letterIndex: List<Int> = emptyList(),
+    val byLetter: Map<String, List<AppEntry>> = emptyMap(),
 )
 
 /**
@@ -65,7 +67,7 @@ fun buildDrawerList(apps: List<AppEntry>, recents: List<AppEntry> = emptyList())
         }
         items += DrawerItem.App(app)
     }
-    return DrawerList(items, letters, letterIndex)
+    return DrawerList(items, letters, letterIndex, byLetter = apps.groupBy { it.section })
 }
 
 private const val MAX_SECTIONS = 28

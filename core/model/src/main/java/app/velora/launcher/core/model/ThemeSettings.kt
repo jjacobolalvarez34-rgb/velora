@@ -32,10 +32,21 @@ enum class IconStyle {
     None,
 }
 
-/** Tema elegido por el usuario. Los valores por defecto son el aspecto de fábrica. */
+/** Tamaño del texto del inicio y la lista, encima del tamaño de fuente del sistema. */
+enum class TextSize(val scale: Float) { Small(0.9f), Normal(1f), Large(1.15f) }
+
+/**
+ * Apariencia elegida por el usuario. Los valores por defecto son el aspecto de fábrica.
+ *
+ * @property leftHanded modo zurdo: el inicio y la lista se espejan (alfabeto a la izquierda).
+ * @property fullList lista completa con scroll; si es false (por defecto) se ve solo la letra elegida.
+ */
 @Immutable
 data class ThemeSettings(
     val font: FontChoice = FontChoice.PlusJakartaSans,
     val clock: ClockStyle = ClockStyle.Classic,
     val icons: IconStyle = IconStyle.Circle,
+    val textSize: TextSize = TextSize.Normal,
+    val leftHanded: Boolean = false,
+    val fullList: Boolean = false,
 )

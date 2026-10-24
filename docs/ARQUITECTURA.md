@@ -76,7 +76,7 @@ LauncherApps.Callback       └─► Room (caché: componente, label, sortKey, 
  onPackagesAvailable/Unavailable/Suspended)
 ```
 
-- **Arranque**: se emite primero lo que hay en Room (instantáneo), luego se reconcilia con el sistema en segundo plano y se emite la diferencia.
+- **Arranque**: se emite primero lo que hay en Room (`apps_cache.db`, `RoomAppsCache`; instantáneo), luego se reconcilia con el sistema en segundo plano y se emite la diferencia. La caché solo se reescribe si la lista cambió. `infoFor()` (íconos) espera a la primera lectura del sistema.
 - `AppKey` = `ComponentName` + `UserHandle` serial. Es la `key` en listas lazy y la clave primaria.
 - `sortKey`: label normalizado con `Collator` en `Locale` actual, sin tildes, mayúsculas; `Ñ` se trata como letra propia en español. Se recalcula al cambiar idioma (`ACTION_LOCALE_CHANGED`).
 - Al reanudar (`onResume`) se verifica una "huella" barata (conteo + hash de paquetes) por si se perdieron callbacks con el proceso muerto.

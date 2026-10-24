@@ -37,6 +37,7 @@ import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import app.velora.launcher.R
 import app.velora.launcher.core.data.apps.AppSorting
@@ -105,7 +107,9 @@ fun WaveAlphabet(
     val wave = remember { WaveState() }
     val touchStart by rememberUpdatedState(onTouchStart)
     val letterChange by rememberUpdatedState(onLetterChange)
-    val draw = WaveDrawing(rememberTextMeasurer(), VeloraTheme.typography.letter, VeloraTheme.onWallpaper)
+    // La ola siempre se abre hacia el centro de la pantalla: a la izquierda, o a la derecha en modo zurdo.
+    val towardCenter = if (LocalLayoutDirection.current == LayoutDirection.Rtl) 1f else -1f
+    val draw = WaveDrawing(rememberTextMeasurer(), VeloraTheme.typography.letter, VeloraTheme.onWallpaper, towardCenter)
 
     Box(
         modifier = modifier
@@ -162,6 +166,7 @@ private class WaveDrawing(
     private val textMeasurer: TextMeasurer,
     private val style: TextStyle,
     private val colors: OnWallpaperColors,
+    private val towardCenter: Float,
 ) {
     fun CacheDrawScope.drawLetters(letters: List<String>, wave: WaveState): DrawResult {
         val layouts = letters.map { textMeasurer.measure(it, style) }
@@ -177,7 +182,7 @@ private class WaveDrawing(
                 val centerY = (i + ROW_CENTER) * rowHeight
                 val rows = (finger - centerY) / rowHeight
                 val g = strength * exp(-(rows * rows) / twoSigmaSq)
-                val centerX = size.width / 2f - amplitude * g
+                val centerX = size.width / 2f + towardCenter * amplitude * g
                 val letterScale = 1f + WAVE_SCALE_GAIN * g
                 scale(letterScale, letterScale, pivot = Offset(centerX, centerY)) {
                     drawText(

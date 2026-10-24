@@ -19,7 +19,7 @@
 
 > 2026-10-24: la 0.1.0 se probó en el teléfono del autor y todo funcionó (`PENDIENTES.md` §1). Los ítems probados pasan a `[x]`. La fase cierra tras 7 días de uso como launcher principal (VERIFICACIONES §7).
 
-- [~] `AppsRepository` con `LauncherApps`, perfiles y callbacks (B-008, B-009). _Falta: caché de apps en Room para el primer frame._
+- [~] `AppsRepository` con `LauncherApps`, perfiles, callbacks y caché en Room para el arranque (B-008, B-009)
 - [~] `IconRepository` con caché en memoria. _Falta: caché en disco._
 - [x] Inicio: reloj/fecha + favoritos abajo (Room) — 2026-10-24
 - [x] Lista completa con secciones por letra — 2026-10-24
@@ -28,8 +28,8 @@
 - [x] Abrir apps con animación desde la fila — 2026-10-24
 - [~] Menú de pulsación larga: atajos (B-018), favorito, ocultar, info, desinstalar
 - [~] Apps ocultas (recuperables en Ajustes)
-- [ ] Ajustes: zurdo, íconos sí/no, tamaño de texto, reordenar favoritos, fuente del sistema
-- [~] Onboarding: landing con "establecer como predeterminado". _Falta: elegir favoritos._
+- [~] Ajustes: zurdo, íconos sí/no, tamaño de texto, reordenar favoritos, fuente del sistema
+- [~] Onboarding: introducción animada de 5 páginas + "establecer como predeterminado". _Falta: elegir favoritos._
 - [~] Back y `onNewIntent(HOME)` (B-010, B-011). _Falta: animación de back predictivo._
 - [~] Prevención B-001, B-005, B-012, B-013, B-014
 - [ ] Baseline Profile de flujos críticos; presupuestos de RENDIMIENTO cumplidos

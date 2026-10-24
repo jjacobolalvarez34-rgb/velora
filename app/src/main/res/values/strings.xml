@@ -77,4 +77,31 @@
     <string name="settings_hidden">Apps ocultas</string>
     <string name="settings_hidden_empty">No has ocultado ninguna app.</string>
     <string name="settings_unhide">Mostrar</string>
+    <string name="settings_layout">Diseño</string>
+    <string name="settings_left_handed">Modo zurdo</string>
+    <string name="settings_left_handed_summary">El alfabeto y los íconos pasan a la izquierda.</string>
+    <string name="settings_text_size">Tamaño de texto</string>
+    <string name="text_size_small">Pequeño</string>
+    <string name="text_size_normal">Normal</string>
+    <string name="text_size_large">Grande</string>
+    <string name="settings_favorites">Favoritos</string>
+    <string name="settings_favorites_empty">Aún no tienes favoritos. Mantén presionada una app para agregarla.</string>
+    <string name="settings_move_up">Subir %1$s</string>
+    <string name="settings_move_down">Bajar %1$s</string>
+    <string name="drawer_pick_letter">Toca una letra del alfabeto para ver tus apps.</string>
+    <string name="settings_full_list">Lista completa</string>
+    <string name="settings_full_list_summary">Todas las apps en una lista con scroll, en vez de solo la letra elegida.</string>
+
+    <!-- Introducción -->
+    <string name="intro_skip">Saltar</string>
+    <string name="intro_next">Siguiente</string>
+    <string name="intro_page">Página %1$d de %2$d</string>
+    <string name="intro_swipe_title">Desliza hacia arriba</string>
+    <string name="intro_swipe_body">Ahí está el buscador y tus apps recién instaladas. Escribe sin preocuparte por las tildes.</string>
+    <string name="intro_wave_title">El alfabeto ola</string>
+    <string name="intro_wave_body">Pasa el pulgar por las letras de la derecha: verás solo las apps de esa letra.</string>
+    <string name="intro_menu_title">Mantén presionada una app</string>
+    <string name="intro_menu_body">Fíjala en el inicio, ocúltala, o usa sus atajos sin abrirla.</string>
+    <string name="intro_theme_title">Hazlo tuyo</string>
+    <string name="intro_theme_body">Mantén presionado el inicio para elegir fuente, reloj e íconos.</string>
 </resources>

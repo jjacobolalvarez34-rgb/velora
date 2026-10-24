@@ -19,6 +19,7 @@ import app.velora.launcher.core.model.ClockState
 import app.velora.launcher.core.model.ClockStyle
 import app.velora.launcher.core.model.FontChoice
 import app.velora.launcher.core.model.IconStyle
+import app.velora.launcher.core.model.TextSize
 import app.velora.launcher.core.model.ThemeSettings
 import java.time.LocalDateTime
 import kotlinx.coroutines.Dispatchers
@@ -66,6 +67,9 @@ class HomeViewModelTest {
         override suspend fun delete(stableId: String) {
             rows.value = rows.value.filterNot { it.stableId == stableId }
         }
+        override suspend fun setPosition(stableId: String, position: Int) {
+            rows.value = rows.value.map { if (it.stableId == stableId) it.copy(position = position) else it }
+        }
     }
 
     private class FakeDefaultHome(isDefault: Boolean?) : DefaultHomeRepository {
@@ -99,6 +103,19 @@ class HomeViewModelTest {
         }
         override suspend fun setIconStyle(style: IconStyle) {
             theme.value = theme.value.copy(icons = style)
+        }
+        override suspend fun setTextSize(size: TextSize) {
+            theme.value = theme.value.copy(textSize = size)
+        }
+        override suspend fun setLeftHanded(enabled: Boolean) {
+            theme.value = theme.value.copy(leftHanded = enabled)
+        }
+        override suspend fun setFullList(enabled: Boolean) {
+            theme.value = theme.value.copy(fullList = enabled)
+        }
+        override val onboardingDone = MutableStateFlow(true)
+        override suspend fun setOnboardingDone() {
+            onboardingDone.value = true
         }
     }
 

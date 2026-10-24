@@ -42,6 +42,9 @@ interface FavoritesDao {
 
     @Query("DELETE FROM favorites WHERE stableId = :stableId")
     suspend fun delete(stableId: String)
+
+    @Query("UPDATE favorites SET position = :position WHERE stableId = :stableId")
+    suspend fun setPosition(stableId: String, position: Int)
 }
 
 /** Una app oculta: no sale en la lista ni en la búsqueda; se recupera en Ajustes. */

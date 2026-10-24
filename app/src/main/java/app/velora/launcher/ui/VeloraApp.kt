@@ -14,9 +14,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -38,6 +42,7 @@ import app.velora.launcher.feature.drawer.DrawerViewModel
 import app.velora.launcher.feature.drawer.rememberDrawerSearchState
 import app.velora.launcher.feature.home.HomeEvent
 import app.velora.launcher.feature.home.HomeViewModel
+import app.velora.launcher.feature.welcome.OnboardingScreen
 import app.velora.launcher.feature.welcome.WelcomeScreen
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -54,8 +59,12 @@ fun VeloraApp(container: AppContainer, homePresses: Flow<Boolean>, onOpenSetting
     val drawerViewModel: DrawerViewModel = viewModel(factory = DrawerViewModel.factory(container))
     // Hasta leer el tema (milisegundos) solo se ve el wallpaper: nunca la fuente equivocada.
     val theme = homeViewModel.theme.collectAsStateWithLifecycle().value ?: return
+    val onboardingDone = homeViewModel.onboardingDone.collectAsStateWithLifecycle().value ?: return
+    val density = LocalDensity.current
     VeloraTheme(font = theme.font) {
         CompositionLocalProvider(
+            // Tamaño de texto de Velora encima del tamaño de fuente del sistema.
+            LocalDensity provides Density(density.density, density.fontScale * theme.textSize.scale),
             LocalIconRepository provides container.iconRepository,
             LocalIconStyle provides theme.icons,
             LocalShortcutsRepository provides container.shortcutsRepository,
@@ -68,10 +77,23 @@ fun VeloraApp(container: AppContainer, homePresses: Flow<Boolean>, onOpenSetting
             }
             HomeEventMessages(homeViewModel)
 
-            if (home.showWelcome) {
-                WelcomeRoute(homeViewModel)
+            if (!onboardingDone) {
+                WelcomeRoute(homeViewModel, intro = true)
+            } else if (home.showWelcome) {
+                WelcomeRoute(homeViewModel, intro = false)
             } else {
-                LauncherRoute(container, homeViewModel, drawerViewModel, homePresses, onOpenSettings)
+                // Modo zurdo: todo el inicio se espeja (alfabeto, márgenes, íconos, zona de gestos).
+                val direction = if (theme.leftHanded) LayoutDirection.Rtl else LocalLayoutDirection.current
+                CompositionLocalProvider(LocalLayoutDirection provides direction) {
+                    LauncherRoute(
+                        container,
+                        homeViewModel,
+                        drawerViewModel,
+                        homePresses,
+                        onOpenSettings,
+                        theme.fullList,
+                    )
+                }
             }
         }
     }
@@ -84,6 +106,7 @@ private fun LauncherRoute(
     drawerViewModel: DrawerViewModel,
     homePresses: Flow<Boolean>,
     onOpenSettings: () -> Unit,
+    fullList: Boolean,
 ) {
     val home by homeViewModel.uiState.collectAsStateWithLifecycle()
     val drawer by drawerViewModel.uiState.collectAsStateWithLifecycle()
@@ -111,6 +134,7 @@ private fun LauncherRoute(
         search = search,
         actions = actions,
         onOpenSettings = onOpenSettings,
+        fullList = fullList,
     )
 }
 
@@ -132,6 +156,7 @@ private fun DrawerEffects(
     LaunchedEffect(drawerState) {
         snapshotFlow { drawerState.isOpen }.distinctUntilChanged().filter { !it }.collect {
             search.clear()
+            search.letter = null
             keyboard?.hide()
             focusManager.clearFocus()
         }
@@ -152,23 +177,28 @@ private fun DrawerEffects(
 }
 
 @Composable
-private fun WelcomeRoute(viewModel: HomeViewModel) {
+private fun WelcomeRoute(viewModel: HomeViewModel, intro: Boolean) {
     val context = LocalContext.current
     // El diálogo de "app de inicio" vuelve con un resultado; se vuelve a comprobar al regresar.
     val request = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         viewModel.onResume()
     }
-    WelcomeScreen(
-        onSetDefault = {
-            try {
-                request.launch(viewModel.defaultHomeRequest())
-            } catch (e: ActivityNotFoundException) {
-                Logger.w("WelcomeRoute", e) { "Sin pantalla para elegir la app de inicio" }
-                Toast.makeText(context, R.string.error_open_system_settings, Toast.LENGTH_SHORT).show()
-            }
-        },
-        onNotNow = viewModel::onWelcomeDismissed,
-    )
+    val setDefault = {
+        if (intro) viewModel.onOnboardingFinished(dismissWelcome = false)
+        try {
+            request.launch(viewModel.defaultHomeRequest())
+        } catch (e: ActivityNotFoundException) {
+            Logger.w("WelcomeRoute", e) { "Sin pantalla para elegir la app de inicio" }
+            Toast.makeText(context, R.string.error_open_system_settings, Toast.LENGTH_SHORT).show()
+        }
+    }
+    if (intro) {
+        OnboardingScreen(onSetDefault = setDefault, onNotNow = {
+            viewModel.onOnboardingFinished(dismissWelcome = true)
+        })
+    } else {
+        WelcomeScreen(onSetDefault = setDefault, onNotNow = viewModel::onWelcomeDismissed)
+    }
 }
 
 @Composable

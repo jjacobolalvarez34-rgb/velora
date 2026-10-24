@@ -33,9 +33,13 @@ class HomeViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val defaultHomeRepository: DefaultHomeRepository,
     private val hiddenAppsRepository: HiddenAppsRepository,
-    prefsRepository: PrefsRepository,
+    private val prefsRepository: PrefsRepository,
     batteryRepository: BatteryRepository,
 ) : ViewModel() {
+
+    /** null hasta leer las preferencias; false = primera vez: se muestra la introducción. */
+    val onboardingDone: StateFlow<Boolean?> = prefsRepository.onboardingDone
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     /** null hasta leer las preferencias: así nunca se ve un frame con el tema equivocado. */
     val theme: StateFlow<ThemeSettings?> = prefsRepository.theme
@@ -80,6 +84,12 @@ class HomeViewModel(
     }
 
     fun onWelcomeDismissed() = defaultHomeRepository.dismissWelcome()
+
+    /** Fin de la introducción. Con "Ahora no", tampoco se insiste con la bienvenida corta. */
+    fun onOnboardingFinished(dismissWelcome: Boolean) {
+        if (dismissWelcome) defaultHomeRepository.dismissWelcome()
+        viewModelScope.launch { prefsRepository.setOnboardingDone() }
+    }
 
     /** Intent para pedir ser el inicio (diálogo del sistema o pantalla de "App de inicio"). */
     fun defaultHomeRequest(): Intent = defaultHomeRepository.requestIntent()

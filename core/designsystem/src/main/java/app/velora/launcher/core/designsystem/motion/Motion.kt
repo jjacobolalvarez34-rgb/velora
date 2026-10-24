@@ -2,6 +2,10 @@ package app.velora.launcher.core.designsystem.motion
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.InfiniteRepeatableSpec
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -41,6 +45,21 @@ class VeloraMotion(val reduced: Boolean) {
 
     /** Retraso entre filas en la entrada escalonada del arranque en frío (ESTILO §5.3). */
     val staggerMillis: Int get() = if (reduced) 0 else 20
+
+    /**
+     * Movimiento ambiental lento, de ida y vuelta (el logo que flota). Con [reduced] quien lo use
+     * no debe animar: se queda quieto.
+     */
+    fun ambientFloat(): InfiniteRepeatableSpec<Float> =
+        infiniteRepeatable(tween(durationMillis = 3200, easing = FastOutSlowInEasing), RepeatMode.Reverse)
+
+    /** Brillo que recorre el logo de lado a lado, con una pausa entre pasadas. */
+    fun ambientSweep(): InfiniteRepeatableSpec<Float> =
+        infiniteRepeatable(tween(durationMillis = 2600, delayMillis = 1200, easing = LinearEasing), RepeatMode.Restart)
+
+    /** Demostraciones del tutorial: un gesto que se repite. */
+    fun demoLoop(): InfiniteRepeatableSpec<Float> =
+        infiniteRepeatable(tween(durationMillis = 2200, easing = FastOutSlowInEasing), RepeatMode.Reverse)
 
     private companion object {
         const val REDUCED_EFFECT_MS = 50

@@ -5,6 +5,7 @@ import app.velora.launcher.core.model.AppKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 sealed interface AddFavoriteResult {
@@ -38,6 +39,16 @@ class FavoritesRepository(private val dao: FavoritesDao, apps: StateFlow<List<Ap
     }
 
     suspend fun remove(key: AppKey) = dao.delete(key.stableId)
+
+    /** Sube (-1) o baja (+1) un favorito; en los extremos no hace nada. */
+    suspend fun move(key: AppKey, offset: Int) {
+        val order = dao.observe().first().map { it.stableId }.toMutableList()
+        val from = order.indexOf(key.stableId)
+        val to = from + offset
+        if (from < 0 || to !in order.indices) return
+        order.add(to, order.removeAt(from))
+        order.forEachIndexed { position, id -> dao.setPosition(id, position) }
+    }
 
     companion object {
         const val MAX_FAVORITES = 12

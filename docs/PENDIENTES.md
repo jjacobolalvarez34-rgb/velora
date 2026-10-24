@@ -31,10 +31,10 @@
 
 ## 3. Siguiente (Fase 1, en orden)
 
-- [ ] Caché de apps en Room para que la lista y los favoritos estén en el **primer frame** del arranque en frío (hoy llegan unos ms después).
+- [~] Caché de apps (`apps_cache.db`, no se respalda): al arrancar la lista sale de ahí y luego se reconcilia con el sistema; los íconos esperan a esa reconciliación.
 - [~] Apps ocultas: "Ocultar" en el menú; se recuperan en Ajustes → Apps ocultas (Room v2, migración automática).
 - [~] Atajos de la app arriba del menú (`LauncherApps.getShortcuts`, B-018; solo si Velora es el inicio predeterminado).
-- [ ] Ajustes: modo zurdo (espejar alfabeto), tamaño de texto, reordenar favoritos. (Íconos sí/no y fuente del sistema ya están en Tema.)
+- [~] Ajustes → Diseño: modo zurdo (todo el inicio espejado) y tamaño de texto (pequeño/normal/grande); Ajustes → Favoritos: subir y bajar.
 - [ ] Onboarding: elegir favoritos la primera vez.
 - [ ] Animación de back predictivo al cerrar la lista.
 - [ ] Baseline Profile de los flujos nuevos (abrir lista, arrastrar alfabeto, buscar) y medir los presupuestos de RENDIMIENTO §2.
@@ -57,7 +57,14 @@
   7. Riesgos: widgets pesados de algunos fabricantes, y que los widgets son Views, no Compose. Hay que medir el scroll con Macrobenchmark antes de darlo por bueno.
 - [ ] Carpetas / agrupar apps (como "Tareas"): Fase 3.
 
-## 5. Cierre de la Fase 0 (falta verificar)
+## 5. Pedidos del 2026-10-24 (noche)
+
+- [~] Lista por letra por defecto: solo las apps de la letra elegida; se cambia con el alfabeto. Lista completa como opción.
+- [~] Landing mejorada con logo animado (entrada, flotación, brillo).
+- [~] Introducción de 5 páginas con demos animadas, una sola vez.
+- [ ] Si Velora ya es el inicio, la última página de la introducción debería decir "Empezar" en vez de "Usar Velora como inicio".
+
+## 6. Cierre de la Fase 0 (falta verificar)
 
 - [ ] Crear el repositorio en GitHub y ver el CI en verde (`.github/workflows/ci.yml`).
 - [ ] Primera medición de arranque con `:macrobenchmark` (necesita un dispositivo conectado).

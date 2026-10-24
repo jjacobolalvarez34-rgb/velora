@@ -44,7 +44,8 @@ Anti-palabras: *ruidoso, recargado, gamer, neón*.
 - Íconos: 40 dp en favoritos, 36 dp en lista. Forma por defecto: círculo (íconos adaptativos con máscara).
 - Esquinas: pop-ups y hojas `28 dp`; menús `16 dp`.
 - **Edge-to-edge siempre** (obligatorio con targetSdk 36): contenido detrás de barras de sistema, con `WindowInsets` correctos.
-- **Zona del pulgar**: favoritos anclados abajo (alineados al fondo de la pantalla), reloj arriba. En modo zurdo todo se espeja.
+- **Zona del pulgar**: favoritos anclados abajo (alineados al fondo de la pantalla), reloj arriba. En modo zurdo todo se espeja: el inicio se dibuja con `LayoutDirection.Rtl`, así alfabeto, márgenes, íconos y zona de gestos cambian de lado sin código aparte; la ola se abre hacia la derecha.
+- **Tamaño de texto** (Ajustes → Diseño): 0,9× / 1× / 1,15× encima del tamaño de fuente del sistema.
 
 ## 5. Movimiento (motion)
 
@@ -117,9 +118,17 @@ El elemento firma. Especificación:
 
 ## 7.2 Lista y búsqueda
 
+- **Por letra (por defecto, pedido del autor):** al tocar el alfabeto solo se ven las apps de esa letra, con la letra grande arriba. Al deslizar el pulgar cambia la letra y las apps entran deslizándose en la dirección del dedo (`SpatialFast` + fundido). Al soltar se queda la última letra.
+- **Abierta deslizando, sin letra:** buscador, la pista "Toca una letra…" y Recién instaladas.
+- **Lista completa** con scroll: opción en Ajustes → Diseño.
 - Arriba de la lista: **Recién instaladas** (últimos 14 días, máximo 4; `LauncherActivityInfo.firstInstallTime`, sin permisos).
 - El buscador se **esconde al bajar** por la lista y vuelve al subir o al llegar arriba.
 - **Modo búsqueda** (buscador con foco o con texto): la lista completa y el alfabeto se van con un fundido; sin texto se ven las recientes, con texto los resultados. Los resultados entran con fundido (`EffectDefault`) y se reacomodan con resorte (`SpatialDefault`, `animateItem`).
+
+## 7.3 Bienvenida e introducción
+
+- **Logo vivo** (`AnimatedLogo`): entra con `SpatialHero`, flota (±6 dp, ±2°, `ambientFloat`) y un brillo plateado recorre solo la cinta (capa `Offscreen` + `BlendMode.SrcAtop`, `ambientSweep`). Con "Quitar animaciones", quieto.
+- **Introducción de la primera vez** (5 páginas deslizables): logo, deslizar para buscar, alfabeto ola, mantener presionada una app y Tema, cada una con una demo animada (`demoLoop`). En la última: "Usar Velora como inicio" / "Ahora no". Se ve una sola vez (`onboarding_done`).
 
 ## 8. Háptica
 

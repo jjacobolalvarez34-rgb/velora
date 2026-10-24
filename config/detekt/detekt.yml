@@ -28,8 +28,11 @@ style:
     excludeGuardClauses: true
   MagicNumber:
     # Los tokens de diseño son, por definición, números con nombre.
-    excludes: ['**/core/designsystem/**', '**/test/**', '**/androidTest/**', '**/*.kts']
+    # Las ilustraciones del tutorial son proporciones de dibujo.
+    excludes: ['**/core/designsystem/**', '**/OnboardingDemos.kt', '**/test/**', '**/androidTest/**', '**/*.kts']
     ignorePropertyDeclaration: true
+    # Valores con nombre en un enum (p. ej. TextSize.Large(1.15f)).
+    ignoreEnums: true
     ignoreAnnotated: ['Preview']
   UnusedPrivateMember:
     ignoreAnnotated: ['Preview']

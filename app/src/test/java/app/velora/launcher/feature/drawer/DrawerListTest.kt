@@ -63,6 +63,14 @@ class DrawerListTest {
     }
 
     @Test
+    fun `cada letra tiene sus apps en orden`() {
+        val list = buildDrawerList(listOf(app("Banco", "B"), app("Bolt", "B"), app("Nequi", "N")))
+
+        assertEquals(listOf("Banco", "Bolt"), list.byLetter.getValue("B").map { it.label })
+        assertEquals(listOf("Nequi"), list.byLetter.getValue("N").map { it.label })
+    }
+
+    @Test
     fun `sin apps no hay letras`() {
         assertTrue(buildDrawerList(emptyList()).letters.isEmpty())
     }

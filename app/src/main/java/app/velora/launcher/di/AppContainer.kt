@@ -4,6 +4,7 @@ import android.content.Context
 import app.velora.launcher.core.data.apps.AppLauncher
 import app.velora.launcher.core.data.apps.AppsRepository
 import app.velora.launcher.core.data.apps.IconRepository
+import app.velora.launcher.core.data.apps.RoomAppsCache
 import app.velora.launcher.core.data.apps.ShortcutsRepository
 import app.velora.launcher.core.data.apps.SystemAppsRepository
 import app.velora.launcher.core.data.battery.BatteryRepository
@@ -36,7 +37,12 @@ class AppContainer(context: Context) {
     val clockRepository: ClockRepository by lazy { SystemClockRepository(appContext) }
 
     private val systemApps: SystemAppsRepository by lazy {
-        SystemAppsRepository(appContext, applicationScope, onPackageChanged = { iconRepository.evictPackage(it) })
+        SystemAppsRepository(
+            context = appContext,
+            scope = applicationScope,
+            cache = RoomAppsCache(appContext),
+            onPackageChanged = { iconRepository.evictPackage(it) },
+        )
     }
 
     val appsRepository: AppsRepository get() = systemApps

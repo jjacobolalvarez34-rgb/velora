@@ -19,6 +19,9 @@ class DrawerSearchState {
 
     var focused by mutableStateOf(false)
 
+    /** Letra elegida en el alfabeto; null = aún no se ha tocado (se ven recientes y buscador). */
+    var letter by mutableStateOf<String?>(null)
+
     val active: Boolean get() = focused || text.text.isNotEmpty()
 
     fun clear() = text.clearText()

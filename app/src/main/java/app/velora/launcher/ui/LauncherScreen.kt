@@ -75,13 +75,13 @@ fun LauncherScreen(
     search: DrawerSearchState,
     actions: AppActions,
     onOpenSettings: () -> Unit,
+    fullList: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val motion = VeloraTheme.motion
     drawerState.spec = if (motion.reduced) null else motion.spatialDefault()
     val drawerVisible by remember(drawerState) { derivedStateOf { drawerState.isOpen } }
     var activeLetter by remember { mutableIntStateOf(-1) }
-    val letters = drawer.list.letters
 
     Box(
         modifier = modifier
@@ -104,15 +104,31 @@ fun LauncherScreen(
                 search = search,
                 actions = actions,
                 nestedScrollConnection = drawerState.nestedScroll,
-                activeSection = { letters.getOrNull(activeLetter) },
+                fullList = fullList,
+                activeSection = { drawer.list.letters.getOrNull(activeLetter) },
                 modifier = Modifier.drawerLayer(drawerState),
             )
         }
         // Buscando, el alfabeto sobra: se oculta para dejar la pantalla limpia.
         if (!search.active) {
-            AlphabetOverlay(drawer.list, drawerState, listState, onActiveLetter = { activeLetter = it })
+            AlphabetOverlay(drawer.list, drawerState) { index ->
+                activeLetter = index
+                onLetter(drawer.list, index, search, listState, fullList)
+            }
         }
     }
+}
+
+/** Al soltar se queda la última letra elegida; en la lista completa, además, salta a ella. */
+private fun onLetter(
+    list: DrawerList,
+    index: Int,
+    search: DrawerSearchState,
+    listState: LazyListState,
+    fullList: Boolean,
+) {
+    list.letters.getOrNull(index)?.let { search.letter = it }
+    if (fullList) list.letterIndex.getOrNull(index)?.let(listState::requestScrollToItem)
 }
 
 /** Con la lista abierta el wallpaper se oscurece del todo, para leer sin esfuerzo. */
@@ -141,19 +157,11 @@ private fun Modifier.drawerLayer(drawerState: DrawerState) = graphicsLayer {
 }
 
 @Composable
-private fun BoxScope.AlphabetOverlay(
-    list: DrawerList,
-    drawerState: DrawerState,
-    listState: LazyListState,
-    onActiveLetter: (Int) -> Unit,
-) {
+private fun BoxScope.AlphabetOverlay(list: DrawerList, drawerState: DrawerState, onLetterChange: (Int) -> Unit) {
     WaveAlphabet(
         letters = list.letters,
         onTouchStart = drawerState::open,
-        onLetterChange = { index ->
-            onActiveLetter(index)
-            list.letterIndex.getOrNull(index)?.let(listState::requestScrollToItem)
-        },
+        onLetterChange = onLetterChange,
         modifier = Modifier
             .align(Alignment.BottomEnd)
             .fillMaxHeight(ALPHABET_HEIGHT_FRACTION)

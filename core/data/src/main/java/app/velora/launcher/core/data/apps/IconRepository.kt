@@ -17,7 +17,7 @@ import kotlinx.coroutines.withContext
  * Íconos ya renderizados al tamaño y estilo finales (RENDIMIENTO §3.9), en memoria
  * (ARQUITECTURA §4.2). Nunca decodifica en el hilo principal.
  */
-class IconRepository(context: Context, private val infoFor: (AppKey) -> LauncherActivityInfo?) {
+class IconRepository(context: Context, private val infoFor: suspend (AppKey) -> LauncherActivityInfo?) {
 
     private val renderer = IconRenderer(context, context.resources.displayMetrics.densityDpi)
 

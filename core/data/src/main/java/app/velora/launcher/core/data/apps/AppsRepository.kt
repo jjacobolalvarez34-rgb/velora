@@ -23,21 +23,28 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.withContext
 
 /** Todas las apps abribles de todos los perfiles, ordenadas (ARQUITECTURA §4.1). */
 interface AppsRepository {
-    /** Vacía hasta la primera carga; luego se actualiza sola con instalaciones y cambios. */
+    /**
+     * Al arrancar, la lista de la caché (milisegundos); luego la del sistema, que se
+     * actualiza sola con instalaciones y cambios.
+     */
     val apps: StateFlow<List<AppEntry>>
 
     /** Vuelve a leer del sistema por si se perdieron eventos con el proceso muerto (B-008). */
@@ -51,6 +58,7 @@ interface AppsRepository {
 class SystemAppsRepository(
     private val context: Context,
     scope: CoroutineScope,
+    private val cache: AppsCache,
     private val onPackageChanged: (String) -> Unit = {},
 ) : AppsRepository {
 
@@ -59,20 +67,44 @@ class SystemAppsRepository(
     private val infos = ConcurrentHashMap<String, LauncherActivityInfo>()
     private val refreshRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
-    override val apps: StateFlow<List<AppEntry>> =
-        merge(systemChanges(), refreshRequests)
-            .onStart { emit(Unit) }
-            .conflate()
-            .map { withContext(Dispatchers.IO) { loadAll() } }
-            .distinctUntilChanged()
-            .stateIn(scope, SharingStarted.Eagerly, emptyList())
+    /** true tras la primera lectura del sistema: desde ahí hay `LauncherActivityInfo` para los íconos. */
+    private val systemLoaded = MutableStateFlow(false)
+
+    override val apps: StateFlow<List<AppEntry>> = flow {
+        val cached = runCatching { cache.load(Locale.getDefault()) }
+            .onFailure { Logger.w(TAG, it) { "Caché de apps ilegible" } }
+            .getOrDefault(emptyList())
+        if (cached.isNotEmpty()) emit(cached)
+        var persisted = cached
+        emitAll(
+            merge(systemChanges(), refreshRequests)
+                .onStart { emit(Unit) }
+                .conflate()
+                .map { loadAll() }
+                .onEach { fresh ->
+                    systemLoaded.value = true
+                    if (fresh != persisted) {
+                        runCatching { cache.save(fresh) }.onFailure { Logger.w(TAG, it) { "No se guardó la caché" } }
+                        persisted = fresh
+                    }
+                },
+        )
+    }.flowOn(Dispatchers.IO)
+        .distinctUntilChanged()
+        .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
     override fun refresh() {
         refreshRequests.tryEmit(Unit)
     }
 
-    /** El `LauncherActivityInfo` de la última carga, o null si la app ya no está. */
-    fun infoFor(key: AppKey): LauncherActivityInfo? = infos[key.stableId]
+    /**
+     * El `LauncherActivityInfo` de la última carga, o null si la app ya no está. Si la lista
+     * aún viene de la caché, espera a la primera lectura del sistema.
+     */
+    suspend fun infoFor(key: AppKey): LauncherActivityInfo? {
+        systemLoaded.first { it }
+        return infos[key.stableId]
+    }
 
     fun userFor(key: AppKey): UserHandle? = userManager.getUserForSerialNumber(key.userSerial)
 

@@ -2,9 +2,12 @@ package app.velora.launcher.feature.drawer
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -45,6 +48,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import app.velora.launcher.R
+import app.velora.launcher.core.designsystem.motion.VeloraMotion
 import app.velora.launcher.core.designsystem.theme.Sizes
 import app.velora.launcher.core.designsystem.theme.Spacing
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
@@ -55,16 +59,12 @@ import app.velora.launcher.feature.apps.AppRowStyle
 import app.velora.launcher.feature.apps.PreviewAppActions
 import app.velora.launcher.feature.apps.previewApp
 
-/** Espacio que la lista deja abajo para que el buscador no tape la última app. */
-private val SearchBarSpace: Dp = Sizes.appRowHeight + Spacing.m * 2
-
-/** Cuánto hay que arrastrar para que el buscador se esconda o vuelva. */
-private const val BAR_TOGGLE_PX = 12f
-
 /**
- * Lista completa o, buscando, las recientes / los resultados. El cambio entre ambas es un fundido.
+ * La lista: por letra (por defecto), completa (opción), o buscando. Cada cambio se anima: entre
+ * letras, las apps entran desde el lado hacia el que se movió el dedo.
  *
- * @param activeSection sección resaltada por el alfabeto; se lee en la fase de dibujo.
+ * @param fullList lista completa con scroll en vez de "solo la letra elegida".
+ * @param activeSection sección resaltada por el alfabeto en la lista completa; se lee al dibujar.
  */
 @Composable
 fun AppListScreen(
@@ -73,70 +73,41 @@ fun AppListScreen(
     search: DrawerSearchState,
     actions: AppActions,
     nestedScrollConnection: NestedScrollConnection,
+    fullList: Boolean,
     modifier: Modifier = Modifier,
     activeSection: () -> String? = { null },
 ) {
     val motion = VeloraTheme.motion
     val barState = rememberSearchBarVisibility(listState)
+    val mode = drawerMode(search, fullList)
     Box(modifier = modifier.fillMaxSize()) {
         val padding = listPadding()
         val scroll = Modifier.listScroll(nestedScrollConnection, barState.observer)
+        val letters = uiState.list.letters
         AnimatedContent(
-            targetState = search.active,
-            transitionSpec = { fadeIn(motion.effectDefault()) togetherWith fadeOut(motion.effectFast()) },
-            label = "search-mode",
-        ) { searching ->
-            if (searching) {
-                SearchPanel(uiState, padding, actions, scroll)
-            } else {
-                FullList(uiState, listState, padding, actions, activeSection, scroll)
+            targetState = mode,
+            transitionSpec = { modeTransition(initialState, targetState, letters, motion) },
+            label = "drawer-mode",
+        ) { current ->
+            when (current) {
+                DrawerMode.Search -> SearchPanel(uiState, padding, actions, scroll, exploring = false)
+                DrawerMode.Explore -> SearchPanel(uiState, padding, actions, scroll, exploring = true)
+                DrawerMode.Full -> FullList(uiState, listState, padding, actions, activeSection, scroll)
+                is DrawerMode.Letter -> LetterPage(current.letter, uiState, padding, actions, scroll)
             }
         }
-        val shown by animateFloatAsState(
-            targetValue = if (search.active || barState.visible) 1f else 0f,
-            animationSpec = motion.spatialDefault(),
-            label = "search-bar",
-        )
-        DrawerSearchBar(
+        AnimatedSearchBar(
             state = search,
+            visible = search.active || mode != DrawerMode.Full || barState.visible,
             onGo = { uiState.results?.firstOrNull()?.let { actions.open(it, null) } },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .windowInsetsPadding(
-                    WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal),
-                )
-                .padding(horizontal = Spacing.l, vertical = Spacing.m)
-                .graphicsLayer {
-                    alpha = shown
-                    translationY = (1f - shown) * SearchBarSpace.toPx()
-                },
+            modifier = Modifier.align(Alignment.BottomCenter),
         )
-    }
-}
-
-/** El buscador se ve arriba de la lista y al subir; se esconde al bajar (no tapa las apps). */
-private class SearchBarVisibility(private val listState: LazyListState) {
-    private var scrollingUp by mutableStateOf(true)
-    private val atTop by derivedStateOf { listState.firstVisibleItemIndex == 0 }
-
-    val visible: Boolean get() = atTop || scrollingUp
-
-    val observer = object : NestedScrollConnection {
-        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-            if (available.y < -BAR_TOGGLE_PX) scrollingUp = false
-            if (available.y > BAR_TOGGLE_PX) scrollingUp = true
-            return Offset.Zero
-        }
     }
 }
 
 /** El cajón (cerrar arrastrando) va por fuera; el que esconde el buscador solo observa. */
 private fun Modifier.listScroll(drawer: NestedScrollConnection, barObserver: NestedScrollConnection) =
     fillMaxSize().nestedScroll(drawer).nestedScroll(barObserver)
-
-@Composable
-private fun rememberSearchBarVisibility(listState: LazyListState) =
-    remember(listState) { SearchBarVisibility(listState) }
 
 @Composable
 private fun FullList(
@@ -167,14 +138,24 @@ private fun FullList(
     }
 }
 
-/** Buscando: sin texto, las recientes; con texto, los resultados con fundido y resorte. */
+/**
+ * Buscando: sin texto, las recientes; con texto, los resultados con fundido y resorte.
+ * [exploring] = se abrió sin letra: arriba, la pista para usar el alfabeto.
+ */
 @Composable
-private fun SearchPanel(uiState: DrawerUiState, padding: PaddingValues, actions: AppActions, modifier: Modifier) {
+private fun SearchPanel(
+    uiState: DrawerUiState,
+    padding: PaddingValues,
+    actions: AppActions,
+    modifier: Modifier,
+    exploring: Boolean,
+) {
     val results = uiState.results
     LazyColumn(state = rememberLazyListState(), contentPadding = padding, modifier = modifier) {
+        if (exploring) item(key = "pick-letter") { Hint(stringResource(R.string.drawer_pick_letter)) }
         when {
-            results == null && uiState.recents.isEmpty() -> item(key = "hint") {
-                Hint(stringResource(R.string.drawer_search_empty))
+            results == null && uiState.recents.isEmpty() -> if (!exploring) {
+                item(key = "hint") { Hint(stringResource(R.string.drawer_search_empty)) }
             }
 
             results == null -> {
@@ -197,7 +178,7 @@ private fun SearchPanel(uiState: DrawerUiState, padding: PaddingValues, actions:
 
 /** Al filtrar, lo que entra aparece con un fundido y lo que queda se reacomoda con un resorte. */
 @Composable
-private fun LazyItemScope.animatedItem(): Modifier {
+internal fun LazyItemScope.animatedItem(): Modifier {
     val motion = VeloraTheme.motion
     return Modifier.animateItem(
         fadeInSpec = motion.effectDefault(),
@@ -207,7 +188,7 @@ private fun LazyItemScope.animatedItem(): Modifier {
 }
 
 @Composable
-private fun ListApp(
+internal fun ListApp(
     app: AppEntry,
     uiState: DrawerUiState,
     actions: AppActions,
@@ -277,6 +258,7 @@ private fun AppListScreenPreview() {
             search = rememberDrawerSearchState(),
             actions = PreviewAppActions,
             nestedScrollConnection = object : NestedScrollConnection {},
+            fullList = true,
             modifier = Modifier.background(VeloraTheme.onWallpaper.drawerScrim),
         )
     }

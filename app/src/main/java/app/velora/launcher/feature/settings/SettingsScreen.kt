@@ -21,6 +21,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -39,6 +40,7 @@ import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.ClockStyle
 import app.velora.launcher.core.model.FontChoice
 import app.velora.launcher.core.model.IconStyle
+import app.velora.launcher.core.model.TextSize
 import app.velora.launcher.core.model.ThemeSettings
 import app.velora.launcher.feature.home.ClockText
 import app.velora.launcher.feature.home.components.ClockHeader
@@ -50,13 +52,21 @@ interface SettingsActions {
     fun onIconStyle(style: IconStyle)
     fun onChooseHomeApp()
     fun onUnhide(app: AppEntry)
+    fun onMoveFavorite(app: AppEntry, offset: Int)
+    fun onTextSize(size: TextSize)
+    fun onLeftHanded(enabled: Boolean)
+    fun onFullList(enabled: Boolean)
 }
+
+/** Listas de apps que se editan en Ajustes. */
+@Immutable
+data class SettingsLists(val favorites: List<AppEntry> = emptyList(), val hidden: List<AppEntry> = emptyList())
 
 @Composable
 fun SettingsScreen(
     theme: ThemeSettings,
     preview: ClockPreview,
-    hidden: List<AppEntry>,
+    lists: SettingsLists,
     actions: SettingsActions,
     modifier: Modifier = Modifier,
 ) {
@@ -69,7 +79,9 @@ fun SettingsScreen(
         item(key = "title") { Title(stringResource(R.string.settings_title)) }
         item(key = "preview") { ThemePreview(theme, preview) }
         themeSection(theme, actions)
-        hiddenSection(hidden, actions)
+        layoutSection(theme, actions)
+        favoritesSection(lists.favorites, actions)
+        hiddenSection(lists.hidden, actions)
         item(key = "general") { SectionTitle(R.string.settings_general) }
         item(key = "home-app") {
             Option(
@@ -162,7 +174,7 @@ private fun Title(text: String) {
 }
 
 @Composable
-private fun SectionTitle(@StringRes title: Int) {
+internal fun SectionTitle(@StringRes title: Int) {
     Text(
         text = stringResource(title),
         style = MaterialTheme.typography.titleSmall,
@@ -174,7 +186,7 @@ private fun SectionTitle(@StringRes title: Int) {
 }
 
 @Composable
-private fun RadioOption(
+internal fun RadioOption(
     title: String,
     selected: Boolean,
     onClick: () -> Unit,
@@ -206,6 +218,10 @@ private object PreviewSettingsActions : SettingsActions {
     override fun onIconStyle(style: IconStyle) = Unit
     override fun onChooseHomeApp() = Unit
     override fun onUnhide(app: AppEntry) = Unit
+    override fun onMoveFavorite(app: AppEntry, offset: Int) = Unit
+    override fun onTextSize(size: TextSize) = Unit
+    override fun onLeftHanded(enabled: Boolean) = Unit
+    override fun onFullList(enabled: Boolean) = Unit
 }
 
 @Preview(name = "Claro", heightDp = 1200)
@@ -216,7 +232,7 @@ private fun SettingsScreenPreview() {
         SettingsScreen(
             theme = ThemeSettings(clock = ClockStyle.Day),
             preview = ClockPreview(ClockText("7:05", "Jueves, 23 de octubre", "JUE"), battery = 82),
-            hidden = emptyList(),
+            lists = SettingsLists(),
             actions = PreviewSettingsActions,
         )
     }

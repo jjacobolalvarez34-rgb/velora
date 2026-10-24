@@ -6,12 +6,14 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import app.velora.launcher.core.data.battery.BatteryRepository
 import app.velora.launcher.core.data.clock.ClockRepository
+import app.velora.launcher.core.data.favorites.FavoritesRepository
 import app.velora.launcher.core.data.favorites.HiddenAppsRepository
 import app.velora.launcher.core.data.prefs.PrefsRepository
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.ClockStyle
 import app.velora.launcher.core.model.FontChoice
 import app.velora.launcher.core.model.IconStyle
+import app.velora.launcher.core.model.TextSize
 import app.velora.launcher.core.model.ThemeSettings
 import app.velora.launcher.di.AppContainer
 import app.velora.launcher.feature.home.ClockFormatter
@@ -30,6 +32,7 @@ data class ClockPreview(val clock: ClockText = ClockText(), val battery: Int? = 
 class SettingsViewModel(
     private val prefs: PrefsRepository,
     private val hiddenApps: HiddenAppsRepository,
+    private val favorites: FavoritesRepository,
     clockRepository: ClockRepository,
     clockFormatter: ClockFormatter,
     batteryRepository: BatteryRepository,
@@ -52,6 +55,18 @@ class SettingsViewModel(
 
     fun onUnhide(app: AppEntry) = save { hiddenApps.unhide(app.key) }
 
+    /** Favoritos en su orden, para subirlos o bajarlos. */
+    val favoriteApps: StateFlow<List<AppEntry>> =
+        favorites.favorites.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), emptyList())
+
+    fun onMoveFavorite(app: AppEntry, offset: Int) = save { favorites.move(app.key, offset) }
+
+    fun onTextSize(size: TextSize) = save { prefs.setTextSize(size) }
+
+    fun onLeftHanded(enabled: Boolean) = save { prefs.setLeftHanded(enabled) }
+
+    fun onFullList(enabled: Boolean) = save { prefs.setFullList(enabled) }
+
     fun onFont(font: FontChoice) = save { prefs.setFont(font) }
 
     fun onClockStyle(style: ClockStyle) = save { prefs.setClockStyle(style) }
@@ -70,6 +85,7 @@ class SettingsViewModel(
                 SettingsViewModel(
                     prefs = container.prefsRepository,
                     hiddenApps = container.hiddenAppsRepository,
+                    favorites = container.favoritesRepository,
                     clockRepository = container.clockRepository,
                     clockFormatter = LocalizedClockFormatter(),
                     batteryRepository = container.batteryRepository,

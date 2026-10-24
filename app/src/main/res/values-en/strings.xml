@@ -71,4 +71,31 @@
     <string name="settings_hidden">Hidden apps</string>
     <string name="settings_hidden_empty">You haven\'t hidden any apps.</string>
     <string name="settings_unhide">Show</string>
+    <string name="settings_layout">Layout</string>
+    <string name="settings_left_handed">Left-handed mode</string>
+    <string name="settings_left_handed_summary">The alphabet and icons move to the left.</string>
+    <string name="settings_text_size">Text size</string>
+    <string name="text_size_small">Small</string>
+    <string name="text_size_normal">Normal</string>
+    <string name="text_size_large">Large</string>
+    <string name="settings_favorites">Favorites</string>
+    <string name="settings_favorites_empty">No favorites yet. Long-press an app to add it.</string>
+    <string name="settings_move_up">Move %1$s up</string>
+    <string name="settings_move_down">Move %1$s down</string>
+    <string name="drawer_pick_letter">Tap a letter in the alphabet to see your apps.</string>
+    <string name="settings_full_list">Full list</string>
+    <string name="settings_full_list_summary">Every app in one scrolling list, instead of just the chosen letter.</string>
+
+    <!-- Introduction -->
+    <string name="intro_skip">Skip</string>
+    <string name="intro_next">Next</string>
+    <string name="intro_page">Page %1$d of %2$d</string>
+    <string name="intro_swipe_title">Swipe up</string>
+    <string name="intro_swipe_body">Search and your recently installed apps live there. Accents don\'t matter.</string>
+    <string name="intro_wave_title">The wave alphabet</string>
+    <string name="intro_wave_body">Slide your thumb along the letters on the right to see just that letter\'s apps.</string>
+    <string name="intro_menu_title">Long-press an app</string>
+    <string name="intro_menu_body">Pin it to your home screen, hide it, or use its shortcuts without opening it.</string>
+    <string name="intro_theme_title">Make it yours</string>
+    <string name="intro_theme_body">Long-press your home screen to pick a font, clock and icons.</string>
 </resources>
