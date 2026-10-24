@@ -2,24 +2,18 @@
 
 > Lista viva de lo que falta, en orden. Al terminar un punto: marcarlo `[x]` con fecha y moverlo a `ROADMAP.md` si corresponde.
 > `[~]` = código hecho y probado en la JVM; falta verlo en el teléfono.
-> Última actualización: 2026-10-23.
+> Última actualización: 2026-10-24.
 
-## 1. Probar en el teléfono (lo primero)
+## 1. Prueba en el teléfono de la 0.1.0
 
-Todo lo de §2 está implementado pero nadie lo ha visto funcionar en un teléfono real. Instalar `Velora-0.1.0.apk` y revisar:
+> 2026-10-24: el autor instaló `Velora-0.1.0.apk` y reporta que **todo funcionó**.
 
-- [ ] Tocar el ícono de Velora → aparece la **landing** (si no es el inicio) → "Usar Velora como inicio" abre el diálogo del sistema.
-- [ ] "Ahora no" → inicio con reloj, fecha y la pista "Desliza hacia arriba…".
-- [ ] Deslizar hacia arriba abre la lista **siguiendo el dedo**; soltar a medias decide abrir/cerrar según la velocidad.
-- [ ] **Alfabeto ola**: arrastrar el pulgar por las letras; la ola sigue al dedo, vibra al cambiar de letra, la lista salta y las otras letras se atenúan. Ajustar `WaveAmplitude`, `WAVE_SIGMA_ROWS` y la altura (`ALPHABET_HEIGHT_FRACTION`) hasta que se sienta perfecto.
-- [ ] Buscar "camara" encuentra "Cámara"; Enter abre el primer resultado; el teclado no tapa el buscador.
-- [ ] Abrir una app: crece desde su fila. Volver con Inicio: la lista ya está cerrada, sin animación.
-- [ ] Mantener presionada una app → "Agregar a favoritos" → aparece abajo en el inicio. Quitarla. Información de la app. Desinstalar.
-- [ ] Atrás cierra la búsqueda y luego la lista; en el inicio no hace nada.
-- [ ] Navegación por gestos: arrastrar el alfabeto no dispara el gesto "atrás" (B-013).
-- [ ] Instalar/desinstalar una app con Velora abierto → la lista se actualiza sola.
-- [ ] Bloquear/desbloquear; llamada con pantalla apagada (B-001).
-- [ ] Perfil de trabajo (si hay): apps con insignia que abren en su perfil.
+- [x] Ícono → landing → "Usar Velora como inicio" / "Ahora no" — 2026-10-24
+- [x] Lista que sigue al dedo, alfabeto ola, búsqueda sin tildes — 2026-10-24
+- [x] Abrir apps desde la fila, volver con Inicio, atrás — 2026-10-24
+- [x] Menú: favoritos, información, desinstalar — 2026-10-24
+- [ ] Casos de borde por confirmar (VERIFICACIONES §5): llamada entrante con la pantalla apagada → colgar → el inicio responde (B-001); perfil de trabajo, si hay; instalar/desinstalar una app con Velora abierto; navegación por gestos junto al alfabeto (B-013).
+- [ ] Afinar el alfabeto ola si algo se siente raro: `WaveAmplitude`, `WAVE_SIGMA_ROWS`, `ALPHABET_HEIGHT_FRACTION`.
 
 ## 2. Hecho en esta sesión (2026-10-23)
 
@@ -37,7 +31,6 @@ Todo lo de §2 está implementado pero nadie lo ha visto funcionar en un teléfo
 
 ## 3. Siguiente (Fase 1, en orden)
 
-- [ ] Ajustar el alfabeto ola tras probarlo (ver §1).
 - [ ] Caché de apps en Room para que la lista y los favoritos estén en el **primer frame** del arranque en frío (hoy llegan unos ms después).
 - [ ] Apps ocultas (menú + lista recuperable en Ajustes).
 - [ ] Atajos de la app en el menú (`LauncherApps.getShortcuts`, B-018).

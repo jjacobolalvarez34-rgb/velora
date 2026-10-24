@@ -2,10 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Visibilidad de paquetes: solo apps abribles. Nunca QUERY_ALL_PACKAGES (SEGURIDAD §2). -->
     <!-- Abrir el diálogo de desinstalar del sistema (SEGURIDAD §2). -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
 
+    <!-- Visibilidad de paquetes: solo apps abribles. Nunca QUERY_ALL_PACKAGES (SEGURIDAD §2). -->
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
