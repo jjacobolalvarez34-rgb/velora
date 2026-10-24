@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Evita que el fabricante (MIUI/HyperOS) altere los colores en modo oscuro (B-005). -->
+    <style name="Theme.Velora" parent="Base.Theme.Velora">
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+</resources>

@@ -1,0 +1,21 @@
+# Gradle / Android Studio
+.gradle/
+.kotlin/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+.idea/
+*.iml
+local.properties
+
+# Artefactos y secretos: nunca al repo (REGLAS §7)
+*.apk
+*.aab
+*.jks
+*.keystore
+keystore.properties
+
+# Sistema
+.DS_Store
+Thumbs.db

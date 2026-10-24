@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Iguales a Slate99 / Slate10 de core/designsystem Color.kt. -->
+    <color name="window_background">#FFF9FBFC</color>
+    <color name="ic_launcher_background">#FF000000</color>
+</resources>

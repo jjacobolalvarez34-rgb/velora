@@ -1,0 +1,36 @@
+# Se construye sobre la configuración por defecto de detekt (--build-upon-default-config).
+# Solo se listan las diferencias.
+
+complexity:
+  LongMethod:
+    threshold: 40
+  LongParameterList:
+    # Los composables reciben estado + lambdas + modifier.
+    ignoreAnnotated: ['Composable']
+  TooManyFunctions:
+    ignoreAnnotatedFunctions: ['Preview']
+
+naming:
+  # Los nombres de archivo los fija ESTILO.md (Color.kt, Type.kt, Motion.kt…).
+  MatchingDeclarationName:
+    active: false
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][A-Za-z0-9_]*'
+
+style:
+  MagicNumber:
+    # Los tokens de diseño son, por definición, números con nombre.
+    excludes: ['**/core/designsystem/**', '**/test/**', '**/androidTest/**', '**/*.kts']
+    ignorePropertyDeclaration: true
+    ignoreAnnotated: ['Preview']
+  UnusedPrivateMember:
+    ignoreAnnotated: ['Preview']
+  ForbiddenComment:
+    active: false
+
+potential-bugs:
+  # Prohibido `!!` (REGLAS §1).
+  UnsafeCallOnNullableType:
+    active: true

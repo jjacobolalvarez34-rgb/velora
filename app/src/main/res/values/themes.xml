@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Compose dibuja todo; estos temas solo definen la ventana. -->
+    <style name="Base.Theme.Velora" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.Velora" parent="Base.Theme.Velora" />
+
+    <!-- Inicio: el fondo es el wallpaper del usuario (ESTILO §2). Sin splash (RENDIMIENTO §4). -->
+    <style name="Theme.Velora.Home">
+        <item name="android:windowShowWallpaper">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+    </style>
+</resources>

@@ -1,0 +1,10 @@
+* text=auto
+
+# Scripts: el de Unix siempre con LF (el CI corre en Linux), el de Windows con CRLF.
+gradlew text eol=lf
+*.sh text eol=lf
+*.bat text eol=crlf
+
+*.jar binary
+*.png binary
+*.jpg binary

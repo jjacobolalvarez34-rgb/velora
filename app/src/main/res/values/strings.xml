@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Velora</string>
+    <string name="settings_launcher_label">Ajustes de Velora</string>
+
+    <string name="home_open_settings">Abrir ajustes de Velora</string>
+
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_home_app_title">App de inicio</string>
+    <string name="settings_home_app_summary">Elige Velora o vuelve a tu launcher anterior.</string>
+    <string name="error_open_system_settings">No se pudieron abrir los ajustes del sistema.</string>
+</resources>
