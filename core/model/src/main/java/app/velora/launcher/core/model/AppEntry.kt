@@ -16,6 +16,7 @@ data class AppKey(val packageName: String, val className: String, val userSerial
  *
  * @property section letra de sección ("A", "Ñ", "#"…).
  * @property searchKey nombre en minúsculas y sin tildes, para buscar.
+ * @property installedAtMs primera instalación (epoch ms), para "Recién instaladas".
  */
 @Immutable
 data class AppEntry(
@@ -25,4 +26,5 @@ data class AppEntry(
     val searchKey: String,
     val isWorkProfile: Boolean,
     val canUninstall: Boolean,
+    val installedAtMs: Long = 0L,
 )

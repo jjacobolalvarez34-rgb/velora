@@ -1,0 +1,32 @@
+package app.velora.launcher.feature.settings
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import app.velora.launcher.R
+import app.velora.launcher.core.model.ClockStyle
+import app.velora.launcher.core.model.FontChoice
+import app.velora.launcher.core.model.IconStyle
+
+// Textos de las opciones de Ajustes → Tema: (título, descripción).
+
+@Composable
+internal fun fontName(font: FontChoice): String = when (font) {
+    FontChoice.PlusJakartaSans -> stringResource(R.string.font_plus_jakarta_sans)
+    FontChoice.Figtree -> stringResource(R.string.font_figtree)
+    FontChoice.Fraunces -> stringResource(R.string.font_fraunces)
+    FontChoice.Quicksand -> stringResource(R.string.font_quicksand)
+    FontChoice.System -> stringResource(R.string.font_system)
+}
+
+internal fun clockLabels(style: ClockStyle): Pair<Int, Int> = when (style) {
+    ClockStyle.Classic -> R.string.clock_classic to R.string.clock_classic_summary
+    ClockStyle.Centered -> R.string.clock_centered to R.string.clock_centered_summary
+    ClockStyle.Day -> R.string.clock_day to R.string.clock_day_summary
+}
+
+internal fun iconLabels(style: IconStyle): Pair<Int, Int> = when (style) {
+    IconStyle.Circle -> R.string.icons_circle to R.string.icons_circle_summary
+    IconStyle.System -> R.string.icons_system to R.string.icons_system_summary
+    IconStyle.Minimal -> R.string.icons_minimal to R.string.icons_minimal_summary
+    IconStyle.None -> R.string.icons_none to R.string.icons_none_summary
+}

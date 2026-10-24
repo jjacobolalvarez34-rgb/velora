@@ -17,6 +17,7 @@ import app.velora.launcher.core.data.apps.AppLauncher
 import app.velora.launcher.core.data.apps.LaunchResult
 import app.velora.launcher.core.data.log.Logger
 import app.velora.launcher.core.model.AppEntry
+import app.velora.launcher.core.model.AppShortcut
 import kotlin.math.roundToInt
 
 /**
@@ -32,6 +33,18 @@ class AppOpener(private val context: Context, private val view: View, private va
             ActivityOptions.makeClipRevealAnimation(view, it.left, it.top, it.width(), it.height()).toBundle()
         }
         report(app, launcher.launch(app.key, local?.toScreen(), options))
+    }
+
+    fun openShortcut(shortcut: AppShortcut, bounds: ComposeRect?) {
+        val local = bounds?.toAndroidRect()
+        val result = launcher.launchShortcut(shortcut, local?.toScreen(), null)
+        if (result != LaunchResult.Launched) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.error_app_launch, shortcut.label),
+                Toast.LENGTH_SHORT,
+            ).show()
+        }
     }
 
     fun openInfo(app: AppEntry, bounds: ComposeRect?) {

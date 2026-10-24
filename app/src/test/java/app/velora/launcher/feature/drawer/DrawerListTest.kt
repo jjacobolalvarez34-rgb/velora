@@ -52,6 +52,17 @@ class DrawerListTest {
     }
 
     @Test
+    fun `las recientes van arriba con otra key y el alfabeto salta por encima`() {
+        val banco = app("Banco", "B")
+        val list = buildDrawerList(listOf(banco, app("Nequi", "N")), recents = listOf(banco))
+
+        assertEquals(DrawerItem.RecentHeader, list.items[0])
+        assertEquals("recent:pkg.Banco", list.items[1].key.substringBefore('/'))
+        assertEquals(listOf(2, 4), list.letterIndex)
+        assertEquals(list.items.size, list.items.map { it.key }.toSet().size)
+    }
+
+    @Test
     fun `sin apps no hay letras`() {
         assertTrue(buildDrawerList(emptyList()).letters.isEmpty())
     }

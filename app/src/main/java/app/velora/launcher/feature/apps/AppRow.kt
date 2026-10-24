@@ -41,6 +41,8 @@ import app.velora.launcher.core.designsystem.theme.Spacing
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.AppKey
+import app.velora.launcher.core.model.AppShortcut
+import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.feature.appmenu.AppMenu
 
 /** Dónde se usa la fila: cambia tamaños y tipografía (ESTILO §3 y §4). */
@@ -117,8 +119,10 @@ private fun pressScale(interaction: MutableInteractionSource): State<Float> {
 
 @Composable
 private fun AppRowContent(app: AppEntry, style: AppRowStyle) {
-    AppIcon(key = app.key, size = style.iconSize)
-    Spacer(Modifier.width(Spacing.m))
+    if (LocalIconStyle.current != IconStyle.None) {
+        AppIcon(key = app.key, size = style.iconSize)
+        Spacer(Modifier.width(Spacing.m))
+    }
     Text(
         text = app.label,
         style = style.textStyle,
@@ -159,6 +163,8 @@ internal object PreviewAppActions : AppActions {
     override fun uninstall(app: AppEntry) = Unit
     override fun addFavorite(app: AppEntry) = Unit
     override fun removeFavorite(app: AppEntry) = Unit
+    override fun hide(app: AppEntry) = Unit
+    override fun openShortcut(shortcut: AppShortcut, bounds: Rect?) = Unit
 }
 
 internal fun previewApp(label: String) = AppEntry(

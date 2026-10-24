@@ -26,15 +26,17 @@
 - [x] **Alfabeto ola** (ESTILO §6), primera versión (2026-10-24): un solo `Canvas`, háptica por letra, alternativa con TalkBack. _Iterar en el teléfono hasta que se sienta perfecto._
 - [x] Búsqueda sin tildes — 2026-10-24
 - [x] Abrir apps con animación desde la fila — 2026-10-24
-- [~] Menú de pulsación larga: info, desinstalar, favorito. _Faltan: ocultar y atajos (B-018)._
-- [ ] Apps ocultas
+- [~] Menú de pulsación larga: atajos (B-018), favorito, ocultar, info, desinstalar
+- [~] Apps ocultas (recuperables en Ajustes)
 - [ ] Ajustes: zurdo, íconos sí/no, tamaño de texto, reordenar favoritos, fuente del sistema
 - [~] Onboarding: landing con "establecer como predeterminado". _Falta: elegir favoritos._
 - [~] Back y `onNewIntent(HOME)` (B-010, B-011). _Falta: animación de back predictivo._
 - [~] Prevención B-001, B-005, B-012, B-013, B-014
 - [ ] Baseline Profile de flujos críticos; presupuestos de RENDIMIENTO cumplidos
 - [x] Strings es/en — 2026-10-24
-- [x] Fuente Manrope (ADR-015) — 2026-10-24
+- [x] ~~Fuente Manrope (ADR-015)~~ — reemplazada por el Tema (ADR-016)
+- [~] Tema: fuentes (ADR-016), relojes Clásico/Centrado/Día, íconos Círculo/Sistema/Minimalista/Sin íconos
+- [~] Recién instaladas y buscador limpio con animaciones
 - [x] El ícono abre el inicio (ADR-014) — 2026-10-24
 
 **Salida:** usarlo 7 días como launcher principal.

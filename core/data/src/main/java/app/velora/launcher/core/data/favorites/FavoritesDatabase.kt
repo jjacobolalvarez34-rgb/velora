@@ -1,6 +1,7 @@
 package app.velora.launcher.core.data.favorites
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
@@ -43,10 +44,41 @@ interface FavoritesDao {
     suspend fun delete(stableId: String)
 }
 
-/** Base de datos que **sí** se respalda (favoritos; luego ocultos y carpetas). SEGURIDAD §4. */
-@Database(entities = [FavoriteEntity::class], version = 1, exportSchema = true)
+/** Una app oculta: no sale en la lista ni en la búsqueda; se recupera en Ajustes. */
+@Entity(tableName = "hidden_apps")
+data class HiddenAppEntity(
+    @PrimaryKey val stableId: String,
+    val packageName: String,
+    val className: String,
+    val userSerial: Long,
+)
+
+@Dao
+interface HiddenAppsDao {
+    @Query("SELECT * FROM hidden_apps")
+    fun observe(): Flow<List<HiddenAppEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insert(app: HiddenAppEntity)
+
+    @Query("DELETE FROM hidden_apps WHERE stableId = :stableId")
+    suspend fun delete(stableId: String)
+}
+
+/**
+ * Base de datos que **sí** se respalda (favoritos, ocultas; luego carpetas). SEGURIDAD §4.
+ * Versión 2: se agregó `hidden_apps` (migración automática, sin perder favoritos).
+ */
+@Database(
+    entities = [FavoriteEntity::class, HiddenAppEntity::class],
+    version = 2,
+    exportSchema = true,
+    autoMigrations = [AutoMigration(from = 1, to = 2)],
+)
 abstract class VeloraDatabase : RoomDatabase() {
     abstract fun favorites(): FavoritesDao
+
+    abstract fun hiddenApps(): HiddenAppsDao
 
     companion object {
         private const val NAME = "velora.db"

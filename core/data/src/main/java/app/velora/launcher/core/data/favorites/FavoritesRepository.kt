@@ -1,6 +1,5 @@
 package app.velora.launcher.core.data.favorites
 
-import android.content.Context
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.AppKey
 import kotlinx.coroutines.flow.Flow
@@ -42,9 +41,5 @@ class FavoritesRepository(private val dao: FavoritesDao, apps: StateFlow<List<Ap
 
     companion object {
         const val MAX_FAVORITES = 12
-
-        /** Crea el repositorio sobre la base de datos de Velora (Room queda dentro de `core:data`). */
-        fun create(context: Context, apps: StateFlow<List<AppEntry>>): FavoritesRepository =
-            FavoritesRepository(VeloraDatabase.create(context).favorites(), apps)
     }
 }

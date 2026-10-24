@@ -12,6 +12,7 @@ import android.os.UserHandle
 import android.os.UserManager
 import app.velora.launcher.core.data.log.Logger
 import app.velora.launcher.core.model.AppKey
+import app.velora.launcher.core.model.AppShortcut
 
 sealed interface LaunchResult {
     data object Launched : LaunchResult
@@ -29,6 +30,13 @@ class AppLauncher(context: Context, private val userFor: (AppKey) -> UserHandle?
 
     fun launch(key: AppKey, sourceBounds: Rect?, options: Bundle?): LaunchResult = withUser(key) { user ->
         launcherApps.startMainActivity(key.component, user, sourceBounds, options)
+    }
+
+    fun launchShortcut(shortcut: AppShortcut, sourceBounds: Rect?, options: Bundle?): LaunchResult {
+        val key = AppKey(shortcut.packageName, "", shortcut.userSerial)
+        return withUser(key) { user ->
+            launcherApps.startShortcut(shortcut.packageName, shortcut.id, sourceBounds, options, user)
+        }
     }
 
     fun openAppInfo(key: AppKey, sourceBounds: Rect?): LaunchResult = withUser(key) { user ->

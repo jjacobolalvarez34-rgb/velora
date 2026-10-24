@@ -40,4 +40,41 @@
     <string name="error_open_system_settings">No se pudieron abrir los ajustes del sistema.</string>
     <string name="error_app_launch">No se pudo abrir %1$s.</string>
     <string name="error_work_profile_paused">Tu perfil de trabajo está en pausa.</string>
+
+    <!-- Reloj -->
+    <string name="clock_battery">%1$d %%</string>
+
+    <!-- Lista: recientes y búsqueda -->
+    <string name="drawer_recent">Recién instaladas</string>
+    <string name="drawer_search_empty">Escribe el nombre de una app.</string>
+
+    <!-- Ajustes: tema -->
+    <string name="settings_general">General</string>
+    <string name="settings_font">Fuente</string>
+    <string name="settings_clock">Reloj</string>
+    <string name="settings_icons">Íconos</string>
+    <string name="font_plus_jakarta_sans" translatable="false">Plus Jakarta Sans</string>
+    <string name="font_figtree" translatable="false">Figtree</string>
+    <string name="font_fraunces" translatable="false">Fraunces</string>
+    <string name="font_quicksand" translatable="false">Quicksand</string>
+    <string name="font_system">Fuente del sistema</string>
+    <string name="clock_classic">Clásico</string>
+    <string name="clock_classic_summary">Hora grande y fecha debajo.</string>
+    <string name="clock_centered">Centrado</string>
+    <string name="clock_centered_summary">Hora, fecha y batería al centro.</string>
+    <string name="clock_day">Día</string>
+    <string name="clock_day_summary">El día en grande, cortado por la hora, la fecha y la batería.</string>
+    <string name="icons_circle">Círculo</string>
+    <string name="icons_circle_summary">Todos los íconos redondos e iguales.</string>
+    <string name="icons_system">Forma del sistema</string>
+    <string name="icons_system_summary">La forma que usa tu teléfono.</string>
+    <string name="icons_minimal">Minimalista</string>
+    <string name="icons_minimal_summary">De un solo color, tomado de tu fondo.</string>
+    <string name="icons_none">Sin íconos</string>
+    <string name="icons_none_summary">Solo los nombres. Lo más limpio y lo más rápido.</string>
+    <string name="app_menu_hide">Ocultar</string>
+    <string name="app_hidden">Se ocultó %1$s. Recupérala en Ajustes → Apps ocultas.</string>
+    <string name="settings_hidden">Apps ocultas</string>
+    <string name="settings_hidden_empty">No has ocultado ninguna app.</string>
+    <string name="settings_unhide">Mostrar</string>
 </resources>

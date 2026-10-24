@@ -95,7 +95,7 @@ IconRepository
 
 ### 4.3 Preferencias
 
-- `PrefsRepository` sobre **DataStore Proto** (tipado). Una sola instancia. Lectura como `Flow`.
+- `PrefsRepository` sobre **DataStore Preferences** con API tipada (ADR-017). Una sola instancia. Lectura como `Flow`. `HomeActivity` no dibuja el inicio hasta leer el tema (milisegundos; solo se ve el wallpaper).
 - Favoritos y ocultos en **Room** (relacionales, reordenables).
 
 ### 4.4 Notificaciones (Fase 2)

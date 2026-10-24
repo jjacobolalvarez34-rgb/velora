@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import app.velora.launcher.core.data.apps.AppSearch
-import app.velora.launcher.core.data.apps.AppsRepository
+import app.velora.launcher.core.data.apps.RecentApps
 import app.velora.launcher.core.data.favorites.FavoritesRepository
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.di.AppContainer
@@ -24,25 +24,35 @@ import kotlinx.coroutines.flow.stateIn
 data class DrawerUiState(
     val list: DrawerList = DrawerList(),
     val query: String = "",
-    /** null cuando no se está buscando. */
+    /** null cuando no se ha escrito nada. */
     val results: List<AppEntry>? = null,
+    /** Recién instaladas: arriba de la lista y en el buscador vacío. */
+    val recents: List<AppEntry> = emptyList(),
     val favoriteIds: Set<String> = emptySet(),
 )
 
-class DrawerViewModel(apps: AppsRepository, favorites: FavoritesRepository) : ViewModel() {
+class DrawerViewModel(
+    /** Instaladas menos ocultas. */
+    apps: StateFlow<List<AppEntry>>,
+    favorites: FavoritesRepository,
+    private val nowMs: () -> Long = System::currentTimeMillis,
+) : ViewModel() {
 
     private val query = MutableStateFlow("")
 
     // Ordenar, agrupar y filtrar en Dispatchers.Default (ARQUITECTURA §7), nunca en un composable.
-    private val list = apps.apps.map(::buildDrawerList).flowOn(Dispatchers.Default)
+    private val list = apps.map { installed ->
+        val recents = RecentApps.of(installed, nowMs())
+        buildDrawerList(installed, recents) to recents
+    }.flowOn(Dispatchers.Default)
 
-    private val results = combine(apps.apps, query) { installed, q ->
+    private val results = combine(apps, query) { installed, q ->
         if (q.isBlank()) null else AppSearch.filter(installed, q, Locale.getDefault())
     }.flowOn(Dispatchers.Default)
 
     val uiState: StateFlow<DrawerUiState> =
-        combine(list, query, results, favorites.favoriteIds) { list, q, results, favoriteIds ->
-            DrawerUiState(list = list, query = q, results = results, favoriteIds = favoriteIds)
+        combine(list, query, results, favorites.favoriteIds) { (list, recents), q, results, favoriteIds ->
+            DrawerUiState(list = list, query = q, results = results, recents = recents, favoriteIds = favoriteIds)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), DrawerUiState())
 
     fun onQueryChange(value: String) {
@@ -53,7 +63,7 @@ class DrawerViewModel(apps: AppsRepository, favorites: FavoritesRepository) : Vi
         private const val STOP_TIMEOUT_MS = 5_000L
 
         fun factory(container: AppContainer) = viewModelFactory {
-            initializer { DrawerViewModel(container.appsRepository, container.favoritesRepository) }
+            initializer { DrawerViewModel(container.visibleApps, container.favoritesRepository) }
         }
     }
 }

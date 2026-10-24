@@ -21,12 +21,13 @@ Anti-palabras: *ruidoso, recargado, gamer, neón*.
 
 ## 3. Tipografía
 
-- Fuente: **Manrope** (ADR-015), variable y empaquetada en `core/designsystem` (~87 KB, recortada a latino) para que el texto nunca "salte" en el primer frame. Idiomas no latinos usan la fuente del sistema. Pendiente: opción "Fuente del sistema" en Ajustes.
+- Fuente: elegible en **Ajustes → Tema** (ADR-016). Por defecto **Plus Jakarta Sans**; también Figtree, Fraunces, Quicksand y la del sistema. Todas variables y empaquetadas para que el texto nunca "salte" en el primer frame. Los idiomas no latinos usan la fuente del sistema.
 - Escala (sp), siempre respetando el tamaño de fuente del sistema:
 
 | Token | Uso | Tamaño | Peso |
 |---|---|---|---|
-| `clock` | Hora en inicio | 56 | ExtraLight |
+| `clock` | Hora en inicio | 56 | Light |
+| `clockDay` | Día grande del reloj "Día" ("JUE") | 120 | Bold, espaciado 4 sp |
 | `date` | Fecha bajo la hora | 16 | Regular |
 | `favorite` | Nombre de favorito | 22 | Regular |
 | `appRow` | Fila de lista completa | 18 | Regular |
@@ -100,10 +101,25 @@ El elemento firma. Especificación:
 
 ## 7. Íconos
 
-- Íconos del sistema vía `LauncherApps.getActivityList(...).getBadgedIcon(density)` (incluye insignia de perfil de trabajo).
-- Normalizados a íconos adaptativos con máscara uniforme; los no adaptativos se escalan dentro de un fondo neutro.
-- Modo "sin íconos" (solo texto) disponible: es el más minimalista y el más rápido.
+- Estilos (Ajustes → Tema), renderizados en `IconRenderer` fuera del hilo principal:
+  - **Círculo** (por defecto): capas del ícono adaptativo a sangre completa y recorte circular suavizado (`BitmapShader`, nunca `clipPath`, que deja el borde dentado). Los íconos antiguos van sobre un círculo neutro.
+  - **Forma del sistema**: `getBadgedIcon` tal cual.
+  - **Minimalista**: una sola tinta, el acento claro del tema (`OnWallpaperColors.accent`). Usa la capa monocroma de Android 13+ si la app la trae; si no, el ícono en escala de grises multiplicado por el acento.
+  - **Sin íconos**: solo texto; es el más minimalista y el más rápido.
+- La insignia de perfil de trabajo se agrega encima del ícono ya recortado (`getUserBadgedIcon`).
 - **No** usar ni imitar los paquetes de íconos de Niagara.
+
+## 7.1 Reloj (Ajustes → Tema)
+
+- **Clásico** (por defecto): hora grande y fecha debajo, a la izquierda.
+- **Centrado**: hora, y debajo fecha · batería, al centro.
+- **Día**: el día abreviado en grande ("JUE"), cortado por una franja con hora · fecha · batería. La franja borra los píxeles del día que tiene debajo (capa `Offscreen` + `BlendMode.Clear`), y por el corte se ve el wallpaper.
+
+## 7.2 Lista y búsqueda
+
+- Arriba de la lista: **Recién instaladas** (últimos 14 días, máximo 4; `LauncherActivityInfo.firstInstallTime`, sin permisos).
+- El buscador se **esconde al bajar** por la lista y vuelve al subir o al llegar arriba.
+- **Modo búsqueda** (buscador con foco o con texto): la lista completa y el alfabeto se van con un fundido; sin texto se ven las recientes, con texto los resultados. Los resultados entran con fundido (`EffectDefault`) y se reacomodan con resorte (`SpatialDefault`, `animateItem`).
 
 ## 8. Háptica
 

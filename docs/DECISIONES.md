@@ -15,7 +15,7 @@
 ## ADR-004 · DI manual — Aceptada
 **Decisión:** `AppContainer` con `lazy`. **Por qué:** cero costo de arranque y menos complejidad para un proyecto de una persona. **Revisar** si el grafo supera ~25 dependencias.
 
-## ADR-005 · Room para caché de apps + DataStore Proto para preferencias — Aceptada
+## ADR-005 · Room para caché de apps + DataStore Proto para preferencias — Aceptada (la parte de DataStore Proto fue reemplazada por ADR-017)
 **Por qué:** primer frame inmediato desde caché; favoritos y ocultos son relacionales y reordenables; preferencias tipadas.
 
 ## ADR-006 · Sin `QUERY_ALL_PACKAGES` ni `INTERNET` — Aceptada
@@ -61,12 +61,25 @@ _`compileSdk` actualizado a 37 por ADR-013; `minSdk` y `targetSdk` siguen vigent
 **Por qué:** un solo punto de entrada, claro. Abrir el inicio sin ser predeterminado muestra la landing (PENDIENTES §1), que ofrece hacerlo predeterminado. Un componente exportado menos (SEGURIDAD §3.5).
 **Consecuencias:** Velora se excluye de su propia lista de apps. Si los ajustes crecen, considerar un acceso visible en el inicio.
 
-## ADR-015 · Fuente Manrope empaquetada — Aceptada (2026-10-23)
+## ADR-015 · Fuente Manrope empaquetada — Reemplazada por ADR-016 (2026-10-24)
 **Contexto:** el autor pidió una fuente "elegante, bonita". ESTILO §3 decía "fuente del sistema; propia opcional y descargable en Fase 3".
 **Opciones:** A) fuente del sistema. B) Manrope descargable (Google Fonts provider). C) Manrope empaquetada.
 **Decisión:** C. Manrope variable (eje `wght` 200–800), recortada a latino con `fontTools` (~87 KB), en `core/designsystem/src/main/res/font/manrope.ttf`. Licencia SIL OFL 1.1 (`docs/licencias/OFL-Manrope.txt`, `THIRD_PARTY_NOTICES.md`).
 **Por qué:** una fuente descargable llega después del primer frame y el texto "salta": inaceptable en un launcher. Una sola fuente variable cubre todos los pesos. Pesa poco frente al presupuesto de 8 MB.
 **Consecuencias:** idiomas no latinos (cirílico, griego, CJK) caen a la fuente del sistema. Pendiente: opción "Fuente del sistema" en Ajustes.
+
+## ADR-016 · Varias fuentes empaquetadas, elegibles en Ajustes → Tema — Aceptada (2026-10-24)
+**Contexto:** probada en el teléfono, Manrope se sintió "forzada, robótica" para el autor. El gusto tipográfico es personal, y los launchers de referencia ofrecen temas con fuentes.
+**Decisión:** cinco opciones: **Plus Jakarta Sans** (por defecto: moderna y suave), **Figtree** (amable), **Fraunces** (serif con carácter; ejes SOFT/WONK/opsz fijados con `fontTools.varLib.instancer`, solo queda `wght`), **Quicksand** (redondeada) y **Fuente del sistema**. Todas variables, empaquetadas en `core/designsystem/src/main/res/font/` y, salvo Quicksand, recortadas a latino.
+**Por qué:** empaquetadas, por la misma razón que ADR-015 (sin "salto" en el primer frame). Quicksand declara un *Reserved Font Name* en su OFL: una versión modificada (y recortar ya es modificar) no puede llamarse igual, por eso va **sin modificar**.
+**Consecuencias:** +~400 KB de APK, dentro del presupuesto de 8 MB. Licencias en `docs/licencias/`. Manrope se elimina.
+
+## ADR-017 · DataStore Preferences en vez de DataStore Proto — Aceptada (2026-10-24)
+**Contexto:** ADR-005 pedía DataStore Proto. Proto exige el plugin de protobuf y `protoc` en el build, para unas pocas preferencias.
+**Opciones:** A) Proto + plugin de protobuf. B) Preferences detrás de un repositorio tipado (`PrefsRepository`) que guarda nombres de enums.
+**Decisión:** B, con `androidx.datastore:datastore-preferences` 1.2.1 (la 1.3.0 tenía menos de dos semanas).
+**Por qué:** mismo modelo asíncrono y seguro, sin generación de código. El tipado lo da `PrefsRepository`; un valor desconocido vuelve al de fábrica (`decodeTheme`, con prueba).
+**Consecuencias:** si las preferencias crecen mucho o necesitan estructuras anidadas, reconsiderar Proto con un ADR.
 
 ---
 

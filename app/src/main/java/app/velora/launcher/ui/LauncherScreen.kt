@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.systemGestures
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -45,6 +44,7 @@ import app.velora.launcher.core.designsystem.theme.VeloraTheme
 import app.velora.launcher.feature.apps.AppActions
 import app.velora.launcher.feature.drawer.AppListScreen
 import app.velora.launcher.feature.drawer.DrawerList
+import app.velora.launcher.feature.drawer.DrawerSearchState
 import app.velora.launcher.feature.drawer.DrawerUiState
 import app.velora.launcher.feature.drawer.WaveAlphabet
 import app.velora.launcher.feature.home.HomeScreen
@@ -72,7 +72,7 @@ fun LauncherScreen(
     drawer: DrawerUiState,
     drawerState: DrawerState,
     listState: LazyListState,
-    searchState: TextFieldState,
+    search: DrawerSearchState,
     actions: AppActions,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
@@ -101,14 +101,15 @@ fun LauncherScreen(
             AppListScreen(
                 uiState = drawer,
                 listState = listState,
-                searchState = searchState,
+                search = search,
                 actions = actions,
                 nestedScrollConnection = drawerState.nestedScroll,
                 activeSection = { letters.getOrNull(activeLetter) },
                 modifier = Modifier.drawerLayer(drawerState),
             )
         }
-        if (drawer.results == null) {
+        // Buscando, el alfabeto sobra: se oculta para dejar la pantalla limpia.
+        if (!search.active) {
             AlphabetOverlay(drawer.list, drawerState, listState, onActiveLetter = { activeLetter = it })
         }
     }

@@ -38,4 +38,37 @@
     <string name="error_open_system_settings">Couldn\'t open system settings.</string>
     <string name="error_app_launch">Couldn\'t open %1$s.</string>
     <string name="error_work_profile_paused">Your work profile is paused.</string>
+
+    <!-- Clock -->
+    <string name="clock_battery">%1$d%%</string>
+
+    <!-- List: recent and search -->
+    <string name="drawer_recent">Recently installed</string>
+    <string name="drawer_search_empty">Type an app name.</string>
+
+    <!-- Settings: theme -->
+    <string name="settings_general">General</string>
+    <string name="settings_font">Font</string>
+    <string name="settings_clock">Clock</string>
+    <string name="settings_icons">Icons</string>
+    <string name="font_system">System font</string>
+    <string name="clock_classic">Classic</string>
+    <string name="clock_classic_summary">Large time with the date below.</string>
+    <string name="clock_centered">Centered</string>
+    <string name="clock_centered_summary">Time, date and battery in the middle.</string>
+    <string name="clock_day">Day</string>
+    <string name="clock_day_summary">The day in large letters, cut by the time, date and battery.</string>
+    <string name="icons_circle">Circle</string>
+    <string name="icons_circle_summary">Every icon round and even.</string>
+    <string name="icons_system">System shape</string>
+    <string name="icons_system_summary">The shape your phone uses.</string>
+    <string name="icons_minimal">Minimal</string>
+    <string name="icons_minimal_summary">One color, taken from your wallpaper.</string>
+    <string name="icons_none">No icons</string>
+    <string name="icons_none_summary">Names only. The cleanest and fastest.</string>
+    <string name="app_menu_hide">Hide</string>
+    <string name="app_hidden">%1$s is hidden. Bring it back in Settings → Hidden apps.</string>
+    <string name="settings_hidden">Hidden apps</string>
+    <string name="settings_hidden_empty">You haven\'t hidden any apps.</string>
+    <string name="settings_unhide">Show</string>
 </resources>

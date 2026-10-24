@@ -3,6 +3,7 @@ package app.velora.launcher.feature.apps
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.geometry.Rect
 import app.velora.launcher.core.model.AppEntry
+import app.velora.launcher.core.model.AppShortcut
 
 /**
  * Todo lo que una fila puede pedir. Una sola instancia estable para toda la lista,
@@ -16,4 +17,6 @@ interface AppActions {
     fun uninstall(app: AppEntry)
     fun addFavorite(app: AppEntry)
     fun removeFavorite(app: AppEntry)
+    fun hide(app: AppEntry)
+    fun openShortcut(shortcut: AppShortcut, bounds: Rect?)
 }

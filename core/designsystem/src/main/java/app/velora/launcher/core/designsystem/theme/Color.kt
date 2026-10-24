@@ -65,6 +65,8 @@ data class OnWallpaperColors(
     val drawerScrim: Color,
     /** Fondo del buscador y de elementos elevados sobre el velo. */
     val surface: Color,
+    /** Único acento sobre el wallpaper (íconos minimalistas, letra activa): tono claro del tema. */
+    val accent: Color,
 )
 
 internal val DefaultOnWallpaperColors = OnWallpaperColors(
@@ -74,6 +76,7 @@ internal val DefaultOnWallpaperColors = OnWallpaperColors(
     scrimBottom = Color(0x8C000000),
     drawerScrim = Color(0xC7000000),
     surface = Color(0x24FFFFFF),
+    accent = Steel80,
 )
 
 /** Colores de marca (landing), tomados del logo: cinta plateada sobre negro. */

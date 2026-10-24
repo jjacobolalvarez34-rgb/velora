@@ -19,6 +19,7 @@ class LocalizedClockFormatter : ClockFormatter {
         val time: DateTimeFormatter = DateTimeFormatter.ofPattern(timePattern(locale, is24Hour), locale)
         val date: DateTimeFormatter =
             DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "EEEEdMMMM"), locale)
+        val weekday: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE", locale)
     }
 
     private var cached: Formatters? = null
@@ -30,6 +31,8 @@ class LocalizedClockFormatter : ClockFormatter {
         return ClockText(
             time = formatters.time.format(state.now),
             date = formatters.date.format(state.now).replaceFirstChar { it.titlecase(locale) },
+            // "jue." → "JUE" para el estilo de reloj Día.
+            weekdayShort = formatters.weekday.format(state.now).removeSuffix(".").uppercase(locale),
         )
     }
 

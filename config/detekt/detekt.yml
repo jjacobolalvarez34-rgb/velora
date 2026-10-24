@@ -7,6 +7,8 @@ complexity:
   LongParameterList:
     # Los composables reciben estado + lambdas + modifier.
     ignoreAnnotated: ['Composable']
+    # Con DI manual (ADR-004) los ViewModels reciben sus repositorios por constructor.
+    constructorThreshold: 9
   TooManyFunctions:
     ignoreAnnotatedFunctions: ['Preview']
 

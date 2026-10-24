@@ -102,6 +102,7 @@ class SystemAppsRepository(
             searchKey = AppSorting.searchKeyOf(label, locale),
             isWorkProfile = isWork,
             canUninstall = !isSystem,
+            installedAtMs = firstInstallTime,
         )
     }
 

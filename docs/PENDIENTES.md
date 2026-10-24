@@ -2,7 +2,7 @@
 
 > Lista viva de lo que falta, en orden. Al terminar un punto: marcarlo `[x]` con fecha y moverlo a `ROADMAP.md` si corresponde.
 > `[~]` = código hecho y probado en la JVM; falta verlo en el teléfono.
-> Última actualización: 2026-10-24.
+> Última actualización: 2026-10-24 (tarde).
 
 ## 1. Prueba en el teléfono de la 0.1.0
 
@@ -32,15 +32,32 @@
 ## 3. Siguiente (Fase 1, en orden)
 
 - [ ] Caché de apps en Room para que la lista y los favoritos estén en el **primer frame** del arranque en frío (hoy llegan unos ms después).
-- [ ] Apps ocultas (menú + lista recuperable en Ajustes).
-- [ ] Atajos de la app en el menú (`LauncherApps.getShortcuts`, B-018).
-- [ ] Ajustes: modo zurdo (espejar alfabeto), íconos sí/no, tamaño de texto, reordenar favoritos, "Fuente del sistema".
+- [~] Apps ocultas: "Ocultar" en el menú; se recuperan en Ajustes → Apps ocultas (Room v2, migración automática).
+- [~] Atajos de la app arriba del menú (`LauncherApps.getShortcuts`, B-018; solo si Velora es el inicio predeterminado).
+- [ ] Ajustes: modo zurdo (espejar alfabeto), tamaño de texto, reordenar favoritos. (Íconos sí/no y fuente del sistema ya están en Tema.)
 - [ ] Onboarding: elegir favoritos la primera vez.
 - [ ] Animación de back predictivo al cerrar la lista.
 - [ ] Baseline Profile de los flujos nuevos (abrir lista, arrastrar alfabeto, buscar) y medir los presupuestos de RENDIMIENTO §2.
 - [ ] Caché de íconos en disco.
 
-## 4. Cierre de la Fase 0 (falta verificar)
+## 4. Pedidos tras comparar con Niagara (2026-10-24)
+
+- [~] Íconos redondos por defecto; estilos Círculo / Sistema / Minimalista / Sin íconos.
+- [~] Fuente nueva por defecto (Plus Jakarta Sans) y elegible: Figtree, Fraunces, Quicksand, sistema (ADR-016).
+- [~] Ajustes → Tema con vista previa en vivo; relojes Clásico / Centrado / Día (con batería).
+- [~] "Recién instaladas" arriba de la lista y en el buscador vacío.
+- [~] Buscador que se esconde al bajar; modo búsqueda limpio (la lista se va con fundido); resultados animados.
+- [ ] **Widgets** (Fase 3, se puede adelantar). Plan:
+  1. Una zona de widgets en el inicio, debajo del reloj, con altura ajustable.
+  2. Mantener presionado el inicio → "Agregar widget" → selector propio con las vistas previas (`AppWidgetManager.getInstalledProvidersForProfile`, todos los perfiles).
+  3. `AppWidgetHost` propio: `allocateAppWidgetId` → `bindAppWidgetIdIfAllowed`. Si no se permite, el diálogo del sistema `ACTION_APPWIDGET_BIND` (solo la primera vez por proveedor) → la actividad de configuración del widget, si la tiene.
+  4. Se dibuja con `AppWidgetHostView` dentro de Compose (`AndroidView`). `startListening` en `onStart` y `stopListening` en `onStop`, para no gastar batería con el inicio oculto.
+  5. Se redimensiona arrastrando un borde y se guarda en Room (id, proveedor, tamaño, orden).
+  6. Quitar un widget o desinstalar su app libera el `appWidgetId` (B-019).
+  7. Riesgos: widgets pesados de algunos fabricantes, y que los widgets son Views, no Compose. Hay que medir el scroll con Macrobenchmark antes de darlo por bueno.
+- [ ] Carpetas / agrupar apps (como "Tareas"): Fase 3.
+
+## 5. Cierre de la Fase 0 (falta verificar)
 
 - [ ] Crear el repositorio en GitHub y ver el CI en verde (`.github/workflows/ci.yml`).
 - [ ] Primera medición de arranque con `:macrobenchmark` (necesita un dispositivo conectado).

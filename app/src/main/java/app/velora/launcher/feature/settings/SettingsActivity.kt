@@ -8,19 +8,43 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.velora.launcher.R
+import app.velora.launcher.VeloraApplication
 import app.velora.launcher.core.data.log.Logger
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
+import app.velora.launcher.core.model.AppEntry
+import app.velora.launcher.core.model.ClockStyle
+import app.velora.launcher.core.model.FontChoice
+import app.velora.launcher.core.model.IconStyle
 
-/** Ajustes de Velora. Fuera de `HomeActivity` (ADR-003) y abrible desde cualquier launcher. */
+/** Ajustes de Velora. Fuera de `HomeActivity` (ADR-003); se abre manteniendo presionado el inicio. */
 class SettingsActivity : ComponentActivity() {
+
+    private val viewModel: SettingsViewModel by viewModels {
+        SettingsViewModel.factory((application as VeloraApplication).container)
+    }
+
+    private val actions = object : SettingsActions {
+        override fun onFont(font: FontChoice) = viewModel.onFont(font)
+        override fun onClockStyle(style: ClockStyle) = viewModel.onClockStyle(style)
+        override fun onIconStyle(style: IconStyle) = viewModel.onIconStyle(style)
+        override fun onChooseHomeApp() = openHomeAppSettings()
+        override fun onUnhide(app: AppEntry) = viewModel.onUnhide(app)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
-            VeloraTheme {
-                SettingsScreen(onChooseHomeApp = ::openHomeAppSettings)
+            val theme = viewModel.theme.collectAsStateWithLifecycle().value ?: return@setContent
+            val preview by viewModel.preview.collectAsStateWithLifecycle()
+            val hidden by viewModel.hidden.collectAsStateWithLifecycle()
+            // La pantalla usa la fuente elegida: se ve el cambio al instante.
+            VeloraTheme(font = theme.font) {
+                SettingsScreen(theme = theme, preview = preview, hidden = hidden, actions = actions)
             }
         }
     }

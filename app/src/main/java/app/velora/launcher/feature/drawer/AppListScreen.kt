@@ -1,6 +1,11 @@
 package app.velora.launcher.feature.drawer
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,37 +15,36 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.TextFieldLineLimits
-import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import app.velora.launcher.R
-import app.velora.launcher.core.designsystem.theme.Shapes
 import app.velora.launcher.core.designsystem.theme.Sizes
 import app.velora.launcher.core.designsystem.theme.Spacing
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
@@ -51,13 +55,14 @@ import app.velora.launcher.feature.apps.AppRowStyle
 import app.velora.launcher.feature.apps.PreviewAppActions
 import app.velora.launcher.feature.apps.previewApp
 
-private val SearchBarHeight = Sizes.appRowHeight
-
 /** Espacio que la lista deja abajo para que el buscador no tape la última app. */
-private val SearchBarSpace: Dp = SearchBarHeight + Spacing.m * 2
+private val SearchBarSpace: Dp = Sizes.appRowHeight + Spacing.m * 2
+
+/** Cuánto hay que arrastrar para que el buscador se esconda o vuelva. */
+private const val BAR_TOGGLE_PX = 12f
 
 /**
- * Lista completa: todas las apps por letra, o los resultados si hay búsqueda.
+ * Lista completa o, buscando, las recientes / los resultados. El cambio entre ambas es un fundido.
  *
  * @param activeSection sección resaltada por el alfabeto; se lee en la fase de dibujo.
  */
@@ -65,32 +70,73 @@ private val SearchBarSpace: Dp = SearchBarHeight + Spacing.m * 2
 fun AppListScreen(
     uiState: DrawerUiState,
     listState: LazyListState,
-    searchState: TextFieldState,
+    search: DrawerSearchState,
     actions: AppActions,
     nestedScrollConnection: NestedScrollConnection,
     modifier: Modifier = Modifier,
     activeSection: () -> String? = { null },
 ) {
+    val motion = VeloraTheme.motion
+    val barState = rememberSearchBarVisibility(listState)
     Box(modifier = modifier.fillMaxSize()) {
         val padding = listPadding()
-        val results = uiState.results
-        if (results == null) {
-            FullList(uiState, listState, padding, actions, activeSection, nestedScrollConnection)
-        } else {
-            SearchResults(results, uiState.query, uiState.favoriteIds, padding, actions, nestedScrollConnection)
+        val scroll = Modifier.listScroll(nestedScrollConnection, barState.observer)
+        AnimatedContent(
+            targetState = search.active,
+            transitionSpec = { fadeIn(motion.effectDefault()) togetherWith fadeOut(motion.effectFast()) },
+            label = "search-mode",
+        ) { searching ->
+            if (searching) {
+                SearchPanel(uiState, padding, actions, scroll)
+            } else {
+                FullList(uiState, listState, padding, actions, activeSection, scroll)
+            }
         }
-        SearchBar(
-            state = searchState,
-            onGo = { results?.firstOrNull()?.let { actions.open(it, null) } },
+        val shown by animateFloatAsState(
+            targetValue = if (search.active || barState.visible) 1f else 0f,
+            animationSpec = motion.spatialDefault(),
+            label = "search-bar",
+        )
+        DrawerSearchBar(
+            state = search,
+            onGo = { uiState.results?.firstOrNull()?.let { actions.open(it, null) } },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .windowInsetsPadding(
                     WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal),
                 )
-                .padding(horizontal = Spacing.l, vertical = Spacing.m),
+                .padding(horizontal = Spacing.l, vertical = Spacing.m)
+                .graphicsLayer {
+                    alpha = shown
+                    translationY = (1f - shown) * SearchBarSpace.toPx()
+                },
         )
     }
 }
+
+/** El buscador se ve arriba de la lista y al subir; se esconde al bajar (no tapa las apps). */
+private class SearchBarVisibility(private val listState: LazyListState) {
+    private var scrollingUp by mutableStateOf(true)
+    private val atTop by derivedStateOf { listState.firstVisibleItemIndex == 0 }
+
+    val visible: Boolean get() = atTop || scrollingUp
+
+    val observer = object : NestedScrollConnection {
+        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+            if (available.y < -BAR_TOGGLE_PX) scrollingUp = false
+            if (available.y > BAR_TOGGLE_PX) scrollingUp = true
+            return Offset.Zero
+        }
+    }
+}
+
+/** El cajón (cerrar arrastrando) va por fuera; el que esconde el buscador solo observa. */
+private fun Modifier.listScroll(drawer: NestedScrollConnection, barObserver: NestedScrollConnection) =
+    fillMaxSize().nestedScroll(drawer).nestedScroll(barObserver)
+
+@Composable
+private fun rememberSearchBarVisibility(listState: LazyListState) =
+    remember(listState) { SearchBarVisibility(listState) }
 
 @Composable
 private fun FullList(
@@ -99,27 +145,20 @@ private fun FullList(
     padding: PaddingValues,
     actions: AppActions,
     activeSection: () -> String?,
-    nestedScrollConnection: NestedScrollConnection,
+    modifier: Modifier,
 ) {
-    LazyColumn(
-        state = listState,
-        contentPadding = padding,
-        modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(nestedScrollConnection),
-    ) {
-        items(
-            items = uiState.list.items,
-            key = { it.key },
-            contentType = { if (it is DrawerItem.Header) "header" else "app" },
-        ) { item ->
+    LazyColumn(state = listState, contentPadding = padding, modifier = modifier) {
+        items(items = uiState.list.items, key = { it.key }, contentType = { it.contentType }) { item ->
             when (item) {
+                DrawerItem.RecentHeader -> SectionHeader(stringResource(R.string.drawer_recent))
+
                 is DrawerItem.Header -> SectionHeader(item.letter)
 
-                is DrawerItem.App -> AppRow(
+                is DrawerItem.Recent -> ListApp(item.entry, uiState, actions)
+
+                is DrawerItem.App -> ListApp(
                     app = item.entry,
-                    isFavorite = item.entry.key.stableId in uiState.favoriteIds,
-                    style = AppRowStyle.List,
+                    uiState = uiState,
                     actions = actions,
                     dimmed = { activeSection().let { it != null && it != item.entry.section } },
                 )
@@ -128,48 +167,67 @@ private fun FullList(
     }
 }
 
+/** Buscando: sin texto, las recientes; con texto, los resultados con fundido y resorte. */
 @Composable
-private fun SearchResults(
-    results: List<AppEntry>,
-    query: String,
-    favoriteIds: Set<String>,
-    padding: PaddingValues,
-    actions: AppActions,
-    nestedScrollConnection: NestedScrollConnection,
-) {
-    // Un estado propio: buscar no mueve la posición de la lista completa.
-    val resultsState = rememberLazyListState()
-    LazyColumn(
-        state = resultsState,
-        contentPadding = padding,
-        modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(nestedScrollConnection),
-    ) {
-        if (results.isEmpty()) {
-            item(key = "empty") {
-                Text(
-                    text = stringResource(R.string.drawer_no_results, query),
-                    style = VeloraTheme.typography.caption,
-                    color = VeloraTheme.onWallpaper.contentVariant,
-                )
+private fun SearchPanel(uiState: DrawerUiState, padding: PaddingValues, actions: AppActions, modifier: Modifier) {
+    val results = uiState.results
+    LazyColumn(state = rememberLazyListState(), contentPadding = padding, modifier = modifier) {
+        when {
+            results == null && uiState.recents.isEmpty() -> item(key = "hint") {
+                Hint(stringResource(R.string.drawer_search_empty))
             }
-        }
-        items(items = results, key = { it.key.stableId }, contentType = { "app" }) { app ->
-            AppRow(
-                app = app,
-                isFavorite = app.key.stableId in favoriteIds,
-                style = AppRowStyle.List,
-                actions = actions,
-            )
+
+            results == null -> {
+                item(key = "recent-header") { SectionHeader(stringResource(R.string.drawer_recent)) }
+                items(uiState.recents, key = { "recent:${it.key.stableId}" }, contentType = { "app" }) {
+                    ListApp(it, uiState, actions, animatedItem())
+                }
+            }
+
+            results.isEmpty() -> item(key = "empty") {
+                Hint(stringResource(R.string.drawer_no_results, uiState.query))
+            }
+
+            else -> items(results, key = { it.key.stableId }, contentType = { "app" }) {
+                ListApp(it, uiState, actions, animatedItem())
+            }
         }
     }
 }
 
+/** Al filtrar, lo que entra aparece con un fundido y lo que queda se reacomoda con un resorte. */
 @Composable
-private fun SectionHeader(letter: String) {
+private fun LazyItemScope.animatedItem(): Modifier {
+    val motion = VeloraTheme.motion
+    return Modifier.animateItem(
+        fadeInSpec = motion.effectDefault(),
+        placementSpec = motion.spatialDefault(),
+        fadeOutSpec = motion.effectFast(),
+    )
+}
+
+@Composable
+private fun ListApp(
+    app: AppEntry,
+    uiState: DrawerUiState,
+    actions: AppActions,
+    modifier: Modifier = Modifier,
+    dimmed: () -> Boolean = { false },
+) {
+    AppRow(
+        app = app,
+        isFavorite = app.key.stableId in uiState.favoriteIds,
+        style = AppRowStyle.List,
+        actions = actions,
+        dimmed = dimmed,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun SectionHeader(text: String) {
     Text(
-        text = letter,
+        text = text,
         style = VeloraTheme.typography.sectionHeader,
         color = VeloraTheme.onWallpaper.contentVariant,
         modifier = Modifier
@@ -179,30 +237,20 @@ private fun SectionHeader(letter: String) {
 }
 
 @Composable
-private fun SearchBar(state: TextFieldState, onGo: () -> Unit, modifier: Modifier = Modifier) {
-    val colors = VeloraTheme.onWallpaper
-    val style = VeloraTheme.typography.appRow.copy(color = colors.content)
-    BasicTextField(
-        state = state,
-        textStyle = style,
-        cursorBrush = SolidColor(colors.content),
-        lineLimits = TextFieldLineLimits.SingleLine,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go, autoCorrectEnabled = false),
-        onKeyboardAction = { onGo() },
-        modifier = modifier
-            .fillMaxWidth()
-            .height(SearchBarHeight)
-            .background(colors.surface, Shapes.sheet),
-        decorator = { field ->
-            Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.padding(horizontal = Spacing.l)) {
-                if (state.text.isEmpty()) {
-                    Text(stringResource(R.string.drawer_search_hint), style = style, color = colors.contentVariant)
-                }
-                field()
-            }
-        },
+private fun Hint(text: String) {
+    Text(
+        text = text,
+        style = VeloraTheme.typography.caption,
+        color = VeloraTheme.onWallpaper.contentVariant,
+        modifier = Modifier.padding(top = Spacing.l),
     )
 }
+
+private val DrawerItem.contentType: String
+    get() = when (this) {
+        DrawerItem.RecentHeader, is DrawerItem.Header -> "header"
+        is DrawerItem.Recent, is DrawerItem.App -> "app"
+    }
 
 @Composable
 private fun listPadding(): PaddingValues {
@@ -224,9 +272,9 @@ private fun AppListScreenPreview() {
     val apps = listOf("Banco", "Calculadora", "Cámara", "Chrome", "Reloj", "Spotify").map(::previewApp)
     VeloraTheme(reducedMotion = true) {
         AppListScreen(
-            uiState = DrawerUiState(list = buildDrawerList(apps)),
+            uiState = DrawerUiState(list = buildDrawerList(apps, recents = apps.take(1)), recents = apps.take(1)),
             listState = rememberLazyListState(),
-            searchState = rememberTextFieldState(),
+            search = rememberDrawerSearchState(),
             actions = PreviewAppActions,
             nestedScrollConnection = object : NestedScrollConnection {},
             modifier = Modifier.background(VeloraTheme.onWallpaper.drawerScrim),

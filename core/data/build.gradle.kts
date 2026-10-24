@@ -31,6 +31,7 @@ dependencies {
     implementation(platform(libs.compose.bom))
     api(libs.compose.ui.graphics)
 
+    implementation(libs.datastore.preferences)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)

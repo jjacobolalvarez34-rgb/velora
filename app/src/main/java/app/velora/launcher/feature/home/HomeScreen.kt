@@ -1,6 +1,7 @@
 package app.velora.launcher.feature.home
 
 import android.content.res.Configuration
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,10 +43,14 @@ fun HomeScreen(uiState: HomeUiState, actions: AppActions, modifier: Modifier = M
             .padding(start = Spacing.l, top = Spacing.xl, end = Spacing.l + WaveAlphabetWidth, bottom = Spacing.l),
     ) {
         StaggeredEntrance(index = 0) {
-            ClockHeader(clock = uiState.clock)
+            ClockHeader(clock = uiState.clock, style = uiState.clockStyle, battery = uiState.battery)
         }
         Spacer(Modifier.weight(1f))
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+        // Agregar o quitar un favorito reacomoda la columna con un resorte, sin saltos.
+        Column(
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+            modifier = Modifier.animateContentSize(VeloraTheme.motion.spatialDefault()),
+        ) {
             if (uiState.favorites.isEmpty()) {
                 StaggeredEntrance(index = 1) {
                     Text(
@@ -55,8 +61,10 @@ fun HomeScreen(uiState: HomeUiState, actions: AppActions, modifier: Modifier = M
                 }
             }
             uiState.favorites.forEachIndexed { index, app ->
-                StaggeredEntrance(index = index + 1) {
-                    AppRow(app = app, isFavorite = true, style = AppRowStyle.Favorite, actions = actions)
+                key(app.key.stableId) {
+                    StaggeredEntrance(index = index + 1) {
+                        AppRow(app = app, isFavorite = true, style = AppRowStyle.Favorite, actions = actions)
+                    }
                 }
             }
         }

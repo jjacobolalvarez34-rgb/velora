@@ -3,14 +3,23 @@ package app.velora.launcher.feature.home
 import android.content.Intent
 import app.cash.turbine.test
 import app.velora.launcher.core.data.apps.AppsRepository
+import app.velora.launcher.core.data.battery.BatteryRepository
 import app.velora.launcher.core.data.clock.ClockRepository
 import app.velora.launcher.core.data.favorites.FavoriteEntity
 import app.velora.launcher.core.data.favorites.FavoritesDao
 import app.velora.launcher.core.data.favorites.FavoritesRepository
+import app.velora.launcher.core.data.favorites.HiddenAppEntity
+import app.velora.launcher.core.data.favorites.HiddenAppsDao
+import app.velora.launcher.core.data.favorites.HiddenAppsRepository
 import app.velora.launcher.core.data.home.DefaultHomeRepository
+import app.velora.launcher.core.data.prefs.PrefsRepository
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.AppKey
 import app.velora.launcher.core.model.ClockState
+import app.velora.launcher.core.model.ClockStyle
+import app.velora.launcher.core.model.FontChoice
+import app.velora.launcher.core.model.IconStyle
+import app.velora.launcher.core.model.ThemeSettings
 import java.time.LocalDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -69,6 +78,34 @@ class HomeViewModelTest {
         override fun requestIntent() = Intent()
     }
 
+    private class FakeHiddenDao : HiddenAppsDao {
+        val rows = MutableStateFlow<List<HiddenAppEntity>>(emptyList())
+        override fun observe() = rows
+        override suspend fun insert(app: HiddenAppEntity) {
+            rows.value += app
+        }
+        override suspend fun delete(stableId: String) {
+            rows.value = rows.value.filterNot { it.stableId == stableId }
+        }
+    }
+
+    private class FakePrefs : PrefsRepository {
+        override val theme = MutableStateFlow(ThemeSettings())
+        override suspend fun setFont(font: FontChoice) {
+            theme.value = theme.value.copy(font = font)
+        }
+        override suspend fun setClockStyle(style: ClockStyle) {
+            theme.value = theme.value.copy(clock = style)
+        }
+        override suspend fun setIconStyle(style: IconStyle) {
+            theme.value = theme.value.copy(icons = style)
+        }
+    }
+
+    private class FakeBattery : BatteryRepository {
+        override val level = MutableStateFlow<Int?>(82)
+    }
+
     /** Formateador trivial: la prueba es del ViewModel, no del formato del idioma. */
     private val formatter = ClockFormatter { state ->
         ClockText(time = "${state.now.hour}:${state.now.minute}", date = if (state.is24Hour) "24" else "12")
@@ -93,7 +130,17 @@ class HomeViewModelTest {
         apps: FakeApps = FakeApps(listOf(camera, clock)),
         dao: FakeFavoritesDao = FakeFavoritesDao(),
         home: FakeDefaultHome = FakeDefaultHome(isDefault = true),
-    ) = HomeViewModel(clockRepo, formatter, apps, FavoritesRepository(dao, apps.apps), home)
+        prefs: FakePrefs = FakePrefs(),
+    ) = HomeViewModel(
+        clockRepository = clockRepo,
+        clockFormatter = formatter,
+        appsRepository = apps,
+        favoritesRepository = FavoritesRepository(dao, apps.apps),
+        defaultHomeRepository = home,
+        hiddenAppsRepository = HiddenAppsRepository(FakeHiddenDao(), apps.apps),
+        prefsRepository = prefs,
+        batteryRepository = FakeBattery(),
+    )
 
     @Before
     fun setUp() {
@@ -176,6 +223,32 @@ class HomeViewModelTest {
         viewModel.uiState.test {
             assertFalse(expectMostRecentItem().showWelcome)
         }
+    }
+
+    @Test
+    fun `el estilo de reloj y la batería llegan al inicio`() = runTest {
+        val prefs = FakePrefs()
+        val viewModel = viewModel(prefs = prefs)
+
+        viewModel.uiState.test {
+            assertEquals(82, expectMostRecentItem().battery)
+            prefs.setClockStyle(ClockStyle.Day)
+            assertEquals(ClockStyle.Day, awaitItem().clockStyle)
+        }
+    }
+
+    @Test
+    fun `ocultar una app avisa dónde recuperarla`() = runTest {
+        val viewModel = viewModel()
+
+        viewModel.onHide(camera)
+
+        assertEquals(HomeEvent.AppHidden("Cámara"), viewModel.events.first())
+    }
+
+    @Test
+    fun `el tema se conoce antes de dibujar el inicio`() {
+        assertEquals(ThemeSettings(), viewModel().theme.value)
     }
 
     @Test

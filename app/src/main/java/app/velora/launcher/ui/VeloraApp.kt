@@ -6,9 +6,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.clearText
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -18,6 +15,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -28,11 +26,16 @@ import app.velora.launcher.R
 import app.velora.launcher.core.data.log.Logger
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
 import app.velora.launcher.core.model.AppEntry
+import app.velora.launcher.core.model.AppShortcut
 import app.velora.launcher.di.AppContainer
+import app.velora.launcher.feature.appmenu.LocalShortcutsRepository
 import app.velora.launcher.feature.apps.AppActions
 import app.velora.launcher.feature.apps.LocalIconRepository
+import app.velora.launcher.feature.apps.LocalIconStyle
 import app.velora.launcher.feature.apps.rememberAppOpener
+import app.velora.launcher.feature.drawer.DrawerSearchState
 import app.velora.launcher.feature.drawer.DrawerViewModel
+import app.velora.launcher.feature.drawer.rememberDrawerSearchState
 import app.velora.launcher.feature.home.HomeEvent
 import app.velora.launcher.feature.home.HomeViewModel
 import app.velora.launcher.feature.welcome.WelcomeScreen
@@ -47,10 +50,16 @@ import kotlinx.coroutines.flow.filter
  */
 @Composable
 fun VeloraApp(container: AppContainer, homePresses: Flow<Boolean>, onOpenSettings: () -> Unit) {
-    VeloraTheme {
-        CompositionLocalProvider(LocalIconRepository provides container.iconRepository) {
-            val homeViewModel: HomeViewModel = viewModel(factory = HomeViewModel.factory(container))
-            val drawerViewModel: DrawerViewModel = viewModel(factory = DrawerViewModel.factory(container))
+    val homeViewModel: HomeViewModel = viewModel(factory = HomeViewModel.factory(container))
+    val drawerViewModel: DrawerViewModel = viewModel(factory = DrawerViewModel.factory(container))
+    // Hasta leer el tema (milisegundos) solo se ve el wallpaper: nunca la fuente equivocada.
+    val theme = homeViewModel.theme.collectAsStateWithLifecycle().value ?: return
+    VeloraTheme(font = theme.font) {
+        CompositionLocalProvider(
+            LocalIconRepository provides container.iconRepository,
+            LocalIconStyle provides theme.icons,
+            LocalShortcutsRepository provides container.shortcutsRepository,
+        ) {
             val home by homeViewModel.uiState.collectAsStateWithLifecycle()
 
             LifecycleResumeEffect(homeViewModel) {
@@ -80,7 +89,7 @@ private fun LauncherRoute(
     val drawer by drawerViewModel.uiState.collectAsStateWithLifecycle()
     val drawerState = rememberDrawerState()
     val listState = rememberLazyListState()
-    val searchState = rememberTextFieldState()
+    val search = rememberDrawerSearchState()
     val opener = rememberAppOpener(container.appLauncher)
     val actions = remember(opener, homeViewModel) {
         object : AppActions {
@@ -89,15 +98,17 @@ private fun LauncherRoute(
             override fun uninstall(app: AppEntry) = opener.uninstall(app)
             override fun addFavorite(app: AppEntry) = homeViewModel.onAddFavorite(app.key)
             override fun removeFavorite(app: AppEntry) = homeViewModel.onRemoveFavorite(app.key)
+            override fun hide(app: AppEntry) = homeViewModel.onHide(app)
+            override fun openShortcut(shortcut: AppShortcut, bounds: Rect?) = opener.openShortcut(shortcut, bounds)
         }
     }
-    DrawerEffects(drawerState, searchState, homePresses, drawerViewModel::onQueryChange)
+    DrawerEffects(drawerState, search, homePresses, drawerViewModel::onQueryChange)
     LauncherScreen(
         home = home,
         drawer = drawer,
         drawerState = drawerState,
         listState = listState,
-        searchState = searchState,
+        search = search,
         actions = actions,
         onOpenSettings = onOpenSettings,
     )
@@ -107,20 +118,20 @@ private fun LauncherRoute(
 @Composable
 private fun DrawerEffects(
     drawerState: DrawerState,
-    searchState: TextFieldState,
+    search: DrawerSearchState,
     homePresses: Flow<Boolean>,
     onQueryChange: (String) -> Unit,
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     // Escribir en el buscador filtra la lista.
-    LaunchedEffect(searchState) {
-        snapshotFlow { searchState.text.toString() }.collect(onQueryChange)
+    LaunchedEffect(search) {
+        snapshotFlow { search.text.text.toString() }.collect(onQueryChange)
     }
     // Al cerrarse la lista del todo: buscador limpio y teclado guardado.
     LaunchedEffect(drawerState) {
         snapshotFlow { drawerState.isOpen }.distinctUntilChanged().filter { !it }.collect {
-            searchState.clearText()
+            search.clear()
             keyboard?.hide()
             focusManager.clearFocus()
         }
@@ -132,7 +143,11 @@ private fun DrawerEffects(
     // Al irse a otra app el inicio queda listo, sin animación al volver (ESTILO §5.3).
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { drawerState.snapClosed() }
     BackHandler(enabled = drawerState.isOpen) {
-        if (searchState.text.isNotEmpty()) searchState.clearText() else drawerState.close()
+        when {
+            search.text.text.isNotEmpty() -> search.clear()
+            search.focused -> focusManager.clearFocus()
+            else -> drawerState.close()
+        }
     }
 }
 
@@ -159,10 +174,12 @@ private fun WelcomeRoute(viewModel: HomeViewModel) {
 @Composable
 private fun HomeEventMessages(viewModel: HomeViewModel) {
     val context = LocalContext.current
-    LaunchedEffect(viewModel) {
+    val resources = LocalResources.current
+    LaunchedEffect(viewModel, resources) {
         viewModel.events.collect { event ->
             val message = when (event) {
-                HomeEvent.FavoritesFull -> R.string.favorites_full
+                HomeEvent.FavoritesFull -> resources.getString(R.string.favorites_full)
+                is HomeEvent.AppHidden -> resources.getString(R.string.app_hidden, event.label)
             }
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
