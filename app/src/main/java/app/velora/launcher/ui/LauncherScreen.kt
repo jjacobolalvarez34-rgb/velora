@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -80,6 +81,8 @@ fun LauncherScreen(
     modifier: Modifier = Modifier,
     onHomeMenu: () -> Unit = onOpenSettings,
     widgets: @Composable () -> Unit = {},
+    photo: ImageBitmap? = null,
+    onDoubleTap: (() -> Unit)? = null,
 ) {
     drawerState.spec = VeloraTheme.motion.let { if (it.reduced) null else it.spatialDefault() }
     val drawerVisible by remember(drawerState) { derivedStateOf { drawerState.isOpen } }
@@ -90,14 +93,14 @@ fun LauncherScreen(
             .fillMaxSize()
             .onSizeChanged { drawerState.dragDistancePx = it.height * DRAG_DISTANCE_FRACTION },
     ) {
-        ThemeBackground(theme.preset)
+        ThemeBackground(theme.preset, photo = photo)
         DrawerScrim(drawerState)
         HomeScreen(
             uiState = home,
             actions = actions,
             modifier = Modifier
                 .homeLayer(drawerState)
-                .homeGestures(drawerState, onHomeMenu, onOpenSettings),
+                .homeGestures(drawerState, onHomeMenu, onOpenSettings, onDoubleTap),
             widgets = widgets,
         )
         if (drawerVisible) {
@@ -177,12 +180,16 @@ private fun BoxScope.AlphabetOverlay(list: DrawerList, drawerState: DrawerState,
     )
 }
 
-/** Deslizar hacia arriba abre la lista; mantener presionado abre los ajustes. */
+/**
+ * Deslizar hacia arriba abre la lista; mantener presionado abre el menú del inicio; doble toque
+ * bloquea la pantalla si está activado (ADR-009).
+ */
 @Composable
 private fun Modifier.homeGestures(
     drawerState: DrawerState,
     onHomeMenu: () -> Unit,
     onOpenSettings: () -> Unit,
+    onDoubleTap: (() -> Unit)?,
 ): Modifier {
     val haptics = LocalHapticFeedback.current
     val openSettings = stringResource(R.string.home_open_settings)
@@ -194,8 +201,9 @@ private fun Modifier.homeGestures(
             orientation = Orientation.Vertical,
             onDragStopped = { velocity -> drawerState.settle(velocity) },
         )
-        .pointerInput(onHomeMenu) {
+        .pointerInput(onHomeMenu, onDoubleTap) {
             detectTapGestures(
+                onDoubleTap = onDoubleTap?.let { lock -> { lock() } },
                 onLongPress = {
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     onHomeMenu()

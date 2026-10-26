@@ -19,11 +19,11 @@
 | `REQUEST_DELETE_PACKAGES` | 1 | Normal | Abrir el diálogo de desinstalar del sistema | — |
 | `VIBRATE` | 1 | Normal | Háptica del alfabeto (si `performHapticFeedback` no basta) | — |
 | `EXPAND_STATUS_BAR` | 1 | Normal | Gesto bajar = abrir panel de notificaciones | — |
-| `SET_WALLPAPER` | 3 | Normal | Aplicar fondos incluidos (opcional) | — |
+| Selector de fotos del sistema (`PickVisualMedia`) y `ACTION_SET_WALLPAPER` | 0.6.0 (ADR-022) | **Sin permiso** | Foto propia como fondo del tema; abrir el selector de fondos del sistema | `READ_MEDIA_IMAGES` y `SET_WALLPAPER` (innecesarios) |
 | `ACCESS_HIDDEN_PROFILES` | 2 | Normal (Android 15+) | Mostrar apps del espacio privado | — |
-| `BIND_NOTIFICATION_LISTENER_SERVICE` (servicio) | 2 | Acceso especial, el usuario lo concede en Ajustes | Notificaciones integradas | — |
+| `BIND_NOTIFICATION_LISTENER_SERVICE` (servicio) | 2 (implementado en 0.6.0, ADR-023) | Acceso especial, el usuario lo concede en Ajustes | Puntos de notificación, último aviso bajo favoritos y reproductor (sesiones de música con el mismo acceso) | — |
 | `AppWidgetHost` + diálogo `ACTION_APPWIDGET_BIND` | 1 (adelantado, ADR-020) | Consentimiento del sistema por proveedor; **sin permiso en el manifiesto** | Widgets | `BIND_APPWIDGET` (solo para apps del sistema) |
-| `BIND_ACCESSIBILITY_SERVICE` (servicio) | 4 | Acceso especial | **Únicamente** bloquear pantalla con gesto (`GLOBAL_ACTION_LOCK_SCREEN`, API 28+) | Administrador de dispositivo (rompe huella), bajar timeout (altera ajustes) |
+| `BIND_ACCESSIBILITY_SERVICE` (servicio) | 4 (adelantado a 0.6.0) | Acceso especial | **Únicamente** bloquear pantalla con gesto (`GLOBAL_ACTION_LOCK_SCREEN`, API 28+) | Administrador de dispositivo (rompe huella), bajar timeout (altera ajustes) |
 | `INTERNET` | — | — | **No se declara.** Si una función futura lo requiere: ADR + revisión completa | — |
 
 Cualquier otro permiso requiere ADR.
@@ -36,7 +36,9 @@ Cualquier otro permiso requiere ADR.
 - Capturar `ActivityNotFoundException`/`SecurityException` (app suspendida, deshabilitada, perfil en pausa) y mostrar mensaje; si el perfil de trabajo está en pausa, ofrecer reactivarlo con la API del sistema.
 
 ### 3.2 Servicio de notificaciones
-- Declarado con `android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"`, `exported="true"` (lo exige el sistema; solo el sistema puede enlazarlo).
+- Declarado con `android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"` y `exported="false"`: lo enlaza el sistema, ninguna otra app puede.
+- Opt-in con aviso destacado en Ajustes antes de mandar a la pantalla del sistema. Con la función apagada se desconecta solo (`requestUnbind`, B-003).
+- Nada a disco ni a logs: `NotificationsRepository` es un `StateFlow` en memoria. Para la música solo se leen título, artista y estado.
 - Datos solo en memoria; se borran al desactivar la función o al morir el proceso.
 - Respuestas rápidas: usar las `RemoteInput` de la propia notificación; nunca guardar el texto escrito.
 - Respetar notificaciones de **pantalla de bloqueo/sensibles**: si `Notification.visibility == VISIBILITY_SECRET` o el perfil está bloqueado, mostrar solo "Nueva notificación".
@@ -46,7 +48,8 @@ Cualquier otro permiso requiere ADR.
 - `isAccessibilityTool="false"` (no somos herramienta de accesibilidad).
 - Config mínima: sin `canRetrieveWindowContent`, `accessibilityEventTypes` vacío/mínimo; solo `performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN)`.
 - **Divulgación destacada dentro de la app** (no solo en la política de privacidad) antes de mandar al usuario a Ajustes; declaración en Play Console.
-- Desactivado por defecto. Si el sistema lo apaga, la función se oculta y se ofrece reactivarlo, sin insistir.
+- Desactivado por defecto. Si el sistema lo apaga, Ajustes muestra "Falta el acceso" y el doble toque avisa una vez y abre Accesibilidad, sin insistir.
+- Implementado en 0.6.0 (`LockAccessibilityService`, `exported="false"`, `res/xml/lock_service.xml`).
 
 ### 3.4 Widgets (Fase 3)
 - `AppWidgetHost` con ID propio; liberar IDs de widgets eliminados (`deleteAppWidgetId`) para no acumular.
@@ -66,6 +69,7 @@ Cualquier otro permiso requiere ADR.
 | Favoritos, ocultos, carpetas | Room | Medio (revela apps instaladas) | Sí, con Android Backup cifrado por el sistema |
 | Preferencias | DataStore | Bajo | Sí |
 | Íconos renderizados | Caché interna | Bajo | No |
+| Foto de fondo elegida (reducida) | `files/backgrounds/` | Medio (foto personal) | **No** (excluida en `backup_rules`/`data_extraction_rules`) |
 | Notificaciones | Solo memoria | **Alto** | Nunca |
 | Contadores de uso por app (para sugerencias / freno de uso) | Room | Medio | Opcional, desactivado por defecto |
 

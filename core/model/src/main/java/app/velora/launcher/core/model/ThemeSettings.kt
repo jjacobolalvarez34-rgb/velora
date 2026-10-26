@@ -3,7 +3,7 @@ package app.velora.launcher.core.model
 import androidx.compose.runtime.Immutable
 
 /** Fuente de toda la interfaz (ADR-016). */
-enum class FontChoice { Nunito, Quicksand, PlusJakartaSans, Figtree, Fraunces, Pixel, System }
+enum class FontChoice { Nunito, Quicksand, PlusJakartaSans, Figtree, Fraunces, Cinzel, Pixel, System }
 
 /** Cómo se dibuja el reloj del inicio. */
 enum class ClockStyle {
@@ -61,6 +61,9 @@ enum class ThemePreset {
 
     /** Morado con estrellas de píxeles y fuente pixel. */
     PixelNight,
+
+    /** Ceniza: fantasía oscura, hoguera y brasas, letras talladas. */
+    Ash,
     ;
 
     /** Fuente, reloj e íconos que mejor le quedan. */
@@ -73,6 +76,7 @@ enum class ThemePreset {
             Forest -> look(FontChoice.Quicksand, ClockStyle.Classic, IconStyle.Minimal)
             Aurora -> look(FontChoice.Nunito, ClockStyle.Centered, IconStyle.Minimal)
             PixelNight -> look(FontChoice.Pixel, ClockStyle.Classic, IconStyle.Circle)
+            Ash -> look(FontChoice.Cinzel, ClockStyle.Day, IconStyle.Minimal)
         }.copy(preset = this)
 
     private fun look(font: FontChoice, clock: ClockStyle, icons: IconStyle) =
@@ -84,6 +88,9 @@ enum class ThemePreset {
  *
  * @property leftHanded modo zurdo: el inicio y la lista se espejan (alfabeto a la izquierda).
  * @property fullList lista completa con scroll; si es false (por defecto) se ve solo la letra elegida.
+ * @property photoBackground ruta de la foto propia que reemplaza el fondo del tema (ADR-022), o null.
+ * @property notifications mostrar notificaciones en el inicio (opt-in, ADR-023).
+ * @property doubleTapLock doble toque en el inicio para bloquear (opt-in, accesibilidad, ADR-009).
  */
 @Immutable
 data class ThemeSettings(
@@ -94,4 +101,7 @@ data class ThemeSettings(
     val leftHanded: Boolean = false,
     val fullList: Boolean = false,
     val preset: ThemePreset = ThemePreset.Wallpaper,
+    val photoBackground: String? = null,
+    val notifications: Boolean = false,
+    val doubleTapLock: Boolean = false,
 )

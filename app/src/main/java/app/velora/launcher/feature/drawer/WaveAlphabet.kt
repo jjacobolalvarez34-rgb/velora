@@ -65,10 +65,13 @@ import kotlinx.coroutines.launch
 val WaveAlphabetWidth = 28.dp
 
 /**
- * Cuánto se estira la ola hacia el centro: la mitad del ancho de la pantalla (A en ESTILO §6).
- * Las letras se abren en un arco amplio que se ve de lejos, no en un bulto pequeño.
+ * Lo máximo que se estira la ola hacia el centro: la mitad del ancho de la pantalla (A en ESTILO §6).
+ * Cuánto se estira de verdad lo decide el dedo: sigue su distancia al alfabeto, 1:1.
  */
 private const val WAVE_REACH = 0.5f
+
+/** Al apenas tocar, la ola ya se asoma un poco. */
+private val MinReach = 20.dp
 
 /** Ancho de la campana, en filas de letra (σ en ESTILO §6): un arco que abarca media columna. */
 private const val WAVE_SIGMA_ROWS = 6.5f
@@ -90,6 +93,9 @@ private const val ROW_CENTER = 0.5f
 @Stable
 private class WaveState {
     val fingerY = mutableFloatStateOf(0f)
+
+    /** Posición horizontal del dedo (en el alfabeto): cuanto más se aleja, más se estira la ola. */
+    val fingerX = mutableFloatStateOf(0f)
 
     /** 1 mientras se toca; vuelve a 0 con un resorte al soltar. */
     val intensity = Animatable(0f)
@@ -176,6 +182,7 @@ private suspend fun PointerInputScope.letterGestures(
     while (change != null && change.pressed) {
         val y = change.position.y
         wave.fingerY.floatValue = y
+        wave.fingerX.floatValue = change.position.x
         val index = (y / size.height * letterCount).toInt().coerceIn(0, letterCount - 1)
         if (index != current) {
             current = index
@@ -204,12 +211,15 @@ private class WaveDrawing(
         val radius = bubbleRadius.toPx()
         val gap = BubbleGap.toPx()
         val rowHeight = size.height / letters.size
-        val reach = amplitude.toPx()
+        val maxReach = amplitude.toPx()
+        val minReach = MinReach.toPx()
         val twoSigmaSq = 2f * WAVE_SIGMA_ROWS * WAVE_SIGMA_ROWS
         val rest = colors.contentVariant.copy(alpha = colors.contentVariant.alpha * REST_ALPHA)
         return onDrawBehind {
             val finger = wave.fingerY.floatValue
             val strength = wave.intensity.value
+            // La cresta llega hasta el dedo: poco si apenas se aleja del alfabeto, hasta media pantalla si va lejos.
+            val reach = (towardCenter * (wave.fingerX.floatValue - size.width / 2f)).coerceIn(minReach, maxReach)
             for (i in layouts.indices) {
                 val layout = layouts[i]
                 val centerY = (i + ROW_CENTER) * rowHeight
@@ -264,10 +274,10 @@ private fun AccessibleAlphabet(
 ) {
     Column(modifier = modifier.width(WaveAlphabetWidth), horizontalAlignment = Alignment.CenterHorizontally) {
         letters.forEachIndexed { index, letter ->
-            val description = if (letter == AppSorting.SYMBOLS_SECTION) {
-                stringResource(R.string.alphabet_symbols)
-            } else {
-                stringResource(R.string.alphabet_letter, letter)
+            val description = when (letter) {
+                AppSorting.SYMBOLS_SECTION -> stringResource(R.string.alphabet_symbols)
+                FAVORITES_SECTION -> stringResource(R.string.alphabet_favorites)
+                else -> stringResource(R.string.alphabet_letter, letter)
             }
             Text(
                 text = letter,

@@ -111,5 +111,6 @@ internal fun presetName(preset: ThemePreset): Int = when (preset) {
     ThemePreset.Sakura -> R.string.theme_sakura
     ThemePreset.Forest -> R.string.theme_forest
     ThemePreset.PixelNight -> R.string.theme_pixel_night
+    ThemePreset.Ash -> R.string.theme_ash
     ThemePreset.Aurora -> R.string.theme_aurora
 }

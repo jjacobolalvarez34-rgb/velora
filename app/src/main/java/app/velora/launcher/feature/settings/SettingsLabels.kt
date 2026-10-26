@@ -17,6 +17,7 @@ internal fun fontName(font: FontChoice): String = when (font) {
     FontChoice.Quicksand -> stringResource(R.string.font_quicksand)
     FontChoice.Nunito -> stringResource(R.string.font_nunito)
     FontChoice.Pixel -> stringResource(R.string.font_pixel)
+    FontChoice.Cinzel -> stringResource(R.string.font_cinzel)
     FontChoice.System -> stringResource(R.string.font_system)
 }
 

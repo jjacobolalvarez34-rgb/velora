@@ -71,6 +71,7 @@ private fun onWallpaperColorsFor(preset: ThemePreset): OnWallpaperColors = when 
     ThemePreset.Sakura -> PresetColors.sakura
     ThemePreset.Forest -> PresetColors.forest
     ThemePreset.PixelNight -> PresetColors.pixelNight
+    ThemePreset.Ash -> PresetColors.ash
     ThemePreset.Aurora -> PresetColors.aurora
 }
 

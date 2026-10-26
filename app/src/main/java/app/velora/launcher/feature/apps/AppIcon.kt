@@ -17,10 +17,14 @@ import app.velora.launcher.core.data.apps.IconRepository
 import app.velora.launcher.core.data.apps.IconRequest
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
 import app.velora.launcher.core.model.AppKey
+import app.velora.launcher.core.model.AppNotification
 import app.velora.launcher.core.model.IconStyle
 
 /** Caché de íconos para las filas; la provee `VeloraApp`. null en previews: se dibuja el hueco. */
 val LocalIconRepository = staticCompositionLocalOf<IconRepository?> { null }
+
+/** Notificaciones por app ([NotificationsRepository.keyOf]); vacío si la función está apagada. */
+val LocalNotifications = staticCompositionLocalOf<Map<String, AppNotification>> { emptyMap() }
 
 /** Estilo de íconos elegido en Ajustes → Tema. */
 val LocalIconStyle = staticCompositionLocalOf { IconStyle.Circle }
@@ -35,8 +39,8 @@ fun AppIcon(key: AppKey, size: Dp, modifier: Modifier = Modifier) {
     val sizePx = with(LocalDensity.current) { size.roundToPx() }
     val style = LocalIconStyle.current
     val colors = VeloraTheme.onWallpaper
-    val tint = colors.content.toArgb()
-    val backdrop = colors.iconBackdrop.toArgb()
+    val tint = colors.iconGlyph.toArgb()
+    val backdrop = colors.iconCircle.toArgb()
     val request = remember(key, sizePx, style, tint, backdrop) { IconRequest(key, sizePx, style, tint, backdrop) }
     val bitmap: ImageBitmap? by produceState(icons?.cached(request), icons, request) {
         if (value == null && icons != null) value = icons.load(request)

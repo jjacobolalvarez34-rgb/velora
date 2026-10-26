@@ -33,6 +33,13 @@ interface PrefsRepository {
 
     suspend fun setFullList(enabled: Boolean)
 
+    /** Foto propia de fondo (ruta en el almacenamiento privado) o null para el fondo del tema. */
+    suspend fun setPhotoBackground(path: String?)
+
+    suspend fun setNotifications(enabled: Boolean)
+
+    suspend fun setDoubleTapLock(enabled: Boolean)
+
     /** Aplica un tema completo: su fondo y colores, y su fuente, reloj e íconos recomendados. */
     suspend fun applyPreset(preset: ThemePreset)
 
@@ -58,6 +65,9 @@ class DataStorePrefsRepository(context: Context) : PrefsRepository {
                 leftHanded = prefs[LEFT_HANDED],
                 fullList = prefs[FULL_LIST],
                 preset = prefs[PRESET],
+                photoBackground = prefs[PHOTO],
+                notifications = prefs[NOTIFICATIONS],
+                doubleTapLock = prefs[DOUBLE_TAP_LOCK],
             ).decode()
         }
         .distinctUntilChanged()
@@ -75,6 +85,14 @@ class DataStorePrefsRepository(context: Context) : PrefsRepository {
     override suspend fun setLeftHanded(enabled: Boolean) = put(LEFT_HANDED, enabled)
 
     override suspend fun setFullList(enabled: Boolean) = put(FULL_LIST, enabled)
+
+    override suspend fun setPhotoBackground(path: String?) {
+        store.edit { if (path == null) it.remove(PHOTO) else it[PHOTO] = path }
+    }
+
+    override suspend fun setNotifications(enabled: Boolean) = put(NOTIFICATIONS, enabled)
+
+    override suspend fun setDoubleTapLock(enabled: Boolean) = put(DOUBLE_TAP_LOCK, enabled)
 
     override suspend fun applyPreset(preset: ThemePreset) {
         val theme = preset.recommended
@@ -100,6 +118,9 @@ class DataStorePrefsRepository(context: Context) : PrefsRepository {
         val LEFT_HANDED = booleanPreferencesKey("layout_left_handed")
         val FULL_LIST = booleanPreferencesKey("layout_full_list")
         val PRESET = stringPreferencesKey("theme_preset")
+        val PHOTO = stringPreferencesKey("theme_photo_background")
+        val NOTIFICATIONS = booleanPreferencesKey("feature_notifications")
+        val DOUBLE_TAP_LOCK = booleanPreferencesKey("feature_double_tap_lock")
         val ONBOARDING_DONE = booleanPreferencesKey("onboarding_done")
     }
 }
@@ -116,6 +137,9 @@ internal data class StoredTheme(
     val leftHanded: Boolean? = null,
     val fullList: Boolean? = null,
     val preset: String? = null,
+    val photoBackground: String? = null,
+    val notifications: Boolean? = null,
+    val doubleTapLock: Boolean? = null,
 ) {
     fun decode(): ThemeSettings {
         val defaults = ThemeSettings()
@@ -127,6 +151,9 @@ internal data class StoredTheme(
             leftHanded = leftHanded ?: defaults.leftHanded,
             fullList = fullList ?: defaults.fullList,
             preset = ThemePreset.entries.firstOrNull { it.name == preset } ?: defaults.preset,
+            photoBackground = photoBackground,
+            notifications = notifications ?: defaults.notifications,
+            doubleTapLock = doubleTapLock ?: defaults.doubleTapLock,
         )
     }
 }

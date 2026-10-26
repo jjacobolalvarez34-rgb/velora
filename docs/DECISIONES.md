@@ -99,7 +99,27 @@ _`compileSdk` actualizado a 37 por ADR-013; `minSdk` y `targetSdk` siguen vigent
 **Contexto:** el autor pidió widgets (estaban en la Fase 3).
 **Decisión:** un `AppWidgetHost` por proceso (`WidgetHost`, id 1024). Mantener presionado el inicio → "Agregar widget" → selector propio con vistas previas (`installedProviders`) → `bindAppWidgetIdIfAllowed` o el diálogo del sistema `ACTION_APPWIDGET_BIND`, la primera vez por proveedor → configuración del widget, si la tiene. Lista y altos en Room (`widgets`, versión 3, migración automática). Se dibujan con `AndroidView` entre el reloj y los favoritos. En Ajustes → Widgets se cambia el alto o se quitan.
 **Por qué:** cero permisos en el manifiesto (el sistema pide el consentimiento por proveedor). Escuchar solo con el inicio visible (`onStart`/`onStop`) cuida la batería. Los ids huérfanos se liberan al empezar (B-019).
-**Consecuencias:** los resultados del permiso y de la configuración llegan por `onActivityResult` (API clásica, marcada como obsoleta). Pendiente: redimensionar arrastrando y reordenar.
+**Consecuencias:** los resultados del permiso y de la configuración llegan por `onActivityResult` (API clásica, marcada como obsoleta). Desde 0.6.0 se reordenan con flechas en Ajustes (`WidgetsDao.setPosition`). Pendiente: redimensionar arrastrando.
+
+## ADR-021 · Íconos minimalistas con glifos propios (Tabler Icons) — Aceptada (2026-10-26)
+**Contexto:** con el estilo minimalista, las apps sin ícono monocromo (la mayoría) quedaban con su logo a color o en gris. El autor quería todas iguales: círculo claro y un dibujo de línea encima, también para apps que no traen ese dibujo.
+**Opciones:** A) solo el ícono monocromo de Android 13 (la mitad de las apps no lo tiene). B) Dibujar a mano un set de íconos (semanas). C) Un set de íconos de línea con licencia libre + un emparejador por paquete, palabra clave y categoría.
+**Decisión:** C con Tabler Icons 3.49.0 (MIT). `tools/icons/build_glyphs.py` descarga solo los glifos que usamos (~130) y los guarda como datos de trazo en `core/data/src/main/assets/glyphs/tabler.tsv` (≈60 KB). `GlyphMatcher` elige el glifo: paquete conocido → palabra clave del nombre o paquete (español e inglés) → categoría de la app. `IconRenderer` dibuja círculo + glifo (trazo 2, 55 %); si no hay glifo usa el monocromo de la app, y si tampoco, la inicial.
+**Por qué:** cero dependencias en tiempo de ejecución (solo `PathParser` de androidx.core), resultado uniforme y propio, sin copiar los íconos de ningún launcher. Lo que no se reconoce queda con su inicial, nunca con un dibujo equivocado.
+**Consecuencias:** agregar un glifo = añadirlo al script, regenerar y mapearlo en `GlyphMatcher` (con prueba). Aviso MIT en `docs/licencias/MIT-TablerIcons.txt` y `THIRD_PARTY_NOTICES.md`. Las marcas (`brand-*`) se usan solo como pictogramas genéricos de Tabler.
+
+## ADR-022 · Foto propia como fondo de un tema — Aceptada (2026-10-26)
+**Contexto:** el autor pidió poder cambiar el fondo de los temas.
+**Opciones:** A) `READ_MEDIA_IMAGES` y una galería propia (permiso nuevo). B) El selector de fotos del sistema (`PickVisualMedia`), sin permisos. C) Cambiar el wallpaper del sistema (`SET_WALLPAPER`).
+**Decisión:** B para la foto del tema: se copia reducida al tamaño de la pantalla a `files/backgrounds/` (excluida de las copias de seguridad) y su ruta va en DataStore (`theme_photo_background`). Se dibuja con `ContentScale.Crop` y un velo según el tema. Para el fondo del teléfono, un botón abre el selector del sistema (`ACTION_SET_WALLPAPER`), sin permiso.
+**Por qué:** cero permisos; la foto nunca sale del teléfono; leerla una sola vez reducida cuida memoria y arranque.
+**Consecuencias:** la foto se lee fuera del hilo principal al iniciar; hasta tenerla se ve el fondo dibujado del tema. Al quitarla se borra el archivo.
+
+## ADR-023 · Notificaciones y música en el inicio — Aceptada (2026-10-26)
+**Contexto:** Fase 2 del ROADMAP: puntos de notificación, lo último bajo los favoritos y un reproductor contextual.
+**Decisión:** `VeloraNotificationListener` (exported=false, `BIND_NOTIFICATION_LISTENER_SERVICE`), opt-in desde Ajustes con aviso destacado previo. Si la función está apagada, el servicio se desconecta solo tras conectar (B-003). Publica en `NotificationsRepository` (solo memoria, `StateFlow`) agrupado por app y perfil, con 100 ms de debounce. Las notificaciones `VISIBILITY_SECRET` solo cuentan, sin título ni texto. La música se lee con `MediaSessionManager.getActiveSessions` usando el mismo listener (no hace falta otro permiso) y se controla con `TransportControls`. Doble toque para bloquear: `LockAccessibilityService` (ADR-009), que solo ejecuta `GLOBAL_ACTION_LOCK_SCREEN`.
+**Por qué:** es la única vía de Android para estas funciones; todo queda en memoria y en el teléfono.
+**Consecuencias:** nada de notificaciones en disco ni en logs (REGLAS). Si el usuario quita el acceso, los puntos desaparecen y Ajustes muestra "Falta el acceso". Algunos fabricantes apagan la accesibilidad (B-002): el doble toque avisa y abre Accesibilidad.
 
 ---
 

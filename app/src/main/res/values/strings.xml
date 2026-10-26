@@ -125,4 +125,43 @@
     <string name="settings_widget_taller">Más alto</string>
     <string name="settings_widget_shorter">Más bajo</string>
     <string name="settings_widget_remove">Quitar</string>
+    <!-- 0.6.0: tema Ceniza, notificaciones, música, bloqueo y fondo propio -->
+    <string name="theme_ash">Ceniza</string>
+    <string name="font_cinzel" translatable="false">Cinzel</string>
+    <string name="alphabet_favorites">Favoritos</string>
+    <string name="notification_private">Nueva notificación</string>
+    <plurals name="notification_count">
+        <item quantity="one">%d notificación</item>
+        <item quantity="many">%d notificaciones</item>
+        <item quantity="other">%d notificaciones</item>
+    </plurals>
+    <string name="media_previous">Anterior</string>
+    <string name="media_pause">Pausar</string>
+    <string name="media_play">Reproducir</string>
+    <string name="media_next">Siguiente</string>
+    <string name="notifications_service_label">Notificaciones en el inicio de Velora</string>
+    <string name="lock_service_label">Bloqueo con doble toque de Velora</string>
+    <string name="lock_service_description">Solo bloquea la pantalla cuando tocas dos veces el inicio de Velora. No lee lo que hay en pantalla ni lo que escribes.</string>
+    <string name="lock_service_needed">Para bloquear con doble toque, activa Velora en Accesibilidad.</string>
+    <string name="settings_background">Fondo</string>
+    <string name="settings_photo_pick">Usar una foto propia</string>
+    <string name="settings_photo_change">Cambiar la foto</string>
+    <string name="settings_photo_summary">Se pone de fondo con el tema elegido. Se guarda solo en este teléfono.</string>
+    <string name="settings_photo_remove">Quitar la foto</string>
+    <string name="settings_photo_remove_summary">Vuelve el fondo del tema.</string>
+    <string name="settings_photo_error">No se pudo usar esa foto.</string>
+    <string name="settings_system_wallpaper">Cambiar el fondo del teléfono</string>
+    <string name="settings_system_wallpaper_summary">Abre el selector de fondos del sistema (se ve con el tema «Tu fondo»).</string>
+    <string name="settings_features">Funciones</string>
+    <string name="settings_notifications">Notificaciones en el inicio</string>
+    <string name="settings_notifications_summary">Un punto junto a cada app con avisos, lo último bajo los favoritos y la música que suena.</string>
+    <string name="settings_notifications_disclosure">Para mostrar los puntos y la música, Velora necesita leer tus notificaciones. Se usan solo en memoria mientras el inicio está abierto: nunca se guardan ni salen del teléfono. Las notificaciones privadas solo cuentan, no se muestran.\n\nEn la siguiente pantalla, activa Velora.</string>
+    <string name="settings_notifications_access">Toca para darle acceso a Velora en los ajustes del sistema.</string>
+    <string name="settings_double_tap_lock">Doble toque para bloquear</string>
+    <string name="settings_double_tap_lock_summary">Toca dos veces un espacio vacío del inicio para apagar la pantalla.</string>
+    <string name="settings_double_tap_lock_disclosure">Android solo deja bloquear la pantalla desde un servicio de accesibilidad. El de Velora hace únicamente eso: no lee la pantalla, ni lo que escribes, ni tus datos.\n\nEn la siguiente pantalla, busca Velora y actívalo. Algunos teléfonos lo apagan solo; si pasa, Velora te avisará.</string>
+    <string name="settings_double_tap_lock_access">Toca para activar Velora en Accesibilidad.</string>
+    <string name="settings_access_missing">Falta el acceso</string>
+    <string name="settings_disclosure_continue">Continuar</string>
+    <string name="settings_disclosure_cancel">Ahora no</string>
 </resources>

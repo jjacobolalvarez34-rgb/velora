@@ -1,5 +1,7 @@
 package app.velora.launcher.core.designsystem.components
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -11,11 +13,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import app.velora.launcher.core.designsystem.theme.ArtColors
+import app.velora.launcher.core.designsystem.theme.VeloraTheme
 import app.velora.launcher.core.model.ThemePreset
 import kotlin.random.Random
 
@@ -26,7 +31,11 @@ import kotlin.random.Random
  * "Tu fondo" deja ver el wallpaper con un velo suave.
  */
 @Composable
-fun ThemeBackground(preset: ThemePreset, modifier: Modifier = Modifier) {
+fun ThemeBackground(preset: ThemePreset, modifier: Modifier = Modifier, photo: ImageBitmap? = null) {
+    if (photo != null) {
+        PhotoBackground(photo, modifier)
+        return
+    }
     if (preset == ThemePreset.Wallpaper) {
         WallpaperScrim(modifier)
         return
@@ -42,10 +51,27 @@ fun ThemeBackground(preset: ThemePreset, modifier: Modifier = Modifier) {
                     ThemePreset.Forest -> forest()
                     ThemePreset.Aurora -> aurora()
                     ThemePreset.PixelNight -> pixelNight()
+                    ThemePreset.Ash -> ash()
                     ThemePreset.Wallpaper -> onDrawBehind {}
                 }
             },
     )
+}
+
+/**
+ * Foto propia del usuario (ADR-022) llenando la pantalla, con un velo para que el texto se lea:
+ * oscuro en los temas de texto claro, claro en los de texto oscuro.
+ */
+@Composable
+private fun PhotoBackground(photo: ImageBitmap, modifier: Modifier) {
+    Box(modifier.fillMaxSize()) {
+        Image(photo, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        if (VeloraTheme.onWallpaper.isLight) {
+            Box(Modifier.fillMaxSize().background(ArtColors.lightVeil))
+        } else {
+            WallpaperScrim()
+        }
+    }
 }
 
 /** Negro puro con un brillo apenas visible arriba. */
@@ -138,8 +164,45 @@ private fun CacheDrawScope.pixelNight(): DrawResult {
     }
 }
 
+/**
+ * Ceniza: negro cálido, el resplandor de una hoguera desde abajo, brasas que suben y bordes
+ * oscurecidos. Fantasía oscura, sin nada de ningún juego.
+ */
+private fun CacheDrawScope.ash(): DrawResult {
+    val w = size.width
+    val h = size.height
+    val sky = Brush.verticalGradient(listOf(ArtColors.ashTop, ArtColors.ashBottom))
+    val glow = Brush.radialGradient(
+        listOf(ArtColors.ashGlow, Color.Transparent),
+        Offset(w * 0.5f, h * 1.02f),
+        h * 0.55f,
+    )
+    val vignette = Brush.radialGradient(
+        listOf(Color.Transparent, ArtColors.ashVignette),
+        Offset(w / 2f, h / 2f),
+        h * 0.75f,
+    )
+    val random = Random(SEED)
+    // Las brasas se juntan cerca de la hoguera y se apagan al subir.
+    val embers = List(EMBERS) {
+        val rise = random.nextFloat()
+        Triple(
+            Offset(w * (0.5f + (random.nextFloat() - 0.5f) * (0.3f + rise)), h * (1f - rise * 0.75f)),
+            (1f - rise).coerceIn(0.15f, 1f),
+            (0.8f + random.nextFloat() * 1.6f).dp.toPx(),
+        )
+    }
+    return onDrawBehind {
+        drawRect(sky)
+        drawRect(glow)
+        embers.forEach { (at, alpha, radius) -> drawCircle(ArtColors.ashEmber.copy(alpha = alpha), radius, at) }
+        drawRect(vignette)
+    }
+}
+
 private fun snap(value: Float, grid: Float) = (value / grid).toInt() * grid
 
 private const val SEED = 7
 private const val PETALS = 7
 private const val STARS = 40
+private const val EMBERS = 46

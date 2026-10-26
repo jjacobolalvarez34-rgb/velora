@@ -4,30 +4,37 @@ import android.content.res.Configuration
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -35,7 +42,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import app.velora.launcher.R
+import app.velora.launcher.core.data.notifications.NotificationsRepository
 import app.velora.launcher.core.designsystem.theme.Sizes
 import app.velora.launcher.core.designsystem.theme.Spacing
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
@@ -90,6 +100,7 @@ fun AppRow(
                     onClick = { actions.open(app, position.bounds()) },
                     onLongClick = { actions.showMenu(app) },
                 )
+                .swipeToMenu { actions.showMenu(app) }
                 .workProfileSemantics(app.isWorkProfile, workDescription)
                 .padding(vertical = Spacing.xs),
         ) {
@@ -107,19 +118,70 @@ private fun pressScale(interaction: MutableInteractionSource): State<Float> {
 }
 
 @Composable
-private fun AppRowContent(app: AppEntry, style: AppRowStyle) {
+private fun RowScope.AppRowContent(app: AppEntry, style: AppRowStyle) {
+    val notification = LocalNotifications.current[NotificationsRepository.keyOf(app.key)]
     if (LocalIconStyle.current != IconStyle.None) {
         AppIcon(key = app.key, size = style.iconSize)
         Spacer(Modifier.width(Spacing.m))
     }
-    Text(
-        text = app.label,
-        style = style.textStyle,
-        color = VeloraTheme.onWallpaper.content,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
+    Column(Modifier.weight(1f, fill = false)) {
+        Text(
+            text = app.label,
+            style = style.textStyle,
+            color = VeloraTheme.onWallpaper.content,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        // En favoritos, lo último que llegó, en una línea (Fase 2).
+        if (style == AppRowStyle.Favorite && notification != null) {
+            Text(
+                text = notification.title ?: stringResource(R.string.notification_private),
+                style = VeloraTheme.typography.caption,
+                color = VeloraTheme.onWallpaper.contentVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+    if (notification != null) NotificationDot(notification.count)
+}
+
+/** Punto del color de acento junto al nombre: esta app tiene notificaciones. */
+@Composable
+private fun NotificationDot(count: Int) {
+    val description = pluralStringResource(R.plurals.notification_count, count, count)
+    Spacer(Modifier.width(Spacing.s))
+    Box(
+        Modifier
+            .size(DotSize)
+            .background(VeloraTheme.onWallpaper.accent, CircleShape)
+            .semantics { contentDescription = description },
     )
 }
+
+/**
+ * Deslizar la fila hacia el centro (a la derecha, o a la izquierda en modo zurdo) abre su panel:
+ * atajos, favorito, ocultar… como un pop-up sin mantener presionado (PRODUCTO, Fase 3).
+ */
+@Composable
+private fun Modifier.swipeToMenu(onSwipe: () -> Unit): Modifier {
+    val direction = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1f else 1f
+    val threshold = with(LocalDensity.current) { SwipeThreshold.toPx() }
+    val trigger by rememberUpdatedState(onSwipe)
+    return pointerInput(direction, threshold) {
+        var dragged = 0f
+        detectHorizontalDragGestures(
+            onDragStart = { dragged = 0f },
+            onDragEnd = { if (dragged * direction > threshold) trigger() },
+        ) { change, amount ->
+            dragged += amount
+            change.consume()
+        }
+    }
+}
+
+private val DotSize = 7.dp
+private val SwipeThreshold = 56.dp
 
 /** El nombre ya lo lee TalkBack; en perfil de trabajo se aclara de cuál perfil es. */
 private fun Modifier.workProfileSemantics(isWork: Boolean, description: String) =

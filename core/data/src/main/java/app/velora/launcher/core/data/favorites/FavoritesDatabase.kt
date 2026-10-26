@@ -92,6 +92,9 @@ interface WidgetsDao {
     @Query("UPDATE widgets SET heightDp = :heightDp WHERE appWidgetId = :appWidgetId")
     suspend fun setHeight(appWidgetId: Int, heightDp: Int)
 
+    @Query("UPDATE widgets SET position = :position WHERE appWidgetId = :appWidgetId")
+    suspend fun setPosition(appWidgetId: Int, position: Int)
+
     @Query("DELETE FROM widgets WHERE appWidgetId = :appWidgetId")
     suspend fun delete(appWidgetId: Int)
 }

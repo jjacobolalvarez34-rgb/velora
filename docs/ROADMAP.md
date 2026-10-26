@@ -42,22 +42,22 @@
 **Salida:** usarlo 7 días como launcher principal.
 
 ## Fase 2 — Contexto (3–4 semanas)
-- [ ] Listener de notificaciones opt-in + pantalla de explicación (SEGURIDAD §3.2, B-002/B-003/B-004)
-- [ ] Resumen de notificaciones en inicio + punto por app
+- [~] Listener de notificaciones opt-in + aviso destacado en Ajustes (ADR-023, 0.6.0)
+- [~] Punto por app y último aviso bajo los favoritos (0.6.0)
 - [ ] Respuesta rápida
-- [ ] Reproductor de medios contextual (`MediaSessionManager` vía listener)
-- [ ] Apps recién instaladas
+- [~] Reproductor de medios contextual (`MediaSessionManager` vía listener, 0.6.0)
+- [~] Apps recién instaladas (0.3.0)
 - [ ] Espacio privado Android 15+ (B-016)
 
 ## Fase 3 — Organización (4–6 semanas)
-- [ ] Pop-ups por deslizamiento (atajos, notificaciones, apps relacionadas)
+- [~] Deslizar una app hacia el centro abre su panel (atajos, favorito…) (0.6.0). Falta: notificaciones dentro del panel.
 - [ ] Carpetas
-- [ ] Widgets con `AppWidgetHost` (B-019)
+- [~] Widgets con `AppWidgetHost` (B-019, ADR-020), con orden y alto en Ajustes. Falta: redimensionar arrastrando.
 - [ ] Paquetes de íconos de terceros; formas de ícono
 - [ ] Fuente opcional (descargable)
 
 ## Fase 4 — Bienestar y robustez (3–4 semanas)
-- [ ] Bloqueo con doble toque vía accesibilidad opt-in (SEGURIDAD §3.3, B-006/B-007)
+- [~] Bloqueo con doble toque vía accesibilidad opt-in (SEGURIDAD §3.3, adelantado a 0.6.0)
 - [ ] Freno de uso por app (local)
 - [ ] Respaldo con Android Backup + exportar/importar JSON
 - [ ] Página de ayuda por fabricante

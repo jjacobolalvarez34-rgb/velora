@@ -2,7 +2,7 @@
 
 > Lista viva de lo que falta, en orden. Al terminar un punto: marcarlo `[x]` con fecha y moverlo a `ROADMAP.md` si corresponde.
 > `[~]` = código hecho y probado en la JVM; falta verlo en el teléfono.
-> Última actualización: 2026-10-24 (tarde).
+> Última actualización: 2026-10-26 (0.6.0).
 
 ## 1. Prueba en el teléfono de la 0.1.0
 
@@ -85,15 +85,23 @@
 - [~] Calculadora y "Buscar en la web" en el buscador.
 
 ### Funciones de Niagara que Velora aún no tiene
-- [ ] **Notificaciones en el inicio** (puntos en las apps, leer y responder): Fase 2, necesita el acceso a notificaciones (opt-in, SEGURIDAD §3.2).
-- [ ] **Reproductor de música** que aparece solo cuando algo suena (Fase 2, mismo acceso).
-- [ ] **Deslizar sobre una app** para ver atajos y notificaciones (pop-ups, Fase 3).
+- [~] **Notificaciones en el inicio**: punto en cada app y último aviso bajo los favoritos (ADR-023, 0.6.0). Falta: leer y responder desde el inicio.
+- [~] **Reproductor de música** que aparece solo cuando algo suena (0.6.0, mismo acceso).
+- [~] **Deslizar sobre una app** hacia el centro abre su panel con atajos (0.6.0). Falta: notificaciones en el panel.
 - [ ] **Carpetas / categorías** ("Añadir a una categoría", Fase 3).
-- [ ] **Doble toque para bloquear** (accesibilidad opt-in, Fase 4).
+- [~] **Doble toque para bloquear** (accesibilidad opt-in, adelantado a 0.6.0).
 - [ ] **Tiempo de uso / freno de uso** por app (Fase 4).
 - [ ] Búsqueda de **contactos** (permiso de contactos: ADR antes).
-- [ ] Favoritos en el alfabeto (la estrella arriba de la A) y acceso a ajustes al final.
-- [ ] Widgets: redimensionar arrastrando y reordenar.
+- [~] Favoritos en el alfabeto: la estrella arriba de la primera letra (0.6.0). Falta: acceso a ajustes al final.
+- [~] Widgets: reordenar con flechas en Ajustes (0.6.0). Falta: redimensionar arrastrando.
+
+## 7b. Pedidos del 2026-10-26 (tarde) — 0.6.0
+
+- [~] Foto propia como fondo de cualquier tema y botón para cambiar el fondo del teléfono (ADR-022).
+- [~] Tema **Ceniza** (fantasía oscura propia: hoguera, brasas, Cinzel). No usa nada de Dark Souls (marca registrada).
+- [~] Íconos minimalistas iguales para todas las apps: círculo + glifo de línea propio (Tabler Icons, ADR-021) o la inicial.
+- [~] La ola sigue al dedo: poco movimiento, poca ola.
+- Aclaración: la pantalla de bloqueo del sistema **no se puede reemplazar** desde un launcher (Android no se lo permite a apps normales). Lo que sí se puede, el doble toque para bloquear, ya está.
 
 ## 8. Cierre de la Fase 0 (falta verificar)
 

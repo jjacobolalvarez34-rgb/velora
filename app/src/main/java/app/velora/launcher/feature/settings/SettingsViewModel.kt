@@ -37,7 +37,7 @@ class SettingsViewModel(
     private val prefs: PrefsRepository,
     private val hiddenApps: HiddenAppsRepository,
     private val favorites: FavoritesRepository,
-    private val widgetHost: WidgetHost,
+    widgetHost: WidgetHost,
     clockRepository: ClockRepository,
     clockFormatter: ClockFormatter,
     batteryRepository: BatteryRepository,
@@ -74,15 +74,24 @@ class SettingsViewModel(
 
     fun onPreset(preset: ThemePreset) = save { prefs.applyPreset(preset) }
 
-    /** Widgets del inicio con su nombre (leído de `PackageManager`, fuera del hilo principal). */
+    /**
+     * Widgets del inicio con su nombre (leído de `PackageManager`, fuera del hilo principal).
+     * Cambiarlos va directo a [WidgetHost], que ya guarda en segundo plano.
+     */
     val widgets: StateFlow<List<WidgetSetting>> = widgetHost.widgets
         .map { list -> list.map { WidgetSetting(it.appWidgetId, widgetHost.labelOf(it.appWidgetId), it.heightDp) } }
         .flowOn(Dispatchers.IO)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), emptyList())
 
-    fun onWidgetHeight(appWidgetId: Int, heightDp: Int) = widgetHost.setHeight(appWidgetId, heightDp)
+    /** [then] corre después de guardar: el servicio lee la preferencia al conectarse. */
+    fun onNotifications(enabled: Boolean, then: () -> Unit) = save {
+        prefs.setNotifications(enabled)
+        then()
+    }
 
-    fun onRemoveWidget(appWidgetId: Int) = widgetHost.remove(appWidgetId)
+    fun onDoubleTapLock(enabled: Boolean) = save { prefs.setDoubleTapLock(enabled) }
+
+    fun onPhotoBackground(path: String?) = save { prefs.setPhotoBackground(path) }
 
     fun onFont(font: FontChoice) = save { prefs.setFont(font) }
 

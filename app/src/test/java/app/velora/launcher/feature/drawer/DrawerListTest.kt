@@ -74,4 +74,16 @@ class DrawerListTest {
     fun `sin apps no hay letras`() {
         assertTrue(buildDrawerList(emptyList()).letters.isEmpty())
     }
+
+    @Test
+    fun `con favoritos el alfabeto empieza con la estrella`() {
+        val banco = app("Banco", "B")
+        val list = buildDrawerList(listOf(banco, app("Nequi", "N")), favorites = listOf(banco))
+
+        assertEquals(listOf(FAVORITES_SECTION, "B", "N"), list.letters)
+        assertEquals(0, list.letterIndex.first())
+        assertEquals(listOf(banco), list.byLetter[FAVORITES_SECTION])
+        // La lista completa no agrega una sección de favoritos: la estrella solo salta arriba.
+        assertEquals(listOf("header:B", "header:N"), list.items.filterIsInstance<DrawerItem.Header>().map { it.key })
+    }
 }

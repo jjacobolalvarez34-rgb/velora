@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 @Immutable
@@ -44,9 +43,9 @@ class DrawerViewModel(
     private val query = MutableStateFlow("")
 
     // Ordenar, agrupar y filtrar en Dispatchers.Default (ARQUITECTURA §7), nunca en un composable.
-    private val list = apps.map { installed ->
+    private val list = combine(apps, favorites.favorites) { installed, favoriteApps ->
         val recents = RecentApps.of(installed, nowMs())
-        buildDrawerList(installed, recents) to recents
+        buildDrawerList(installed, recents, favoriteApps) to recents
     }.flowOn(Dispatchers.Default)
 
     private val results = combine(apps, query) { installed, q ->

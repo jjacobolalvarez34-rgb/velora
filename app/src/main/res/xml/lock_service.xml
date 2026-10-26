@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Solo bloquear la pantalla (SEGURIDAD §3.3): sin eventos, sin leer la ventana, sin botón flotante (B-006). -->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:canRetrieveWindowContent="false"
+    android:description="@string/lock_service_description"
+    android:isAccessibilityTool="false"
+    android:notificationTimeout="0"
+    tools:targetApi="34" />

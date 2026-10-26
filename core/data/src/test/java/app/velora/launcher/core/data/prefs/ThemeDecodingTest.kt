@@ -47,6 +47,19 @@ class ThemeDecodingTest {
     }
 
     @Test
+    fun `foto propia, notificaciones y doble toque`() {
+        val theme = StoredTheme(
+            photoBackground = "/data/fondo.jpg",
+            notifications = true,
+            doubleTapLock = true,
+        ).decode()
+
+        assertEquals("/data/fondo.jpg", theme.photoBackground)
+        assertEquals(true, theme.notifications)
+        assertEquals(true, theme.doubleTapLock)
+    }
+
+    @Test
     fun `un valor desconocido de otra versión no rompe el arranque`() {
         assertEquals(ThemeSettings(), StoredTheme("Manrope", "Retro", "Square").decode())
     }

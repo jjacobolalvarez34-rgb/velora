@@ -16,6 +16,7 @@ import app.velora.launcher.core.data.favorites.HiddenAppsRepository
 import app.velora.launcher.core.data.favorites.UserListsStore
 import app.velora.launcher.core.data.home.DefaultHomeRepository
 import app.velora.launcher.core.data.home.SystemDefaultHomeRepository
+import app.velora.launcher.core.data.notifications.NotificationsRepository
 import app.velora.launcher.core.data.prefs.DataStorePrefsRepository
 import app.velora.launcher.core.data.prefs.PrefsRepository
 import app.velora.launcher.core.model.AppEntry
@@ -76,6 +77,9 @@ class AppContainer(context: Context) {
     val prefsRepository: PrefsRepository by lazy { DataStorePrefsRepository(appContext) }
 
     val batteryRepository: BatteryRepository by lazy { SystemBatteryRepository(appContext) }
+
+    /** Notificaciones y música, solo en memoria (ADR-023). */
+    val notificationsRepository: NotificationsRepository by lazy { NotificationsRepository() }
 
     /** Un único `AppWidgetHost` por proceso (ADR-020). */
     val widgetHost: WidgetHost by lazy { WidgetHost(appContext, userLists.widgets(), applicationScope) }

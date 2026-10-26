@@ -120,8 +120,9 @@ class WidgetHost(context: Context, private val repository: WidgetsRepository, pr
         scope.launch { repository.remove(appWidgetId) }
     }
 
-    fun setHeight(appWidgetId: Int, heightDp: Int) {
-        scope.launch { repository.setHeight(appWidgetId, heightDp) }
+    /** Cambios de la lista (alto, orden) en segundo plano: `update { move(id, -1) }`. */
+    fun update(change: suspend WidgetsRepository.() -> Unit) {
+        scope.launch { repository.change() }
     }
 
     private fun configureOrSave(activity: Activity) {

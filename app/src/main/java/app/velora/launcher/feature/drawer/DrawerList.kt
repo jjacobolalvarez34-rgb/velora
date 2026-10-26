@@ -47,11 +47,19 @@ data class DrawerList(
     val byLetter: Map<String, List<AppEntry>> = emptyMap(),
 )
 
+/** Primera "letra" del alfabeto: los favoritos, a un toque desde la lista. */
+const val FAVORITES_SECTION = "★"
+
 /**
  * Inserta las recientes arriba y un encabezado antes de cada letra nueva.
- * [apps] ya viene ordenada; [recents] de la más nueva a la más vieja.
+ * [apps] ya viene ordenada; [recents] de la más nueva a la más vieja. Si hay [favorites], el
+ * alfabeto empieza con [FAVORITES_SECTION]: en la lista completa salta arriba del todo.
  */
-fun buildDrawerList(apps: List<AppEntry>, recents: List<AppEntry> = emptyList()): DrawerList {
+fun buildDrawerList(
+    apps: List<AppEntry>,
+    recents: List<AppEntry> = emptyList(),
+    favorites: List<AppEntry> = emptyList(),
+): DrawerList {
     val items = ArrayList<DrawerItem>(apps.size + recents.size + MAX_SECTIONS)
     if (recents.isNotEmpty()) {
         items += DrawerItem.RecentHeader
@@ -59,6 +67,10 @@ fun buildDrawerList(apps: List<AppEntry>, recents: List<AppEntry> = emptyList())
     }
     val letters = ArrayList<String>()
     val letterIndex = ArrayList<Int>()
+    if (favorites.isNotEmpty()) {
+        letters += FAVORITES_SECTION
+        letterIndex += 0
+    }
     for (app in apps) {
         if (app.section != letters.lastOrNull()) {
             letters += app.section
@@ -67,7 +79,13 @@ fun buildDrawerList(apps: List<AppEntry>, recents: List<AppEntry> = emptyList())
         }
         items += DrawerItem.App(app)
     }
-    return DrawerList(items, letters, letterIndex, byLetter = apps.groupBy { it.section })
+    val byLetter = apps.groupBy { it.section }
+    return DrawerList(
+        items,
+        letters,
+        letterIndex,
+        byLetter = if (favorites.isEmpty()) byLetter else byLetter + (FAVORITES_SECTION to favorites),
+    )
 }
 
 private const val MAX_SECTIONS = 28

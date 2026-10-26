@@ -38,6 +38,7 @@ private val PlusJakartaSans = variableFamily(R.font.plus_jakarta_sans)
 private val Figtree = variableFamily(R.font.figtree)
 private val Fraunces = variableFamily(R.font.fraunces)
 private val Quicksand = variableFamily(R.font.quicksand)
+private val Cinzel = variableFamily(R.font.cinzel)
 private val Pixel = FontFamily(
     Font(R.font.silkscreen_regular, FontWeight.Normal),
     Font(R.font.silkscreen_bold, FontWeight.Bold),
@@ -50,6 +51,7 @@ fun fontFamilyOf(choice: FontChoice): FontFamily = when (choice) {
     FontChoice.Fraunces -> Fraunces
     FontChoice.Quicksand -> Quicksand
     FontChoice.Pixel -> Pixel
+    FontChoice.Cinzel -> Cinzel
     FontChoice.System -> FontFamily.Default
 }
 

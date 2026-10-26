@@ -115,4 +115,41 @@
     <string name="settings_widget_taller">Taller</string>
     <string name="settings_widget_shorter">Shorter</string>
     <string name="settings_widget_remove">Remove</string>
+    <!-- 0.6.0 -->
+    <string name="theme_ash">Ash</string>
+    <string name="alphabet_favorites">Favorites</string>
+    <string name="notification_private">New notification</string>
+    <plurals name="notification_count">
+        <item quantity="one">%d notification</item>
+        <item quantity="other">%d notifications</item>
+    </plurals>
+    <string name="media_previous">Previous</string>
+    <string name="media_pause">Pause</string>
+    <string name="media_play">Play</string>
+    <string name="media_next">Next</string>
+    <string name="notifications_service_label">Velora home notifications</string>
+    <string name="lock_service_label">Velora double-tap lock</string>
+    <string name="lock_service_description">Only locks the screen when you double-tap Velora\'s home. It doesn\'t read what\'s on screen or what you type.</string>
+    <string name="lock_service_needed">To lock with a double tap, turn on Velora in Accessibility.</string>
+    <string name="settings_background">Background</string>
+    <string name="settings_photo_pick">Use your own photo</string>
+    <string name="settings_photo_change">Change photo</string>
+    <string name="settings_photo_summary">Shown as the background with the chosen theme. Stored only on this phone.</string>
+    <string name="settings_photo_remove">Remove photo</string>
+    <string name="settings_photo_remove_summary">Brings back the theme background.</string>
+    <string name="settings_photo_error">Couldn\'t use that photo.</string>
+    <string name="settings_system_wallpaper">Change phone wallpaper</string>
+    <string name="settings_system_wallpaper_summary">Opens the system wallpaper picker (shown with the “Your wallpaper” theme).</string>
+    <string name="settings_features">Features</string>
+    <string name="settings_notifications">Notifications on home</string>
+    <string name="settings_notifications_summary">A dot next to apps with alerts, the latest one under favorites and what\'s playing.</string>
+    <string name="settings_notifications_disclosure">To show dots and music, Velora needs to read your notifications. They\'re kept only in memory while the home screen runs: never saved and never leave the phone. Private notifications are only counted, not shown.\n\nOn the next screen, turn on Velora.</string>
+    <string name="settings_notifications_access">Tap to give Velora access in system settings.</string>
+    <string name="settings_double_tap_lock">Double tap to lock</string>
+    <string name="settings_double_tap_lock_summary">Double-tap an empty spot on home to turn the screen off.</string>
+    <string name="settings_double_tap_lock_disclosure">Android only allows locking the screen from an accessibility service. Velora\'s does only that: it doesn\'t read the screen, what you type or your data.\n\nOn the next screen, find Velora and turn it on. Some phones switch it off by themselves; if that happens, Velora will tell you.</string>
+    <string name="settings_double_tap_lock_access">Tap to turn on Velora in Accessibility.</string>
+    <string name="settings_access_missing">Access missing</string>
+    <string name="settings_disclosure_continue">Continue</string>
+    <string name="settings_disclosure_cancel">Not now</string>
 </resources>

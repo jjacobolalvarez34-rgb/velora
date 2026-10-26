@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -70,6 +71,7 @@ interface SettingsActions {
     fun onPreset(preset: ThemePreset)
     fun onWidgetHeight(appWidgetId: Int, heightDp: Int)
     fun onRemoveWidget(appWidgetId: Int)
+    fun onMoveWidget(appWidgetId: Int, offset: Int)
 }
 
 /** Listas de apps que se editan en Ajustes. */
@@ -91,6 +93,9 @@ fun SettingsScreen(
     lists: SettingsLists,
     actions: SettingsActions,
     modifier: Modifier = Modifier,
+    features: FeatureActions = PreviewFeatureActions,
+    status: FeatureStatus = FeatureStatus(),
+    photo: ImageBitmap? = null,
 ) {
     LazyColumn(
         contentPadding = WindowInsets.safeDrawing.asPaddingValues(),
@@ -99,14 +104,16 @@ fun SettingsScreen(
             .background(MaterialTheme.colorScheme.background),
     ) {
         item(key = "title") { Title(stringResource(R.string.settings_title)) }
-        item(key = "preview") { ThemePreview(theme, preview) }
+        item(key = "preview") { ThemePreview(theme, preview, photo) }
         item(key = "presets-title") { SectionTitle(R.string.settings_themes) }
         item(key = "presets") { ThemePresetPicker(selected = theme.preset, onSelect = actions::onPreset) }
+        backgroundSection(theme, features)
         themeSection(theme, actions)
         layoutSection(theme, actions)
         favoritesSection(lists.favorites, actions)
         widgetsSection(lists.widgets, actions)
         hiddenSection(lists.hidden, actions)
+        featuresSection(theme, status, features)
         item(key = "general") { SectionTitle(R.string.settings_general) }
         item(key = "home-app") {
             Option(
@@ -174,7 +181,7 @@ private fun LazyListScope.hiddenSection(hidden: List<AppEntry>, actions: Setting
 
 /** El reloj tal como se verá en el inicio, sobre un degradado del color del tema. */
 @Composable
-private fun ThemePreview(theme: ThemeSettings, preview: ClockPreview) {
+private fun ThemePreview(theme: ThemeSettings, preview: ClockPreview, photo: ImageBitmap?) {
     val scheme = MaterialTheme.colorScheme
     Box(
         modifier = Modifier
@@ -185,7 +192,7 @@ private fun ThemePreview(theme: ThemeSettings, preview: ClockPreview) {
     ) {
         // Mismo fondo y colores que el inicio con el tema elegido.
         VeloraTheme(font = theme.font, preset = theme.preset, reducedMotion = true) {
-            ThemeBackground(theme.preset, Modifier.matchParentSize())
+            ThemeBackground(theme.preset, Modifier.matchParentSize(), photo)
             ClockHeader(
                 clock = preview.clock,
                 style = theme.clock,
@@ -260,7 +267,7 @@ internal fun RadioOption(
 }
 
 @Composable
-private fun Option(title: String, subtitle: String, onClick: () -> Unit, icon: ImageVector? = null) {
+internal fun Option(title: String, subtitle: String, onClick: () -> Unit, icon: ImageVector? = null) {
     ListItem(
         headlineContent = { Text(title) },
         supportingContent = { Text(subtitle) },
@@ -283,6 +290,17 @@ private object PreviewSettingsActions : SettingsActions {
     override fun onPreset(preset: ThemePreset) = Unit
     override fun onWidgetHeight(appWidgetId: Int, heightDp: Int) = Unit
     override fun onRemoveWidget(appWidgetId: Int) = Unit
+    override fun onMoveWidget(appWidgetId: Int, offset: Int) = Unit
+}
+
+private object PreviewFeatureActions : FeatureActions {
+    override fun onPickPhoto() = Unit
+    override fun onRemovePhoto() = Unit
+    override fun onSystemWallpaper() = Unit
+    override fun onNotifications(enabled: Boolean) = Unit
+    override fun onNotificationAccess() = Unit
+    override fun onDoubleTapLock(enabled: Boolean) = Unit
+    override fun onLockAccess() = Unit
 }
 
 @Preview(name = "Claro", heightDp = 1200)

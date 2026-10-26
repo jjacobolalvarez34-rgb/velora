@@ -117,6 +117,15 @@ class HomeViewModelTest {
         override suspend fun applyPreset(preset: ThemePreset) {
             theme.value = preset.recommended
         }
+        override suspend fun setPhotoBackground(path: String?) {
+            theme.value = theme.value.copy(photoBackground = path)
+        }
+        override suspend fun setNotifications(enabled: Boolean) {
+            theme.value = theme.value.copy(notifications = enabled)
+        }
+        override suspend fun setDoubleTapLock(enabled: Boolean) {
+            theme.value = theme.value.copy(doubleTapLock = enabled)
+        }
         override val onboardingDone = MutableStateFlow(true)
         override suspend fun setOnboardingDone() {
             onboardingDone.value = true

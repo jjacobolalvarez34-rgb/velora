@@ -79,7 +79,7 @@ internal fun LazyListScope.favoritesSection(favorites: List<AppEntry>, actions: 
     }
 }
 
-/** Widgets del inicio: más alto, más bajo o quitar (agregar se hace manteniendo presionado el inicio). */
+/** Widgets del inicio: orden, alto o quitar (agregar se hace manteniendo presionado el inicio). */
 internal fun LazyListScope.widgetsSection(widgets: List<WidgetSetting>, actions: SettingsActions) {
     item(key = "widgets") { SectionTitle(R.string.settings_widgets) }
     if (widgets.isEmpty()) {
@@ -89,29 +89,15 @@ internal fun LazyListScope.widgetsSection(widgets: List<WidgetSetting>, actions:
         val widget = widgets[index]
         ListItem(
             headlineContent = { Text(widget.label) },
-            supportingContent = {
-                Row {
-                    TextButton(onClick = {
-                        actions.onWidgetHeight(
-                            widget.appWidgetId,
-                            widget.heightDp - WidgetsRepository.HEIGHT_STEP_DP,
-                        )
-                    }) {
-                        Text(stringResource(R.string.settings_widget_shorter))
-                    }
-                    TextButton(onClick = {
-                        actions.onWidgetHeight(
-                            widget.appWidgetId,
-                            widget.heightDp + WidgetsRepository.HEIGHT_STEP_DP,
-                        )
-                    }) {
-                        Text(stringResource(R.string.settings_widget_taller))
-                    }
-                    TextButton(onClick = { actions.onRemoveWidget(widget.appWidgetId) }) {
-                        Text(stringResource(R.string.settings_widget_remove))
-                    }
-                }
+            trailingContent = {
+                MoveButtons(
+                    label = widget.label,
+                    canMoveUp = index > 0,
+                    canMoveDown = index < widgets.lastIndex,
+                    onMove = { offset -> actions.onMoveWidget(widget.appWidgetId, offset) },
+                )
             },
+            supportingContent = { WidgetSizeButtons(widget, actions) },
             leadingContent = { IconCircle(Icons.Outlined.Add) },
             colors = cardColors(),
             modifier = Modifier.settingsCard(),
@@ -120,7 +106,23 @@ internal fun LazyListScope.widgetsSection(widgets: List<WidgetSetting>, actions:
 }
 
 @Composable
-private fun SwitchOption(
+private fun WidgetSizeButtons(widget: WidgetSetting, actions: SettingsActions) {
+    val step = WidgetsRepository.HEIGHT_STEP_DP
+    Row {
+        TextButton(onClick = { actions.onWidgetHeight(widget.appWidgetId, widget.heightDp - step) }) {
+            Text(stringResource(R.string.settings_widget_shorter))
+        }
+        TextButton(onClick = { actions.onWidgetHeight(widget.appWidgetId, widget.heightDp + step) }) {
+            Text(stringResource(R.string.settings_widget_taller))
+        }
+        TextButton(onClick = { actions.onRemoveWidget(widget.appWidgetId) }) {
+            Text(stringResource(R.string.settings_widget_remove))
+        }
+    }
+}
+
+@Composable
+internal fun SwitchOption(
     title: String,
     subtitle: String,
     checked: Boolean,

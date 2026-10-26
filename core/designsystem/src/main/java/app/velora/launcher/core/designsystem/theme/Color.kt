@@ -67,8 +67,10 @@ data class OnWallpaperColors(
     val surface: Color,
     /** Único acento sobre el fondo (burbuja del alfabeto, resaltados). */
     val accent: Color,
-    /** Círculo translúcido detrás de los íconos minimalistas. */
-    val iconBackdrop: Color = Color(0x2EFFFFFF),
+    /** Íconos minimalistas: círculo relleno… */
+    val iconCircle: Color = Color(0xF0F2F2F7),
+    /** …y el trazo del ícono en línea encima. */
+    val iconGlyph: Color = Color(0xFF26232E),
     /** Texto sobre el acento (la letra dentro de la burbuja). */
     val onAccent: Color = Slate10,
     /** Sombra suave del texto: legible sobre cualquier fondo sin un velo pesado. */
@@ -99,7 +101,8 @@ internal object PresetColors {
         drawerScrim = Color(0xF2050507),
         surface = Color(0x1FFFFFFF),
         accent = Color(0xFFF2F2F2),
-        iconBackdrop = Color(0x26FFFFFF),
+        iconCircle = Color(0xFFE9E9EC),
+        iconGlyph = Color(0xFF111114),
     )
     val paper = OnWallpaperColors(
         content = Color(0xFF2B2620),
@@ -110,8 +113,9 @@ internal object PresetColors {
         surface = Color(0x142B2620),
         accent = Color(0xFF2B2620),
         onAccent = Color(0xFFF3EEE5),
-        iconBackdrop = Color(0x142B2620),
         isLight = true,
+        iconCircle = Color(0xFF2B2620),
+        iconGlyph = Color(0xFFF3EEE5),
     )
     val sakura = OnWallpaperColors(
         content = Color(0xFF2E2433),
@@ -122,8 +126,9 @@ internal object PresetColors {
         surface = Color(0x1A2E2433),
         accent = Color(0xFFC75B7A),
         onAccent = Color(0xFFFFFFFF),
-        iconBackdrop = Color(0x1AC75B7A),
         isLight = true,
+        iconCircle = Color(0xFFC75B7A),
+        iconGlyph = Color(0xFFFFFFFF),
     )
     val forest = OnWallpaperColors(
         content = Color(0xFFEFF5EA),
@@ -134,8 +139,9 @@ internal object PresetColors {
         surface = Color(0x1FEFF5EA),
         accent = Color(0xFFD7E8B0),
         onAccent = Color(0xFF0E2321),
-        iconBackdrop = Color(0x26D7E8B0),
         textShadow = Color(0x40000000),
+        iconCircle = Color(0xFFD7E8B0),
+        iconGlyph = Color(0xFF0E2321),
     )
     val aurora = OnWallpaperColors(
         content = Color(0xFFFFFFFF),
@@ -145,8 +151,24 @@ internal object PresetColors {
         drawerScrim = Color(0xEB070B1F),
         surface = Color(0x1FFFFFFF),
         accent = Color(0xFFFFFFFF),
-        iconBackdrop = Color(0x29FFFFFF),
         textShadow = Color(0x66000000),
+        iconCircle = Color(0xFFE6E9FF),
+        iconGlyph = Color(0xFF1B2150),
+    )
+
+    /** Ceniza: hueso y pergamino sobre negro cálido; brasa como acento. */
+    val ash = OnWallpaperColors(
+        content = Color(0xFFDCCFB6),
+        contentVariant = Color(0xB3DCCFB6),
+        scrimTop = Color.Transparent,
+        scrimBottom = Color.Transparent,
+        drawerScrim = Color(0xF20B0907),
+        surface = Color(0x1FDCCFB6),
+        accent = Color(0xFFE0893C),
+        onAccent = Color(0xFF140D07),
+        textShadow = Color(0xB3000000),
+        iconCircle = Color(0xFF2A211A),
+        iconGlyph = Color(0xFFDCCFB6),
     )
     val pixelNight = OnWallpaperColors(
         content = Color(0xFFF2E9FF),
@@ -157,13 +179,17 @@ internal object PresetColors {
         surface = Color(0x1FF2E9FF),
         accent = Color(0xFFF2E9FF),
         onAccent = Color(0xFF0B0620),
-        iconBackdrop = Color(0x29F2E9FF),
         textShadow = Color(0x99000000),
+        iconCircle = Color(0xFFF2E9FF),
+        iconGlyph = Color(0xFF241046),
     )
 }
 
 /** Colores de las ilustraciones de fondo: pocas formas, mucho aire. */
 internal object ArtColors {
+    /** Velo sobre una foto propia en los temas de texto oscuro. */
+    val lightVeil = Color(0x8CFFFFFF)
+
     val nightBase = Color(0xFF050507)
     val nightGlow = Color(0x14FFFFFF)
 
@@ -185,6 +211,12 @@ internal object ArtColors {
     val auroraTeal = Color(0x592DD4BF)
     val auroraViolet = Color(0x4D8B5CF6)
     val auroraBlue = Color(0x403B82F6)
+
+    val ashTop = Color(0xFF0B0907)
+    val ashBottom = Color(0xFF1A130E)
+    val ashGlow = Color(0x8CE0893C)
+    val ashEmber = Color(0xFFF2A65A)
+    val ashVignette = Color(0xCC000000)
 
     val pixelTop = Color(0xFF0B0620)
     val pixelBottom = Color(0xFF241046)

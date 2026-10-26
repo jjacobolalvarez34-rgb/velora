@@ -105,7 +105,7 @@ El elemento firma. Especificación:
 - Estilos (Ajustes → Tema), renderizados en `IconRenderer` fuera del hilo principal:
   - **Círculo** (por defecto): capas del ícono adaptativo a sangre completa y recorte circular suavizado (`BitmapShader`, nunca `clipPath`, que deja el borde dentado). Los íconos antiguos van sobre un círculo neutro.
   - **Forma del sistema**: `getBadgedIcon` tal cual.
-  - **Minimalista**: una sola tinta, el acento claro del tema (`OnWallpaperColors.accent`). Usa la capa monocroma de Android 13+ si la app la trae; si no, el ícono en escala de grises multiplicado por el acento.
+  - **Minimalista** (ADR-021): círculo lleno (`iconCircle`) con un glifo de línea encima (`iconGlyph`, trazo 2, 55 % del círculo). El glifo sale de `GlyphMatcher` (paquete → palabra clave → categoría); si no hay, la capa monocroma de Android 13+; si tampoco, la inicial de la app.
   - **Sin íconos**: solo texto; es el más minimalista y el más rápido.
 - La insignia de perfil de trabajo se agrega encima del ícono ya recortado (`getUserBadgedIcon`).
 - **No** usar ni imitar los paquetes de íconos de Niagara.
@@ -114,6 +114,8 @@ El elemento firma. Especificación:
 
 - El alfabeto se estira hasta **la mitad del ancho de la pantalla** en un arco amplio (σ = 6,5 filas). Las letras crecen poco (1 + 0,35·g): el estiramiento hace el trabajo.
 - La burbuja es **blanca con la letra oscura** sobre el wallpaper (en cada tema, su acento) y queda pasando la cresta, junto al pulgar.
+- **La ola sigue al dedo** (0.6.0): el estiramiento es la distancia horizontal del dedo al borde, 1 a 1, entre 20 dp y la mitad de la pantalla. Poco movimiento = poca ola; se lee en la fase de dibujo, sin animar entre frames.
+- Si hay favoritos, el alfabeto empieza con **★**: en modo por letra muestra los favoritos; en la lista completa salta arriba.
 
 ## 6.2 Ajustes y menús (ADR-019)
 
@@ -132,10 +134,15 @@ El elemento firma. Especificación:
 | Bosque | verde profundo con una sola curva fina | claro | Quicksand / Clásico / Minimalista |
 | Aurora | azul noche con tres luces suaves | claro | Nunito / Centrado / Minimalista |
 | Noche pixel | morado con estrellas cuadradas | lavanda | Silkscreen / Clásico / Círculo |
+| Ceniza | cenizas cálidas, una hoguera abajo, brasas que flotan, viñeta | hueso/pergamino, acento brasa | Cinzel / Día / Minimalista |
+
+- **Ceniza** es un tema de fantasía oscura propio (sin nombres, logos ni arte de ningún juego): fuente romana grabada (Cinzel, OFL), círculos de íconos de hierro y glifos color hueso.
+- **Foto propia** (ADR-022): cualquier tema puede llevar una foto del usuario de fondo (recortada a pantalla, con el velo del tema); los colores del texto siguen siendo los del tema.
 
 Regla: **sencillo y estético**. Pocas formas, mucho aire: el protagonista es el texto.
 
-- **Íconos minimalistas** = el *logo en línea* de la app (ícono temático de Android 13+) del color del texto, sobre un círculo translúcido (`iconBackdrop`). Las apps que no lo traen: su ícono en grises suaves, mezclado con el color del texto, más chico dentro del mismo círculo.
+- **Íconos minimalistas** = círculo claro lleno con el glifo oscuro (o al revés en temas claros), iguales para todas las apps aunque no traigan ícono temático (ADR-021).
+- **Notificaciones** (ADR-023): un punto de 7 dp del color de acento junto al nombre; en favoritos, el título del último aviso en una línea (`caption`). El reproductor aparece bajo el reloj creciendo en altura (`spatialDefault`) y se va igual.
 
 - Estética más fina: íconos de 34 dp (favoritos) y 30 dp (lista), textos de 19 sp y 17 sp con 0,2 sp de espaciado, filas de 52 dp y 48 dp. Sobre fondos oscuros el texto lleva una sombra suave (desenfoque de 8, caída de 1,5): permite un velo más liviano.
 - **Burbuja del alfabeto**: al arrastrar, un círculo del color de acento (56 dp) con la letra actual sigue al dedo junto a la cresta de la ola, crece desde el 60 % y se desvanece al soltar.

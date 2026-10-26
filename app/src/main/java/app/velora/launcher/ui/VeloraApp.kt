@@ -59,7 +59,6 @@ import app.velora.launcher.feature.home.HomeViewModel
 import app.velora.launcher.feature.welcome.OnboardingScreen
 import app.velora.launcher.feature.welcome.WelcomeScreen
 import app.velora.launcher.feature.widgets.HomeMenuSheet
-import app.velora.launcher.feature.widgets.HomeWidgets
 import app.velora.launcher.feature.widgets.WidgetPickerSheet
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -130,20 +129,24 @@ private fun LauncherRoute(
     val search = rememberDrawerSearchState()
     val sheets = rememberLauncherSheets()
     val actions = rememberAppActions(container, homeViewModel, sheets)
-    val widgets by container.widgetHost.widgets.collectAsStateWithLifecycle()
+    val lock = rememberDoubleTapLock()
     DrawerEffects(drawerState, search, homePresses, drawerViewModel::onQueryChange)
-    LauncherScreen(
-        home = home,
-        drawer = drawer,
-        drawerState = drawerState,
-        listState = listState,
-        search = search,
-        actions = actions,
-        onOpenSettings = onOpenSettings,
-        theme = theme,
-        onHomeMenu = { sheets.homeMenu = true },
-        widgets = { HomeWidgets(container.widgetHost, widgets) },
-    )
+    NotificationsProvider(container.notificationsRepository, enabled = theme.notifications) {
+        LauncherScreen(
+            home = home,
+            drawer = drawer,
+            drawerState = drawerState,
+            listState = listState,
+            search = search,
+            actions = actions,
+            onOpenSettings = onOpenSettings,
+            theme = theme,
+            onHomeMenu = { sheets.homeMenu = true },
+            widgets = { HomeWidgetsSlot(container, showMusic = theme.notifications) },
+            photo = rememberPhoto(theme.photoBackground),
+            onDoubleTap = lock.takeIf { theme.doubleTapLock },
+        )
+    }
     LauncherSheets(sheets, container, drawer, actions, onOpenSettings)
     IconPrefetch(container, home, drawer, theme.icons)
 }
@@ -221,8 +224,8 @@ private fun LauncherSheets(
 @Composable
 private fun IconPrefetch(container: AppContainer, home: HomeUiState, drawer: DrawerUiState, style: IconStyle) {
     if (style == IconStyle.None) return
-    val tint = VeloraTheme.onWallpaper.content.toArgb()
-    val backdrop = VeloraTheme.onWallpaper.iconBackdrop.toArgb()
+    val tint = VeloraTheme.onWallpaper.iconGlyph.toArgb()
+    val backdrop = VeloraTheme.onWallpaper.iconCircle.toArgb()
     val density = LocalDensity.current
     val favoritePx = with(density) { Sizes.favoriteIcon.roundToPx() }
     val listPx = with(density) { Sizes.listIcon.roundToPx() }

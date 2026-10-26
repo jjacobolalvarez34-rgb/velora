@@ -12,6 +12,8 @@ Velora incluye o usa el siguiente software y recursos de terceros.
 | Fuente **Quicksand** (The Quicksand Project Authors), **sin modificar** (tiene nombre reservado) | SIL OFL 1.1 | [docs/licencias/OFL-Quicksand.txt](docs/licencias/OFL-Quicksand.txt) |
 | Fuente **Silkscreen** (The Silkscreen Project Authors), sin modificar | SIL OFL 1.1 | [docs/licencias/OFL-Silkscreen.txt](docs/licencias/OFL-Silkscreen.txt) |
 | Fuente **Nunito** (The Nunito Project Authors), recortada a latino | SIL OFL 1.1 | [docs/licencias/OFL-Nunito.txt](docs/licencias/OFL-Nunito.txt) |
+| Fuente **Cinzel** (The Cinzel Project Authors), recortada a latino (sin nombre reservado) | SIL OFL 1.1 | [docs/licencias/OFL-Cinzel.txt](docs/licencias/OFL-Cinzel.txt) |
+| **Tabler Icons** 3.49.0 (Paweł Kuna), ~130 glifos convertidos a datos de trazo en `core/data/src/main/assets/glyphs/tabler.tsv` | MIT | [docs/licencias/MIT-TablerIcons.txt](docs/licencias/MIT-TablerIcons.txt) |
 
 ## Librerías
 
