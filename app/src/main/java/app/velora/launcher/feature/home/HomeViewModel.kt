@@ -91,6 +91,9 @@ class HomeViewModel(
         viewModelScope.launch { prefsRepository.setOnboardingDone() }
     }
 
+    /** ¿Velora ya es el inicio? Para decir "Empezar" en vez de "Usar Velora como inicio". */
+    val isDefaultHome: StateFlow<Boolean?> = defaultHomeRepository.isDefault
+
     /** Intent para pedir ser el inicio (diálogo del sistema o pantalla de "App de inicio"). */
     fun defaultHomeRequest(): Intent = defaultHomeRepository.requestIntent()
 

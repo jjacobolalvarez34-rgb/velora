@@ -14,9 +14,10 @@ object Spacing {
 
 /** Medidas de componentes (ESTILO §4). */
 object Sizes {
-    val favoriteRowHeight = 56.dp
-    val appRowHeight = 52.dp
+    val favoriteRowHeight = 52.dp
+    val appRowHeight = 48.dp
     val minTouchTarget = 48.dp
-    val favoriteIcon = 40.dp
-    val listIcon = 36.dp
+    val favoriteIcon = 34.dp
+    val listIcon = 30.dp
+    val letterBubble = 56.dp
 }

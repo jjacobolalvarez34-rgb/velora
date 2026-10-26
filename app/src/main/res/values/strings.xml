@@ -104,4 +104,12 @@
     <string name="intro_menu_body">Fíjala en el inicio, ocúltala, o usa sus atajos sin abrirla.</string>
     <string name="intro_theme_title">Hazlo tuyo</string>
     <string name="intro_theme_body">Mantén presionado el inicio para elegir fuente, reloj e íconos.</string>
+    <string name="settings_themes">Temas</string>
+    <string name="theme_wallpaper">Tu fondo</string>
+    <string name="theme_sakura" translatable="false">Sakura</string>
+    <string name="theme_forest">Bosque</string>
+    <string name="theme_pixel_night">Noche pixel</string>
+    <string name="theme_aurora" translatable="false">Aurora</string>
+    <string name="font_pixel" translatable="false">Silkscreen (pixel)</string>
+    <string name="welcome_start">Empezar</string>
 </resources>

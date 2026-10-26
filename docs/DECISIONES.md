@@ -81,6 +81,13 @@ _`compileSdk` actualizado a 37 por ADR-013; `minSdk` y `targetSdk` siguen vigent
 **Por qué:** mismo modelo asíncrono y seguro, sin generación de código. El tipado lo da `PrefsRepository`; un valor desconocido vuelve al de fábrica (`decodeTheme`, con prueba).
 **Consecuencias:** si las preferencias crecen mucho o necesitan estructuras anidadas, reconsiderar Proto con un ADR.
 
+## ADR-018 · Temas completos con fondo dibujado por Velora — Aceptada (2026-10-25)
+**Contexto:** el autor quiere temas como los de las capturas de referencia: fondo, colores, fuente e íconos que combinan.
+**Opciones:** A) cambiar el wallpaper del sistema (`SET_WALLPAPER`, permiso nuevo y cambio que el usuario no pidió fuera del launcher). B) imágenes de fondo empaquetadas (pesan MB). C) fondos dibujados en Compose dentro del inicio.
+**Decisión:** C. `ThemePreset` (Tu fondo, Sakura, Bosque, Noche pixel, Aurora). Cada tema define su fondo (`ThemeBackground`, formas calculadas una vez con `drawWithCache`, sin animación), sus colores sobre el fondo (`PresetColors`, texto, acento, velos, sombra, claro/oscuro) y una fuente, reloj e íconos recomendados que se aplican al elegirlo (`applyPreset`) y luego se pueden cambiar.
+**Por qué:** cero permisos y cero MB: todo el arte pesa unas decenas de KB de código. El wallpaper del usuario no se toca y "Tu fondo" sigue disponible. Diseños propios, no copias de las capturas.
+**Consecuencias:** las barras del sistema usan íconos oscuros en temas claros. Fuente pixel nueva: Silkscreen (OFL, sin nombre reservado, sin modificar). Agregar un tema = colores en `Color.kt` + una función de dibujo + su recomendación.
+
 ---
 
 ## Plantilla

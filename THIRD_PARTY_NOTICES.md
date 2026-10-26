@@ -10,6 +10,7 @@ Velora incluye o usa el siguiente software y recursos de terceros.
 | Fuente **Figtree** (The Figtree Project Authors), recortada a latino | SIL OFL 1.1 | [docs/licencias/OFL-Figtree.txt](docs/licencias/OFL-Figtree.txt) |
 | Fuente **Fraunces** (The Fraunces Project Authors), instancia con solo el eje `wght`, recortada a latino | SIL OFL 1.1 | [docs/licencias/OFL-Fraunces.txt](docs/licencias/OFL-Fraunces.txt) |
 | Fuente **Quicksand** (The Quicksand Project Authors), **sin modificar** (tiene nombre reservado) | SIL OFL 1.1 | [docs/licencias/OFL-Quicksand.txt](docs/licencias/OFL-Quicksand.txt) |
+| Fuente **Silkscreen** (The Silkscreen Project Authors), sin modificar | SIL OFL 1.1 | [docs/licencias/OFL-Silkscreen.txt](docs/licencias/OFL-Silkscreen.txt) |
 
 ## Librerías
 

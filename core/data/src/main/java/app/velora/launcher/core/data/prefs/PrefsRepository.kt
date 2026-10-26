@@ -11,6 +11,7 @@ import app.velora.launcher.core.model.ClockStyle
 import app.velora.launcher.core.model.FontChoice
 import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.TextSize
+import app.velora.launcher.core.model.ThemePreset
 import app.velora.launcher.core.model.ThemeSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -32,6 +33,9 @@ interface PrefsRepository {
 
     suspend fun setFullList(enabled: Boolean)
 
+    /** Aplica un tema completo: su fondo y colores, y su fuente, reloj e íconos recomendados. */
+    suspend fun applyPreset(preset: ThemePreset)
+
     /** true cuando el usuario ya vio la introducción. */
     val onboardingDone: Flow<Boolean>
 
@@ -47,12 +51,13 @@ class DataStorePrefsRepository(context: Context) : PrefsRepository {
     override val theme: Flow<ThemeSettings> = store.data
         .map { prefs ->
             StoredTheme(
-                prefs[FONT],
-                prefs[CLOCK],
-                prefs[ICONS],
-                prefs[TEXT_SIZE],
-                prefs[LEFT_HANDED],
-                prefs[FULL_LIST],
+                font = prefs[FONT],
+                clock = prefs[CLOCK],
+                icons = prefs[ICONS],
+                textSize = prefs[TEXT_SIZE],
+                leftHanded = prefs[LEFT_HANDED],
+                fullList = prefs[FULL_LIST],
+                preset = prefs[PRESET],
             ).decode()
         }
         .distinctUntilChanged()
@@ -71,6 +76,16 @@ class DataStorePrefsRepository(context: Context) : PrefsRepository {
 
     override suspend fun setFullList(enabled: Boolean) = put(FULL_LIST, enabled)
 
+    override suspend fun applyPreset(preset: ThemePreset) {
+        val theme = preset.recommended
+        store.edit {
+            it[PRESET] = preset.name
+            it[FONT] = theme.font.name
+            it[CLOCK] = theme.clock.name
+            it[ICONS] = theme.icons.name
+        }
+    }
+
     override suspend fun setOnboardingDone() = put(ONBOARDING_DONE, true)
 
     private suspend fun <T> put(key: Preferences.Key<T>, value: T) {
@@ -84,6 +99,7 @@ class DataStorePrefsRepository(context: Context) : PrefsRepository {
         val TEXT_SIZE = stringPreferencesKey("theme_text_size")
         val LEFT_HANDED = booleanPreferencesKey("layout_left_handed")
         val FULL_LIST = booleanPreferencesKey("layout_full_list")
+        val PRESET = stringPreferencesKey("theme_preset")
         val ONBOARDING_DONE = booleanPreferencesKey("onboarding_done")
     }
 }
@@ -99,6 +115,7 @@ internal data class StoredTheme(
     val textSize: String? = null,
     val leftHanded: Boolean? = null,
     val fullList: Boolean? = null,
+    val preset: String? = null,
 ) {
     fun decode(): ThemeSettings {
         val defaults = ThemeSettings()
@@ -109,6 +126,7 @@ internal data class StoredTheme(
             textSize = TextSize.entries.firstOrNull { it.name == textSize } ?: defaults.textSize,
             leftHanded = leftHanded ?: defaults.leftHanded,
             fullList = fullList ?: defaults.fullList,
+            preset = ThemePreset.entries.firstOrNull { it.name == preset } ?: defaults.preset,
         )
     }
 }

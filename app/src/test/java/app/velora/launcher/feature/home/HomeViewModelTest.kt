@@ -20,6 +20,7 @@ import app.velora.launcher.core.model.ClockStyle
 import app.velora.launcher.core.model.FontChoice
 import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.TextSize
+import app.velora.launcher.core.model.ThemePreset
 import app.velora.launcher.core.model.ThemeSettings
 import java.time.LocalDateTime
 import kotlinx.coroutines.Dispatchers
@@ -112,6 +113,9 @@ class HomeViewModelTest {
         }
         override suspend fun setFullList(enabled: Boolean) {
             theme.value = theme.value.copy(fullList = enabled)
+        }
+        override suspend fun applyPreset(preset: ThemePreset) {
+            theme.value = preset.recommended
         }
         override val onboardingDone = MutableStateFlow(true)
         override suspend fun setOnboardingDone() {

@@ -98,4 +98,9 @@
     <string name="intro_menu_body">Pin it to your home screen, hide it, or use its shortcuts without opening it.</string>
     <string name="intro_theme_title">Make it yours</string>
     <string name="intro_theme_body">Long-press your home screen to pick a font, clock and icons.</string>
+    <string name="settings_themes">Themes</string>
+    <string name="theme_wallpaper">Your wallpaper</string>
+    <string name="theme_forest">Forest</string>
+    <string name="theme_pixel_night">Pixel night</string>
+    <string name="welcome_start">Get started</string>
 </resources>

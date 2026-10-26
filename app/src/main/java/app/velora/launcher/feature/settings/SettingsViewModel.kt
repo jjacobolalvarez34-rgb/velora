@@ -14,6 +14,7 @@ import app.velora.launcher.core.model.ClockStyle
 import app.velora.launcher.core.model.FontChoice
 import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.TextSize
+import app.velora.launcher.core.model.ThemePreset
 import app.velora.launcher.core.model.ThemeSettings
 import app.velora.launcher.di.AppContainer
 import app.velora.launcher.feature.home.ClockFormatter
@@ -66,6 +67,8 @@ class SettingsViewModel(
     fun onLeftHanded(enabled: Boolean) = save { prefs.setLeftHanded(enabled) }
 
     fun onFullList(enabled: Boolean) = save { prefs.setFullList(enabled) }
+
+    fun onPreset(preset: ThemePreset) = save { prefs.applyPreset(preset) }
 
     fun onFont(font: FontChoice) = save { prefs.setFont(font) }
 

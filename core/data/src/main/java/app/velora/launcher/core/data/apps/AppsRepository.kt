@@ -60,6 +60,8 @@ class SystemAppsRepository(
     scope: CoroutineScope,
     private val cache: AppsCache,
     private val onPackageChanged: (String) -> Unit = {},
+    /** Tras cada lectura del sistema: paquete → `sourceDir` (cambia en cada actualización). */
+    private val onSystemLoad: (Map<String, String>) -> Unit = {},
 ) : AppsRepository {
 
     private val launcherApps = context.getSystemService(LauncherApps::class.java)
@@ -83,6 +85,7 @@ class SystemAppsRepository(
                 .map { loadAll() }
                 .onEach { fresh ->
                     systemLoaded.value = true
+                    onSystemLoad(currentVersions())
                     if (fresh != persisted) {
                         runCatching { cache.save(fresh) }.onFailure { Logger.w(TAG, it) { "No se guardó la caché" } }
                         persisted = fresh
@@ -105,6 +108,9 @@ class SystemAppsRepository(
         systemLoaded.first { it }
         return infos[key.stableId]
     }
+
+    private fun currentVersions(): Map<String, String> =
+        infos.values.associate { it.componentName.packageName to it.applicationInfo.sourceDir.orEmpty() }
 
     fun userFor(key: AppKey): UserHandle? = userManager.getUserForSerialNumber(key.userSerial)
 

@@ -32,6 +32,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import app.velora.launcher.R
+import app.velora.launcher.core.designsystem.components.ThemeBackground
 import app.velora.launcher.core.designsystem.theme.Shapes
 import app.velora.launcher.core.designsystem.theme.Spacing
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
@@ -41,6 +42,7 @@ import app.velora.launcher.core.model.ClockStyle
 import app.velora.launcher.core.model.FontChoice
 import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.TextSize
+import app.velora.launcher.core.model.ThemePreset
 import app.velora.launcher.core.model.ThemeSettings
 import app.velora.launcher.feature.home.ClockText
 import app.velora.launcher.feature.home.components.ClockHeader
@@ -56,6 +58,7 @@ interface SettingsActions {
     fun onTextSize(size: TextSize)
     fun onLeftHanded(enabled: Boolean)
     fun onFullList(enabled: Boolean)
+    fun onPreset(preset: ThemePreset)
 }
 
 /** Listas de apps que se editan en Ajustes. */
@@ -78,6 +81,8 @@ fun SettingsScreen(
     ) {
         item(key = "title") { Title(stringResource(R.string.settings_title)) }
         item(key = "preview") { ThemePreview(theme, preview) }
+        item(key = "presets-title") { SectionTitle(R.string.settings_themes) }
+        item(key = "presets") { ThemePresetPicker(selected = theme.preset, onSelect = actions::onPreset) }
         themeSection(theme, actions)
         layoutSection(theme, actions)
         favoritesSection(lists.favorites, actions)
@@ -153,11 +158,18 @@ private fun ThemePreview(theme: ThemeSettings, preview: ClockPreview) {
             .padding(horizontal = Spacing.m, vertical = Spacing.s)
             .fillMaxWidth()
             .clip(Shapes.sheet)
-            .background(Brush.verticalGradient(listOf(scheme.primary, scheme.tertiary)))
-            .background(VeloraTheme.onWallpaper.scrimBottom)
-            .padding(Spacing.l),
+            .background(Brush.verticalGradient(listOf(scheme.primary, scheme.tertiary))),
     ) {
-        ClockHeader(clock = preview.clock, style = theme.clock, battery = preview.battery)
+        // Mismo fondo y colores que el inicio con el tema elegido.
+        VeloraTheme(font = theme.font, preset = theme.preset, reducedMotion = true) {
+            ThemeBackground(theme.preset, Modifier.matchParentSize())
+            ClockHeader(
+                clock = preview.clock,
+                style = theme.clock,
+                battery = preview.battery,
+                modifier = Modifier.padding(Spacing.l),
+            )
+        }
     }
 }
 
@@ -222,6 +234,7 @@ private object PreviewSettingsActions : SettingsActions {
     override fun onTextSize(size: TextSize) = Unit
     override fun onLeftHanded(enabled: Boolean) = Unit
     override fun onFullList(enabled: Boolean) = Unit
+    override fun onPreset(preset: ThemePreset) = Unit
 }
 
 @Preview(name = "Claro", heightDp = 1200)

@@ -20,6 +20,7 @@ import app.velora.launcher.core.model.ClockStyle
 import app.velora.launcher.core.model.FontChoice
 import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.TextSize
+import app.velora.launcher.core.model.ThemePreset
 
 /** Ajustes de Velora. Fuera de `HomeActivity` (ADR-003); se abre manteniendo presionado el inicio. */
 class SettingsActivity : ComponentActivity() {
@@ -38,6 +39,7 @@ class SettingsActivity : ComponentActivity() {
         override fun onTextSize(size: TextSize) = viewModel.onTextSize(size)
         override fun onLeftHanded(enabled: Boolean) = viewModel.onLeftHanded(enabled)
         override fun onFullList(enabled: Boolean) = viewModel.onFullList(enabled)
+        override fun onPreset(preset: ThemePreset) = viewModel.onPreset(preset)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +51,7 @@ class SettingsActivity : ComponentActivity() {
             val hidden by viewModel.hidden.collectAsStateWithLifecycle()
             val favorites by viewModel.favoriteApps.collectAsStateWithLifecycle()
             // La pantalla usa la fuente elegida: se ve el cambio al instante.
-            VeloraTheme(font = theme.font) {
+            VeloraTheme(font = theme.font, preset = theme.preset) {
                 SettingsScreen(
                     theme = theme,
                     preview = preview,

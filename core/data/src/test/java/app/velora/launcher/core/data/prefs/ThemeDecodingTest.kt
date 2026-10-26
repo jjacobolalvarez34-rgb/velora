@@ -4,6 +4,7 @@ import app.velora.launcher.core.model.ClockStyle
 import app.velora.launcher.core.model.FontChoice
 import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.TextSize
+import app.velora.launcher.core.model.ThemePreset
 import app.velora.launcher.core.model.ThemeSettings
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -29,6 +30,20 @@ class ThemeDecodingTest {
 
         assertEquals(TextSize.Large, theme.textSize)
         assertEquals(true, theme.leftHanded)
+    }
+
+    @Test
+    fun `lee el tema completo guardado`() {
+        assertEquals(ThemePreset.Sakura, StoredTheme(preset = "Sakura").decode().preset)
+    }
+
+    @Test
+    fun `cada tema recomienda fuente, reloj e íconos y se marca a sí mismo`() {
+        val pixel = ThemePreset.PixelNight.recommended
+
+        assertEquals(FontChoice.Pixel, pixel.font)
+        assertEquals(ThemePreset.PixelNight, pixel.preset)
+        ThemePreset.entries.forEach { assertEquals(it, it.recommended.preset) }
     }
 
     @Test

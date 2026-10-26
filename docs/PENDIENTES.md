@@ -62,9 +62,18 @@
 - [~] Lista por letra por defecto: solo las apps de la letra elegida; se cambia con el alfabeto. Lista completa como opción.
 - [~] Landing mejorada con logo animado (entrada, flotación, brillo).
 - [~] Introducción de 5 páginas con demos animadas, una sola vez.
-- [ ] Si Velora ya es el inicio, la última página de la introducción debería decir "Empezar" en vez de "Usar Velora como inicio".
+- [x] Si Velora ya es el inicio, la última página dice "Empezar" — 2026-10-25
 
-## 6. Cierre de la Fase 0 (falta verificar)
+## 6. Pedidos del 2026-10-25
+
+- [~] Íconos al instante: caché en disco, precarga y control de versiones (B-100).
+- [~] Burbuja con la letra junto al dedo en el alfabeto.
+- [~] Estética más fina: íconos y textos más chicos, sombra suave en vez de velo pesado.
+- [~] Temas completos: Tu fondo, Sakura, Bosque, Noche pixel, Aurora (ADR-018), con miniaturas en Ajustes.
+- [x] "Empezar" en la introducción cuando Velora ya es el inicio.
+- [ ] Más temas a futuro (p. ej. papel/tinta, atardecer, minimal blanco) y un fondo animado opcional que respete batería y "Quitar animaciones".
+
+## 7. Cierre de la Fase 0 (falta verificar)
 
 - [ ] Crear el repositorio en GitHub y ver el CI en verde (`.github/workflows/ci.yml`).
 - [ ] Primera medición de arranque con `:macrobenchmark` (necesita un dispositivo conectado).

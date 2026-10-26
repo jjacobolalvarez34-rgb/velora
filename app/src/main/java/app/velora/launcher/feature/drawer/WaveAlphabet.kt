@@ -31,6 +31,7 @@ import androidx.compose.ui.draw.CacheDrawScope
 import androidx.compose.ui.draw.DrawResult
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.PointerInputChange
@@ -42,16 +43,19 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import app.velora.launcher.R
 import app.velora.launcher.core.data.apps.AppSorting
 import app.velora.launcher.core.designsystem.theme.OnWallpaperColors
+import app.velora.launcher.core.designsystem.theme.Sizes
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
 import kotlin.math.exp
 import kotlinx.coroutines.launch
@@ -69,6 +73,11 @@ private const val WAVE_SIGMA_ROWS = 3f
 private const val WAVE_SCALE_GAIN = 0.9f
 
 private const val REST_ALPHA = 0.7f
+
+/** La burbuja aparece en cuanto se toca y crece desde el 60 %. */
+private const val BUBBLE_MIN_STRENGTH = 0.02f
+private const val BUBBLE_START_SCALE = 0.6f
+private val BubbleGap = 12.dp
 
 /** Cada letra se centra en la mitad de su fila. */
 private const val ROW_CENTER = 0.5f
@@ -107,9 +116,7 @@ fun WaveAlphabet(
     val wave = remember { WaveState() }
     val touchStart by rememberUpdatedState(onTouchStart)
     val letterChange by rememberUpdatedState(onLetterChange)
-    // La ola siempre se abre hacia el centro de la pantalla: a la izquierda, o a la derecha en modo zurdo.
-    val towardCenter = if (LocalLayoutDirection.current == LayoutDirection.Rtl) 1f else -1f
-    val draw = WaveDrawing(rememberTextMeasurer(), VeloraTheme.typography.letter, VeloraTheme.onWallpaper, towardCenter)
+    val draw = waveDrawing()
 
     Box(
         modifier = modifier
@@ -130,6 +137,21 @@ fun WaveAlphabet(
                 )
             }
             .drawWithCache { with(draw) { drawLetters(letters, wave) } },
+    )
+}
+
+/** Cómo se dibuja la ola con el tema actual. */
+@Composable
+private fun waveDrawing(): WaveDrawing {
+    val type = VeloraTheme.typography
+    return WaveDrawing(
+        textMeasurer = rememberTextMeasurer(),
+        style = type.letter,
+        bubbleStyle = type.letterActive.copy(shadow = null),
+        colors = VeloraTheme.onWallpaper,
+        // La ola siempre se abre hacia el centro: a la izquierda, o a la derecha en modo zurdo.
+        towardCenter = if (LocalLayoutDirection.current == LayoutDirection.Rtl) 1f else -1f,
+        bubbleRadius = Sizes.letterBubble / 2,
     )
 }
 
@@ -165,11 +187,16 @@ private suspend fun PointerInputScope.letterGestures(
 private class WaveDrawing(
     private val textMeasurer: TextMeasurer,
     private val style: TextStyle,
+    private val bubbleStyle: TextStyle,
     private val colors: OnWallpaperColors,
     private val towardCenter: Float,
+    private val bubbleRadius: Dp,
 ) {
     fun CacheDrawScope.drawLetters(letters: List<String>, wave: WaveState): DrawResult {
         val layouts = letters.map { textMeasurer.measure(it, style) }
+        val bubbleLayouts = letters.map { textMeasurer.measure(it, bubbleStyle) }
+        val radius = bubbleRadius.toPx()
+        val gap = BubbleGap.toPx()
         val rowHeight = size.height / letters.size
         val amplitude = WaveAmplitude.toPx()
         val twoSigmaSq = 2f * WAVE_SIGMA_ROWS * WAVE_SIGMA_ROWS
@@ -192,7 +219,32 @@ private class WaveDrawing(
                     )
                 }
             }
+            if (strength > BUBBLE_MIN_STRENGTH) {
+                val index = (finger / size.height * letters.size).toInt().coerceIn(0, letters.lastIndex)
+                bubble(bubbleLayouts[index], finger, strength, radius, amplitude + gap)
+            }
         }
+    }
+
+    /** Círculo del color de acento con la letra actual, junto a la cresta de la ola. */
+    private fun DrawScope.bubble(
+        layout: TextLayoutResult,
+        fingerY: Float,
+        strength: Float,
+        radius: Float,
+        offset: Float,
+    ) {
+        val r = radius * (BUBBLE_START_SCALE + (1f - BUBBLE_START_SCALE) * strength)
+        val center = Offset(
+            x = size.width / 2f + towardCenter * (offset + r),
+            y = fingerY.coerceIn(r, size.height - r),
+        )
+        drawCircle(colors.accent.copy(alpha = strength), radius = r, center = center)
+        drawText(
+            textLayoutResult = layout,
+            color = colors.onAccent.copy(alpha = strength),
+            topLeft = Offset(center.x - layout.size.width / 2f, center.y - layout.size.height / 2f),
+        )
     }
 }
 

@@ -20,6 +20,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -101,11 +102,12 @@ private fun WelcomePoints() {
 
 /** Abajo, al alcance del pulgar. */
 @Composable
-internal fun WelcomeActions(onSetDefault: () -> Unit, onNotNow: () -> Unit) {
+internal fun WelcomeActions(onSetDefault: () -> Unit, onNotNow: () -> Unit, alreadyDefault: Boolean = false) {
     val type = VeloraTheme.typography
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Button(
-            onClick = onSetDefault,
+            // Si Velora ya es el inicio no hay nada que pedir: solo se empieza.
+            onClick = if (alreadyDefault) onNotNow else onSetDefault,
             shape = Shapes.sheet,
             colors = ButtonDefaults.buttonColors(
                 containerColor = BrandColors.silver,
@@ -115,9 +117,18 @@ internal fun WelcomeActions(onSetDefault: () -> Unit, onNotNow: () -> Unit) {
                 .fillMaxWidth()
                 .heightIn(min = Sizes.appRowHeight),
         ) {
-            Text(stringResource(R.string.welcome_set_default), style = type.appRow)
+            Text(
+                stringResource(if (alreadyDefault) R.string.welcome_start else R.string.welcome_set_default),
+                style = type.appRow,
+            )
         }
-        TextButton(onClick = onNotNow, modifier = Modifier.heightIn(min = Sizes.minTouchTarget)) {
+        TextButton(
+            onClick = onNotNow,
+            enabled = !alreadyDefault,
+            modifier = Modifier
+                .heightIn(min = Sizes.minTouchTarget)
+                .alpha(if (alreadyDefault) 0f else 1f),
+        ) {
             Text(stringResource(R.string.welcome_not_now), style = type.caption, color = BrandColors.silverMuted)
         }
     }

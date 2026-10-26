@@ -3,7 +3,7 @@ package app.velora.launcher.core.model
 import androidx.compose.runtime.Immutable
 
 /** Fuente de toda la interfaz (ADR-016). */
-enum class FontChoice { PlusJakartaSans, Figtree, Fraunces, Quicksand, System }
+enum class FontChoice { PlusJakartaSans, Figtree, Fraunces, Quicksand, Pixel, System }
 
 /** Cómo se dibuja el reloj del inicio. */
 enum class ClockStyle {
@@ -36,6 +36,47 @@ enum class IconStyle {
 enum class TextSize(val scale: Float) { Small(0.9f), Normal(1f), Large(1.15f) }
 
 /**
+ * Tema completo (ADR-018): fondo dibujado por Velora, colores del texto y acento. Al elegirlo
+ * también se aplican su fuente, reloj e íconos recomendados ([recommended]); luego cada uno se
+ * puede cambiar por separado.
+ */
+enum class ThemePreset {
+    /** El fondo de pantalla del usuario, con texto claro. */
+    Wallpaper,
+
+    /** Claro: cielo rosa, luna y pétalos. */
+    Sakura,
+
+    /** Verde azulado con una ola lima y trama de puntos. */
+    Forest,
+
+    /** Espacio morado con estrellas de píxeles y fuente pixel. */
+    PixelNight,
+
+    /** Azul noche con luces suaves. */
+    Aurora,
+    ;
+
+    /** Fuente, reloj e íconos que mejor le quedan. */
+    val recommended: ThemeSettings
+        get() = when (this) {
+            Wallpaper -> ThemeSettings()
+
+            Sakura -> ThemeSettings(font = FontChoice.Figtree, clock = ClockStyle.Classic, icons = IconStyle.Circle)
+
+            Forest -> ThemeSettings(font = FontChoice.Quicksand, clock = ClockStyle.Classic, icons = IconStyle.Minimal)
+
+            PixelNight -> ThemeSettings(font = FontChoice.Pixel, clock = ClockStyle.Classic, icons = IconStyle.Circle)
+
+            Aurora -> ThemeSettings(
+                font = FontChoice.PlusJakartaSans,
+                clock = ClockStyle.Day,
+                icons = IconStyle.Minimal,
+            )
+        }.copy(preset = this)
+}
+
+/**
  * Apariencia elegida por el usuario. Los valores por defecto son el aspecto de fábrica.
  *
  * @property leftHanded modo zurdo: el inicio y la lista se espejan (alfabeto a la izquierda).
@@ -49,4 +90,5 @@ data class ThemeSettings(
     val textSize: TextSize = TextSize.Normal,
     val leftHanded: Boolean = false,
     val fullList: Boolean = false,
+    val preset: ThemePreset = ThemePreset.Wallpaper,
 )

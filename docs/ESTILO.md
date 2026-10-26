@@ -110,6 +110,19 @@ El elemento firma. Especificación:
 - La insignia de perfil de trabajo se agrega encima del ícono ya recortado (`getUserBadgedIcon`).
 - **No** usar ni imitar los paquetes de íconos de Niagara.
 
+## 7.0 Temas (ADR-018)
+
+| Tema | Fondo | Texto | Fuente / reloj / íconos recomendados |
+|---|---|---|---|
+| Tu fondo | wallpaper del usuario + velo suave y sombra en el texto | claro | Plus Jakarta Sans / Clásico / Círculo |
+| Sakura | cielo rosa, luna, montaña con nieve, rama con flores, pétalos | oscuro (barras del sistema oscuras) | Figtree / Clásico / Círculo |
+| Bosque | verde azulado, ola lima a la derecha, trama de puntos, rayas | claro | Quicksand / Clásico / Minimalista |
+| Noche pixel | degradado morado, nebulosa, estrellas y planeta en bloques de 4 dp | lavanda | Silkscreen / Clásico / Círculo |
+| Aurora | azul noche con tres luces suaves y estrellas finas | claro | Plus Jakarta Sans / Día / Minimalista |
+
+- Estética más fina: íconos de 34 dp (favoritos) y 30 dp (lista), textos de 19 sp y 17 sp con 0,2 sp de espaciado, filas de 52 dp y 48 dp. Sobre fondos oscuros el texto lleva una sombra suave (desenfoque de 8, caída de 1,5): permite un velo más liviano.
+- **Burbuja del alfabeto**: al arrastrar, un círculo del color de acento (56 dp) con la letra actual sigue al dedo junto a la cresta de la ola, crece desde el 60 % y se desvanece al soltar.
+
 ## 7.1 Reloj (Ajustes → Tema)
 
 - **Clásico** (por defecto): hora grande y fecha debajo, a la izquierda.

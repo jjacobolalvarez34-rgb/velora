@@ -25,6 +25,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** DI manual (ADR-004). Todo `by lazy`; solo `applicationContext`. */
 class AppContainer(context: Context) {
@@ -42,12 +43,15 @@ class AppContainer(context: Context) {
             scope = applicationScope,
             cache = RoomAppsCache(appContext),
             onPackageChanged = { iconRepository.evictPackage(it) },
+            onSystemLoad = { versions -> applicationScope.launch { iconRepository.syncVersions(versions) } },
         )
     }
 
     val appsRepository: AppsRepository get() = systemApps
 
-    val iconRepository: IconRepository by lazy { IconRepository(appContext, infoFor = { systemApps.infoFor(it) }) }
+    val iconRepository: IconRepository by lazy {
+        IconRepository(appContext, applicationScope, infoFor = { systemApps.infoFor(it) })
+    }
 
     val appLauncher: AppLauncher by lazy { AppLauncher(appContext, userFor = { systemApps.userFor(it) }) }
 

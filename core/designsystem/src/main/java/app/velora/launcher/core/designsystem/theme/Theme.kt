@@ -10,11 +10,15 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import app.velora.launcher.core.designsystem.motion.VeloraMotion
 import app.velora.launcher.core.designsystem.motion.rememberReducedMotion
 import app.velora.launcher.core.model.FontChoice
+import app.velora.launcher.core.model.ThemePreset
 import app.velora.launcher.core.model.ThemeSettings
 
 private val LocalVeloraTypography = staticCompositionLocalOf { veloraTypography(FontFamily.Default) }
@@ -29,6 +33,7 @@ private val LocalOnWallpaperColors = staticCompositionLocalOf { DefaultOnWallpap
 @Composable
 fun VeloraTheme(
     font: FontChoice = ThemeSettings().font,
+    preset: ThemePreset = ThemePreset.Wallpaper,
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
     reducedMotion: Boolean = rememberReducedMotion(),
@@ -44,9 +49,9 @@ fun VeloraTheme(
     }
     // Sobre el wallpaper siempre hay velo oscuro: el acento es el tono claro, en ambos modos.
     val accent = if (dynamic) dynamicDarkColorScheme(context).primary else VeloraDarkColors.primary
-    val onWallpaper = remember(accent) { DefaultOnWallpaperColors.copy(accent = accent) }
+    val onWallpaper = remember(accent, preset) { onWallpaperColorsFor(preset, accent) }
     val family = fontFamilyOf(font)
-    val typography = remember(family) { veloraTypography(family) }
+    val typography = remember(family, onWallpaper) { veloraTypography(family, textShadowOf(onWallpaper)) }
     val material = remember(family) { materialTypography(family) }
     val motion = remember(reducedMotion) { VeloraMotion(reducedMotion) }
 
@@ -58,6 +63,21 @@ fun VeloraTheme(
         MaterialTheme(colorScheme = colorScheme, typography = material, content = content)
     }
 }
+
+/** Colores sobre el fondo: los del tema, o los del wallpaper con el acento de Material You. */
+private fun onWallpaperColorsFor(preset: ThemePreset, wallpaperAccent: Color): OnWallpaperColors = when (preset) {
+    ThemePreset.Wallpaper -> DefaultOnWallpaperColors.copy(accent = wallpaperAccent)
+    ThemePreset.Sakura -> PresetColors.sakura
+    ThemePreset.Forest -> PresetColors.forest
+    ThemePreset.PixelNight -> PresetColors.pixelNight
+    ThemePreset.Aurora -> PresetColors.aurora
+}
+
+private const val SHADOW_BLUR = 8f
+private const val SHADOW_DROP = 1.5f
+
+private fun textShadowOf(colors: OnWallpaperColors): Shadow? =
+    colors.textShadow.takeIf { it.alpha > 0f }?.let { Shadow(it, Offset(0f, SHADOW_DROP), SHADOW_BLUR) }
 
 /** Acceso a los tokens propios de Velora (lo que Material 3 no cubre). */
 object VeloraTheme {

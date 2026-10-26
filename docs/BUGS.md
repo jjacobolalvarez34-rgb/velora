@@ -114,4 +114,15 @@ Plantilla (copiar al final, numeración continúa desde B-100):
 **Lección (si aplica → regla o check nuevo):** 
 ```
 
-_(Sin bugs registrados todavía.)_
+### B-100 · Los íconos a veces tardan en aparecer `[rendimiento]` `[íconos]` — Medio — Resuelto (código; falta confirmar en teléfono)
+**Dispositivo / Android / capa:** teléfono del autor, 0.3.0.
+**Pasos para reproducir:**
+1. Reiniciar el teléfono, o esperar a que Android cierre Velora en segundo plano.
+2. Abrir la lista o mirar los favoritos.
+**Esperado:** íconos al instante.
+**Actual:** huecos vacíos que se llenan uno a uno.
+**Causa raíz:** los íconos solo vivían en memoria. Con el proceso nuevo, cada fila tenía que esperar (a) la primera lectura de `LauncherApps` (que la caché de apps de la 0.3.0 adelanta para la lista, pero no para los íconos) y (b) dibujar su ícono al hacerse visible.
+**Solución:** caché de íconos en disco (`IconDiskCache`, `cacheDir/icons`, PNG por app/tamaño/estilo/acento) que no necesita `LauncherApps`, más precarga en segundo plano de favoritos y de toda la lista (`IconRepository.prefetch`). Para no mostrar íconos viejos: se guarda el `sourceDir` de cada app, que cambia en cada actualización, y al leer el sistema se borran los íconos de las apps que cambiaron o ya no están.
+**Prueba que lo cubre:** `core/data/.../IconDiskCacheTest.kt`.
+**Commit/PR:** feat: temas completos (0.4.0).
+**Lección:** todo lo que se ve en el primer frame necesita una versión en disco, no solo en memoria.

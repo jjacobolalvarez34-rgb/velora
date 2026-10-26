@@ -3,6 +3,7 @@ package app.velora.launcher.core.designsystem.theme
 import androidx.annotation.FontRes
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -36,12 +37,17 @@ private val PlusJakartaSans = variableFamily(R.font.plus_jakarta_sans)
 private val Figtree = variableFamily(R.font.figtree)
 private val Fraunces = variableFamily(R.font.fraunces)
 private val Quicksand = variableFamily(R.font.quicksand)
+private val Pixel = FontFamily(
+    Font(R.font.silkscreen_regular, FontWeight.Normal),
+    Font(R.font.silkscreen_bold, FontWeight.Bold),
+)
 
 fun fontFamilyOf(choice: FontChoice): FontFamily = when (choice) {
     FontChoice.PlusJakartaSans -> PlusJakartaSans
     FontChoice.Figtree -> Figtree
     FontChoice.Fraunces -> Fraunces
     FontChoice.Quicksand -> Quicksand
+    FontChoice.Pixel -> Pixel
     FontChoice.System -> FontFamily.Default
 }
 
@@ -62,19 +68,24 @@ data class VeloraTypography(
     val brandTitle: TextStyle,
 )
 
-fun veloraTypography(family: FontFamily): VeloraTypography {
+/**
+ * @param shadow sombra suave del texto sobre el fondo (null en temas claros).
+ */
+fun veloraTypography(family: FontFamily, shadow: Shadow? = null): VeloraTypography {
     fun style(size: Int, lineHeight: Int, weight: FontWeight) = TextStyle(
         fontFamily = family,
         fontSize = size.sp,
         lineHeight = lineHeight.sp,
         fontWeight = weight,
+        shadow = shadow,
     )
     return VeloraTypography(
         clock = style(56, 64, FontWeight.Light),
         clockDay = style(120, 120, FontWeight.Bold).copy(letterSpacing = 4.sp),
         date = style(16, 22, FontWeight.Normal),
-        favorite = style(22, 28, FontWeight.Normal),
-        appRow = style(18, 24, FontWeight.Normal),
+        // Más finos y con un poco de aire: se leen igual y se ven más elegantes.
+        favorite = style(19, 26, FontWeight.Normal).copy(letterSpacing = 0.2.sp),
+        appRow = style(17, 22, FontWeight.Normal).copy(letterSpacing = 0.2.sp),
         sectionHeader = style(13, 16, FontWeight.SemiBold),
         letter = style(13, 16, FontWeight.Medium),
         letterActive = style(28, 32, FontWeight.SemiBold),

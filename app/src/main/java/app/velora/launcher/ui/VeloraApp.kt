@@ -1,5 +1,6 @@
 package app.velora.launcher.ui
 
+import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -13,24 +14,31 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.velora.launcher.R
+import app.velora.launcher.core.data.apps.IconRequest
 import app.velora.launcher.core.data.log.Logger
+import app.velora.launcher.core.designsystem.theme.Sizes
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.AppShortcut
+import app.velora.launcher.core.model.IconStyle
+import app.velora.launcher.core.model.ThemeSettings
 import app.velora.launcher.di.AppContainer
 import app.velora.launcher.feature.appmenu.LocalShortcutsRepository
 import app.velora.launcher.feature.apps.AppActions
@@ -38,9 +46,11 @@ import app.velora.launcher.feature.apps.LocalIconRepository
 import app.velora.launcher.feature.apps.LocalIconStyle
 import app.velora.launcher.feature.apps.rememberAppOpener
 import app.velora.launcher.feature.drawer.DrawerSearchState
+import app.velora.launcher.feature.drawer.DrawerUiState
 import app.velora.launcher.feature.drawer.DrawerViewModel
 import app.velora.launcher.feature.drawer.rememberDrawerSearchState
 import app.velora.launcher.feature.home.HomeEvent
+import app.velora.launcher.feature.home.HomeUiState
 import app.velora.launcher.feature.home.HomeViewModel
 import app.velora.launcher.feature.welcome.OnboardingScreen
 import app.velora.launcher.feature.welcome.WelcomeScreen
@@ -61,7 +71,7 @@ fun VeloraApp(container: AppContainer, homePresses: Flow<Boolean>, onOpenSetting
     val theme = homeViewModel.theme.collectAsStateWithLifecycle().value ?: return
     val onboardingDone = homeViewModel.onboardingDone.collectAsStateWithLifecycle().value ?: return
     val density = LocalDensity.current
-    VeloraTheme(font = theme.font) {
+    VeloraTheme(font = theme.font, preset = theme.preset) {
         CompositionLocalProvider(
             // Tamaño de texto de Velora encima del tamaño de fuente del sistema.
             LocalDensity provides Density(density.density, density.fontScale * theme.textSize.scale),
@@ -71,12 +81,10 @@ fun VeloraApp(container: AppContainer, homePresses: Flow<Boolean>, onOpenSetting
         ) {
             val home by homeViewModel.uiState.collectAsStateWithLifecycle()
 
-            LifecycleResumeEffect(homeViewModel) {
-                homeViewModel.onResume()
-                onPauseOrDispose {}
-            }
             HomeEventMessages(homeViewModel)
 
+            val onWelcome = !onboardingDone || home.showWelcome
+            SystemBarsAppearance(lightBackground = VeloraTheme.onWallpaper.isLight && !onWelcome)
             if (!onboardingDone) {
                 WelcomeRoute(homeViewModel, intro = true)
             } else if (home.showWelcome) {
@@ -91,7 +99,7 @@ fun VeloraApp(container: AppContainer, homePresses: Flow<Boolean>, onOpenSetting
                         drawerViewModel,
                         homePresses,
                         onOpenSettings,
-                        theme.fullList,
+                        theme,
                     )
                 }
             }
@@ -106,7 +114,7 @@ private fun LauncherRoute(
     drawerViewModel: DrawerViewModel,
     homePresses: Flow<Boolean>,
     onOpenSettings: () -> Unit,
-    fullList: Boolean,
+    theme: ThemeSettings,
 ) {
     val home by homeViewModel.uiState.collectAsStateWithLifecycle()
     val drawer by drawerViewModel.uiState.collectAsStateWithLifecycle()
@@ -134,8 +142,40 @@ private fun LauncherRoute(
         search = search,
         actions = actions,
         onOpenSettings = onOpenSettings,
-        fullList = fullList,
+        theme = theme,
     )
+    IconPrefetch(container, home, drawer, theme.icons)
+}
+
+/**
+ * Prepara en segundo plano los íconos de favoritos y de toda la lista con el estilo actual:
+ * al abrir la lista ya están dibujados (y en disco para el próximo arranque).
+ */
+@Composable
+private fun IconPrefetch(container: AppContainer, home: HomeUiState, drawer: DrawerUiState, style: IconStyle) {
+    if (style == IconStyle.None) return
+    val tint = VeloraTheme.onWallpaper.accent.toArgb()
+    val density = LocalDensity.current
+    val favoritePx = with(density) { Sizes.favoriteIcon.roundToPx() }
+    val listPx = with(density) { Sizes.listIcon.roundToPx() }
+    LaunchedEffect(home.favorites, drawer.list, style, tint, favoritePx, listPx) {
+        val favorites = home.favorites.map { IconRequest(it.key, favoritePx, style, tint) }
+        val everything = drawer.list.byLetter.values.flatten().map { IconRequest(it.key, listPx, style, tint) }
+        container.iconRepository.prefetch(favorites + everything)
+    }
+}
+
+/** Íconos oscuros en las barras del sistema cuando el fondo del tema es claro (Sakura). */
+@Composable
+private fun SystemBarsAppearance(lightBackground: Boolean) {
+    val view = LocalView.current
+    LaunchedEffect(lightBackground) {
+        val window = (view.context as? Activity)?.window ?: return@LaunchedEffect
+        WindowCompat.getInsetsController(window, view).apply {
+            isAppearanceLightStatusBars = lightBackground
+            isAppearanceLightNavigationBars = lightBackground
+        }
+    }
 }
 
 /** Comportamiento del cajón que no es dibujo: búsqueda, atrás, Inicio y salir a otra app. */
@@ -192,17 +232,25 @@ private fun WelcomeRoute(viewModel: HomeViewModel, intro: Boolean) {
             Toast.makeText(context, R.string.error_open_system_settings, Toast.LENGTH_SHORT).show()
         }
     }
+    val alreadyDefault = viewModel.isDefaultHome.collectAsStateWithLifecycle().value == true
     if (intro) {
-        OnboardingScreen(onSetDefault = setDefault, onNotNow = {
-            viewModel.onOnboardingFinished(dismissWelcome = true)
-        })
+        OnboardingScreen(
+            onSetDefault = setDefault,
+            onNotNow = { viewModel.onOnboardingFinished(dismissWelcome = true) },
+            alreadyDefault = alreadyDefault,
+        )
     } else {
         WelcomeScreen(onSetDefault = setDefault, onNotNow = viewModel::onWelcomeDismissed)
     }
 }
 
+/** Avisos de un solo uso y, al volver al frente, refrescar apps y app de inicio. */
 @Composable
 private fun HomeEventMessages(viewModel: HomeViewModel) {
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResume()
+        onPauseOrDispose {}
+    }
     val context = LocalContext.current
     val resources = LocalResources.current
     LaunchedEffect(viewModel, resources) {

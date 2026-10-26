@@ -66,7 +66,12 @@ private enum class IntroPage(@StringRes val title: Int, @StringRes val body: Int
  * En la última página se ofrece hacerlo el inicio predeterminado.
  */
 @Composable
-fun OnboardingScreen(onSetDefault: () -> Unit, onNotNow: () -> Unit, modifier: Modifier = Modifier) {
+fun OnboardingScreen(
+    onSetDefault: () -> Unit,
+    onNotNow: () -> Unit,
+    modifier: Modifier = Modifier,
+    alreadyDefault: Boolean = false,
+) {
     val pages = IntroPage.entries
     val pager = rememberPagerState { pages.size }
     val scope = rememberCoroutineScope()
@@ -90,7 +95,7 @@ fun OnboardingScreen(onSetDefault: () -> Unit, onNotNow: () -> Unit, modifier: M
         PageDots(pager)
         Spacer(Modifier.height(Spacing.l))
         if (isLast) {
-            WelcomeActions(onSetDefault, onNotNow)
+            WelcomeActions(onSetDefault, onNotNow, alreadyDefault)
         } else {
             NextButton { scope.launch { pager.animateScrollToPage(pager.currentPage + 1) } }
         }

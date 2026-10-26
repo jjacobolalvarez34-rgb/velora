@@ -37,10 +37,11 @@ import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.velora.launcher.R
-import app.velora.launcher.core.designsystem.components.WallpaperScrim
+import app.velora.launcher.core.designsystem.components.ThemeBackground
 import app.velora.launcher.core.designsystem.theme.Sizes
 import app.velora.launcher.core.designsystem.theme.Spacing
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
+import app.velora.launcher.core.model.ThemeSettings
 import app.velora.launcher.feature.apps.AppActions
 import app.velora.launcher.feature.drawer.AppListScreen
 import app.velora.launcher.feature.drawer.DrawerList
@@ -75,7 +76,7 @@ fun LauncherScreen(
     search: DrawerSearchState,
     actions: AppActions,
     onOpenSettings: () -> Unit,
-    fullList: Boolean,
+    theme: ThemeSettings,
     modifier: Modifier = Modifier,
 ) {
     val motion = VeloraTheme.motion
@@ -88,7 +89,7 @@ fun LauncherScreen(
             .fillMaxSize()
             .onSizeChanged { drawerState.dragDistancePx = it.height * DRAG_DISTANCE_FRACTION },
     ) {
-        WallpaperScrim()
+        ThemeBackground(theme.preset)
         DrawerScrim(drawerState)
         HomeScreen(
             uiState = home,
@@ -104,7 +105,7 @@ fun LauncherScreen(
                 search = search,
                 actions = actions,
                 nestedScrollConnection = drawerState.nestedScroll,
-                fullList = fullList,
+                fullList = theme.fullList,
                 activeSection = { drawer.list.letters.getOrNull(activeLetter) },
                 modifier = Modifier.drawerLayer(drawerState),
             )
@@ -113,7 +114,7 @@ fun LauncherScreen(
         if (!search.active) {
             AlphabetOverlay(drawer.list, drawerState) { index ->
                 activeLetter = index
-                onLetter(drawer.list, index, search, listState, fullList)
+                onLetter(drawer.list, index, search, listState, theme.fullList)
             }
         }
     }
