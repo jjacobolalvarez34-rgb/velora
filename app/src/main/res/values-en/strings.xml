@@ -103,4 +103,16 @@
     <string name="theme_forest">Forest</string>
     <string name="theme_pixel_night">Pixel night</string>
     <string name="welcome_start">Get started</string>
+    <string name="home_menu_add_widget">Add widget</string>
+    <string name="widget_picker_title">Widgets</string>
+    <string name="calculator_copy">Tap to copy</string>
+    <string name="copied">Copied: %1$s</string>
+    <string name="web_search">Search the web for “%1$s”</string>
+    <string name="theme_night">Night</string>
+    <string name="theme_paper">Paper</string>
+    <string name="settings_widgets">Widgets</string>
+    <string name="settings_widgets_empty">Long-press your home screen and choose “Add widget”.</string>
+    <string name="settings_widget_taller">Taller</string>
+    <string name="settings_widget_shorter">Shorter</string>
+    <string name="settings_widget_remove">Remove</string>
 </resources>

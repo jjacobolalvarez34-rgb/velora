@@ -3,7 +3,7 @@ package app.velora.launcher.core.model
 import androidx.compose.runtime.Immutable
 
 /** Fuente de toda la interfaz (ADR-016). */
-enum class FontChoice { PlusJakartaSans, Figtree, Fraunces, Quicksand, Pixel, System }
+enum class FontChoice { Nunito, Quicksand, PlusJakartaSans, Figtree, Fraunces, Pixel, System }
 
 /** Cómo se dibuja el reloj del inicio. */
 enum class ClockStyle {
@@ -13,7 +13,7 @@ enum class ClockStyle {
     /** Hora, fecha y batería centradas. */
     Centered,
 
-    /** El día en grande ("JUE") cortado por una franja con hora, fecha y batería. */
+    /** El día en mayúsculas espaciadas arriba, la hora y la fecha debajo. */
     Day,
 }
 
@@ -25,7 +25,7 @@ enum class IconStyle {
     /** La forma que usa el sistema del teléfono. */
     System,
 
-    /** Una sola tinta del color de acento (íconos temáticos de Android 13+). */
+    /** Logo en línea (ícono temático de Android 13+) sobre un círculo translúcido. */
     Minimal,
 
     /** Solo texto: lo más minimalista y lo más rápido. */
@@ -44,36 +44,39 @@ enum class ThemePreset {
     /** El fondo de pantalla del usuario, con texto claro. */
     Wallpaper,
 
-    /** Claro: cielo rosa, luna y pétalos. */
+    /** Negro puro con un brillo tenue. */
+    Night,
+
+    /** Crema con tinta oscura y fuente con serifa. */
+    Paper,
+
+    /** Claro: cielo rosa, luna y unos pétalos. */
     Sakura,
 
-    /** Verde azulado con una ola lima y trama de puntos. */
+    /** Verde profundo con una curva suave. */
     Forest,
-
-    /** Espacio morado con estrellas de píxeles y fuente pixel. */
-    PixelNight,
 
     /** Azul noche con luces suaves. */
     Aurora,
+
+    /** Morado con estrellas de píxeles y fuente pixel. */
+    PixelNight,
     ;
 
     /** Fuente, reloj e íconos que mejor le quedan. */
     val recommended: ThemeSettings
         get() = when (this) {
             Wallpaper -> ThemeSettings()
-
-            Sakura -> ThemeSettings(font = FontChoice.Figtree, clock = ClockStyle.Classic, icons = IconStyle.Circle)
-
-            Forest -> ThemeSettings(font = FontChoice.Quicksand, clock = ClockStyle.Classic, icons = IconStyle.Minimal)
-
-            PixelNight -> ThemeSettings(font = FontChoice.Pixel, clock = ClockStyle.Classic, icons = IconStyle.Circle)
-
-            Aurora -> ThemeSettings(
-                font = FontChoice.PlusJakartaSans,
-                clock = ClockStyle.Day,
-                icons = IconStyle.Minimal,
-            )
+            Night -> look(FontChoice.Nunito, ClockStyle.Classic, IconStyle.Minimal)
+            Paper -> look(FontChoice.Fraunces, ClockStyle.Day, IconStyle.Minimal)
+            Sakura -> look(FontChoice.Nunito, ClockStyle.Classic, IconStyle.Circle)
+            Forest -> look(FontChoice.Quicksand, ClockStyle.Classic, IconStyle.Minimal)
+            Aurora -> look(FontChoice.Nunito, ClockStyle.Centered, IconStyle.Minimal)
+            PixelNight -> look(FontChoice.Pixel, ClockStyle.Classic, IconStyle.Circle)
         }.copy(preset = this)
+
+    private fun look(font: FontChoice, clock: ClockStyle, icons: IconStyle) =
+        ThemeSettings(font = font, clock = clock, icons = icons)
 }
 
 /**
@@ -84,7 +87,7 @@ enum class ThemePreset {
  */
 @Immutable
 data class ThemeSettings(
-    val font: FontChoice = FontChoice.PlusJakartaSans,
+    val font: FontChoice = FontChoice.Nunito,
     val clock: ClockStyle = ClockStyle.Classic,
     val icons: IconStyle = IconStyle.Circle,
     val textSize: TextSize = TextSize.Normal,

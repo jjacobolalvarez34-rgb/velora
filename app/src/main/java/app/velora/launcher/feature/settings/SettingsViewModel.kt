@@ -20,9 +20,12 @@ import app.velora.launcher.di.AppContainer
 import app.velora.launcher.feature.home.ClockFormatter
 import app.velora.launcher.feature.home.ClockText
 import app.velora.launcher.feature.home.LocalizedClockFormatter
+import app.velora.launcher.feature.widgets.WidgetHost
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -34,6 +37,7 @@ class SettingsViewModel(
     private val prefs: PrefsRepository,
     private val hiddenApps: HiddenAppsRepository,
     private val favorites: FavoritesRepository,
+    private val widgetHost: WidgetHost,
     clockRepository: ClockRepository,
     clockFormatter: ClockFormatter,
     batteryRepository: BatteryRepository,
@@ -70,6 +74,16 @@ class SettingsViewModel(
 
     fun onPreset(preset: ThemePreset) = save { prefs.applyPreset(preset) }
 
+    /** Widgets del inicio con su nombre (leído de `PackageManager`, fuera del hilo principal). */
+    val widgets: StateFlow<List<WidgetSetting>> = widgetHost.widgets
+        .map { list -> list.map { WidgetSetting(it.appWidgetId, widgetHost.labelOf(it.appWidgetId), it.heightDp) } }
+        .flowOn(Dispatchers.IO)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), emptyList())
+
+    fun onWidgetHeight(appWidgetId: Int, heightDp: Int) = widgetHost.setHeight(appWidgetId, heightDp)
+
+    fun onRemoveWidget(appWidgetId: Int) = widgetHost.remove(appWidgetId)
+
     fun onFont(font: FontChoice) = save { prefs.setFont(font) }
 
     fun onClockStyle(style: ClockStyle) = save { prefs.setClockStyle(style) }
@@ -89,6 +103,7 @@ class SettingsViewModel(
                     prefs = container.prefsRepository,
                     hiddenApps = container.hiddenAppsRepository,
                     favorites = container.favoritesRepository,
+                    widgetHost = container.widgetHost,
                     clockRepository = container.clockRepository,
                     clockFormatter = LocalizedClockFormatter(),
                     batteryRepository = container.batteryRepository,

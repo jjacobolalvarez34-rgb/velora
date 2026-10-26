@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
@@ -63,14 +64,17 @@ import kotlinx.coroutines.launch
 /** Ancho de la columna de letras en reposo. */
 val WaveAlphabetWidth = 28.dp
 
-/** Cuánto se desplaza hacia el centro la letra bajo el dedo (A en ESTILO §6). */
-private val WaveAmplitude = 56.dp
+/**
+ * Cuánto se estira la ola hacia el centro: la mitad del ancho de la pantalla (A en ESTILO §6).
+ * Las letras se abren en un arco amplio que se ve de lejos, no en un bulto pequeño.
+ */
+private const val WAVE_REACH = 0.5f
 
-/** Ancho de la campana, en filas de letra (σ en ESTILO §6). */
-private const val WAVE_SIGMA_ROWS = 3f
+/** Ancho de la campana, en filas de letra (σ en ESTILO §6): un arco que abarca media columna. */
+private const val WAVE_SIGMA_ROWS = 6.5f
 
-/** Escala extra de la letra bajo el dedo: 1 + 0.9 · g. */
-private const val WAVE_SCALE_GAIN = 0.9f
+/** Escala extra de la letra bajo el dedo: 1 + 0.35 · g. El estiramiento hace el trabajo, no el tamaño. */
+private const val WAVE_SCALE_GAIN = 0.35f
 
 private const val REST_ALPHA = 0.7f
 
@@ -152,6 +156,7 @@ private fun waveDrawing(): WaveDrawing {
         // La ola siempre se abre hacia el centro: a la izquierda, o a la derecha en modo zurdo.
         towardCenter = if (LocalLayoutDirection.current == LayoutDirection.Rtl) 1f else -1f,
         bubbleRadius = Sizes.letterBubble / 2,
+        amplitude = LocalConfiguration.current.screenWidthDp.dp * WAVE_REACH,
     )
 }
 
@@ -191,6 +196,7 @@ private class WaveDrawing(
     private val colors: OnWallpaperColors,
     private val towardCenter: Float,
     private val bubbleRadius: Dp,
+    private val amplitude: Dp,
 ) {
     fun CacheDrawScope.drawLetters(letters: List<String>, wave: WaveState): DrawResult {
         val layouts = letters.map { textMeasurer.measure(it, style) }
@@ -198,7 +204,7 @@ private class WaveDrawing(
         val radius = bubbleRadius.toPx()
         val gap = BubbleGap.toPx()
         val rowHeight = size.height / letters.size
-        val amplitude = WaveAmplitude.toPx()
+        val reach = amplitude.toPx()
         val twoSigmaSq = 2f * WAVE_SIGMA_ROWS * WAVE_SIGMA_ROWS
         val rest = colors.contentVariant.copy(alpha = colors.contentVariant.alpha * REST_ALPHA)
         return onDrawBehind {
@@ -209,7 +215,7 @@ private class WaveDrawing(
                 val centerY = (i + ROW_CENTER) * rowHeight
                 val rows = (finger - centerY) / rowHeight
                 val g = strength * exp(-(rows * rows) / twoSigmaSq)
-                val centerX = size.width / 2f + towardCenter * amplitude * g
+                val centerX = size.width / 2f + towardCenter * reach * g
                 val letterScale = 1f + WAVE_SCALE_GAIN * g
                 scale(letterScale, letterScale, pivot = Offset(centerX, centerY)) {
                     drawText(
@@ -221,7 +227,7 @@ private class WaveDrawing(
             }
             if (strength > BUBBLE_MIN_STRENGTH) {
                 val index = (finger / size.height * letters.size).toInt().coerceIn(0, letters.lastIndex)
-                bubble(bubbleLayouts[index], finger, strength, radius, amplitude + gap)
+                bubble(bubbleLayouts[index], finger, strength, radius, reach + gap)
             }
         }
     }

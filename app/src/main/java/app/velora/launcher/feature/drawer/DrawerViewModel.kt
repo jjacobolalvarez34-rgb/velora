@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import app.velora.launcher.core.data.apps.AppSearch
 import app.velora.launcher.core.data.apps.RecentApps
 import app.velora.launcher.core.data.favorites.FavoritesRepository
+import app.velora.launcher.core.data.search.Calculator
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.di.AppContainer
 import java.util.Locale
@@ -26,6 +27,8 @@ data class DrawerUiState(
     val query: String = "",
     /** null cuando no se ha escrito nada. */
     val results: List<AppEntry>? = null,
+    /** Resultado de la calculadora si lo escrito es una cuenta ("12*3" → "36"). */
+    val calculation: String? = null,
     /** Recién instaladas: arriba de la lista y en el buscador vacío. */
     val recents: List<AppEntry> = emptyList(),
     val favoriteIds: Set<String> = emptySet(),
@@ -52,7 +55,14 @@ class DrawerViewModel(
 
     val uiState: StateFlow<DrawerUiState> =
         combine(list, query, results, favorites.favoriteIds) { (list, recents), q, results, favoriteIds ->
-            DrawerUiState(list = list, query = q, results = results, recents = recents, favoriteIds = favoriteIds)
+            DrawerUiState(
+                list = list,
+                query = q,
+                results = results,
+                calculation = Calculator.evaluate(q),
+                recents = recents,
+                favoriteIds = favoriteIds,
+            )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), DrawerUiState())
 
     fun onQueryChange(value: String) {

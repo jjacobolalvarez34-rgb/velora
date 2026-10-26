@@ -11,9 +11,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -22,15 +28,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import app.velora.launcher.R
 import app.velora.launcher.core.designsystem.components.ThemeBackground
 import app.velora.launcher.core.designsystem.theme.Shapes
@@ -59,11 +68,21 @@ interface SettingsActions {
     fun onLeftHanded(enabled: Boolean)
     fun onFullList(enabled: Boolean)
     fun onPreset(preset: ThemePreset)
+    fun onWidgetHeight(appWidgetId: Int, heightDp: Int)
+    fun onRemoveWidget(appWidgetId: Int)
 }
 
 /** Listas de apps que se editan en Ajustes. */
 @Immutable
-data class SettingsLists(val favorites: List<AppEntry> = emptyList(), val hidden: List<AppEntry> = emptyList())
+data class SettingsLists(
+    val favorites: List<AppEntry> = emptyList(),
+    val hidden: List<AppEntry> = emptyList(),
+    val widgets: List<WidgetSetting> = emptyList(),
+)
+
+/** Un widget del inicio tal como se edita en Ajustes. */
+@Immutable
+data class WidgetSetting(val appWidgetId: Int, val label: String, val heightDp: Int)
 
 @Composable
 fun SettingsScreen(
@@ -86,6 +105,7 @@ fun SettingsScreen(
         themeSection(theme, actions)
         layoutSection(theme, actions)
         favoritesSection(lists.favorites, actions)
+        widgetsSection(lists.widgets, actions)
         hiddenSection(lists.hidden, actions)
         item(key = "general") { SectionTitle(R.string.settings_general) }
         item(key = "home-app") {
@@ -93,6 +113,7 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_home_app_title),
                 subtitle = stringResource(R.string.settings_home_app_summary),
                 onClick = actions::onChooseHomeApp,
+                icon = Icons.Outlined.Home,
             )
         }
     }
@@ -133,7 +154,8 @@ private fun LazyListScope.hiddenSection(hidden: List<AppEntry>, actions: Setting
         item(key = "hidden-empty") {
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_hidden_empty)) },
-                colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
+                colors = cardColors(),
+                modifier = Modifier.settingsCard(),
             )
         }
     }
@@ -144,7 +166,8 @@ private fun LazyListScope.hiddenSection(hidden: List<AppEntry>, actions: Setting
             trailingContent = {
                 TextButton(onClick = { actions.onUnhide(app) }) { Text(stringResource(R.string.settings_unhide)) }
             },
-            colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
+            colors = cardColors(),
+            modifier = Modifier.settingsCard(),
         )
     }
 }
@@ -185,6 +208,28 @@ private fun Title(text: String) {
     )
 }
 
+/** Tarjeta de ajustes: esquinas redondeadas y un poco de aire entre una y otra. */
+internal fun Modifier.settingsCard() = padding(horizontal = Spacing.m, vertical = 3.dp).clip(SettingsCardShape)
+
+private val SettingsCardShape = RoundedCornerShape(20.dp)
+private val IconCircleSize = 40.dp
+
+@Composable
+internal fun cardColors() = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+
+/** Ícono de una opción dentro de un círculo suave, a la izquierda de la tarjeta. */
+@Composable
+internal fun IconCircle(icon: ImageVector) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(IconCircleSize)
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f), CircleShape),
+    ) {
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+    }
+}
+
 @Composable
 internal fun SectionTitle(@StringRes title: Int) {
     Text(
@@ -209,18 +254,19 @@ internal fun RadioOption(
         headlineContent = { Text(title, style = titleStyle) },
         supportingContent = subtitle?.let { { Text(it) } },
         trailingContent = { RadioButton(selected = selected, onClick = null) },
-        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
-        modifier = Modifier.selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
+        colors = cardColors(),
+        modifier = Modifier.settingsCard().selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
     )
 }
 
 @Composable
-private fun Option(title: String, subtitle: String, onClick: () -> Unit) {
+private fun Option(title: String, subtitle: String, onClick: () -> Unit, icon: ImageVector? = null) {
     ListItem(
         headlineContent = { Text(title) },
         supportingContent = { Text(subtitle) },
-        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
-        modifier = Modifier.clickable(onClick = onClick),
+        leadingContent = icon?.let { { IconCircle(it) } },
+        colors = cardColors(),
+        modifier = Modifier.settingsCard().clickable(onClick = onClick),
     )
 }
 
@@ -235,6 +281,8 @@ private object PreviewSettingsActions : SettingsActions {
     override fun onLeftHanded(enabled: Boolean) = Unit
     override fun onFullList(enabled: Boolean) = Unit
     override fun onPreset(preset: ThemePreset) = Unit
+    override fun onWidgetHeight(appWidgetId: Int, heightDp: Int) = Unit
+    override fun onRemoveWidget(appWidgetId: Int) = Unit
 }
 
 @Preview(name = "Claro", heightDp = 1200)

@@ -17,7 +17,15 @@ data class HomeUiState(
 
 /** Hora y fecha ya formateadas según el idioma y la preferencia 12/24 h del sistema. */
 @Immutable
-data class ClockText(val time: String = "", val date: String = "", val weekdayShort: String = "")
+data class ClockText(
+    val time: String = "",
+    val date: String = "",
+    val weekdayShort: String = "",
+    /** "LUNES": el día completo en mayúsculas, para el reloj Día. */
+    val weekday: String = "",
+    /** "26 de octubre": la fecha sin el día de la semana. */
+    val dayMonth: String = "",
+)
 
 /** Avisos de un solo uso para la UI. */
 sealed interface HomeEvent {

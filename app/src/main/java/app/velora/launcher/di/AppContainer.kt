@@ -19,6 +19,7 @@ import app.velora.launcher.core.data.home.SystemDefaultHomeRepository
 import app.velora.launcher.core.data.prefs.DataStorePrefsRepository
 import app.velora.launcher.core.data.prefs.PrefsRepository
 import app.velora.launcher.core.model.AppEntry
+import app.velora.launcher.feature.widgets.WidgetHost
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -75,4 +76,7 @@ class AppContainer(context: Context) {
     val prefsRepository: PrefsRepository by lazy { DataStorePrefsRepository(appContext) }
 
     val batteryRepository: BatteryRepository by lazy { SystemBatteryRepository(appContext) }
+
+    /** Un único `AppWidgetHost` por proceso (ADR-020). */
+    val widgetHost: WidgetHost by lazy { WidgetHost(appContext, userLists.widgets(), applicationScope) }
 }

@@ -27,6 +27,8 @@ dependencies {
     api(libs.compose.ui)
     api(libs.compose.foundation)
     api(libs.compose.material3)
+    // Íconos de Material para ajustes y menús (ADR-019); R8 quita los que no se usan.
+    api(libs.compose.material.icons)
     api(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)
 }

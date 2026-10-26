@@ -10,6 +10,7 @@ import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
@@ -26,11 +27,16 @@ import app.velora.launcher.core.model.IconStyle
  */
 internal class IconRenderer(private val context: Context, private val densityDpi: Int) {
 
-    fun render(info: LauncherActivityInfo, sizePx: Int, style: IconStyle, tint: Int): Bitmap = when (style) {
-        IconStyle.System, IconStyle.None -> info.getBadgedIcon(densityDpi).toBitmap(sizePx, sizePx)
-        IconStyle.Circle -> badge(info, circle(fullBleed(info.getIcon(densityDpi), sizePx), sizePx))
-        IconStyle.Minimal -> badge(info, minimal(info.getIcon(densityDpi), sizePx, tint))
-    }
+    /**
+     * @param tint color del logo en línea (el del texto del tema).
+     * @param backdrop círculo translúcido detrás del logo en línea.
+     */
+    fun render(info: LauncherActivityInfo, sizePx: Int, style: IconStyle, tint: Int, backdrop: Int): Bitmap =
+        when (style) {
+            IconStyle.System, IconStyle.None -> info.getBadgedIcon(densityDpi).toBitmap(sizePx, sizePx)
+            IconStyle.Circle -> badge(info, circle(fullBleed(info.getIcon(densityDpi), sizePx), sizePx))
+            IconStyle.Minimal -> badge(info, minimal(info.getIcon(densityDpi), sizePx, tint, backdrop))
+        }
 
     /** El ícono a sangre completa en un cuadrado; los antiguos sobre un fondo neutro. */
     private fun fullBleed(icon: Drawable, sizePx: Int): Bitmap {
@@ -61,39 +67,50 @@ internal class IconRenderer(private val context: Context, private val densityDpi
     }
 
     /**
-     * Una sola tinta: el ícono temático (monocromo) de Android 13+ si la app lo trae; si no,
-     * el ícono en escala de grises teñido con el acento.
+     * Logo en línea: el ícono temático (monocromo) de Android 13+ pintado del color del texto,
+     * sobre un círculo translúcido. Si la app no lo trae, su ícono en grises suaves mezclados
+     * con ese color, un poco más chico dentro del mismo círculo: nada desentona.
      */
-    private fun minimal(icon: Drawable, sizePx: Int, tint: Int): Bitmap {
+    private fun minimal(icon: Drawable, sizePx: Int, tint: Int, backdrop: Int): Bitmap {
+        val output = createBitmap(sizePx, sizePx)
+        val canvas = Canvas(output)
+        val radius = sizePx / 2f
+        canvas.drawCircle(radius, radius, radius, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = backdrop })
         val monochrome = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             (icon as? AdaptiveIconDrawable)?.monochrome
         } else {
             null
         }
-        if (monochrome == null) return circle(fullBleed(icon, sizePx), sizePx, tintedGrayscale(tint))
-
-        val output = createBitmap(sizePx, sizePx)
-        val canvas = Canvas(output)
-        val radius = sizePx / 2f
-        val backdrop = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = tint
-            alpha = MINIMAL_BACKDROP_ALPHA
+        if (monochrome != null) {
+            val inset = sizePx / ADAPTIVE_INSET_DIVISOR
+            monochrome.colorFilter = PorterDuffColorFilter(tint, PorterDuff.Mode.SRC_IN)
+            monochrome.drawLayer(canvas, -inset, sizePx + inset)
+        } else {
+            val inner = circle(fullBleed(icon, sizePx), sizePx, softGrayscale(tint))
+            val pad = sizePx * FALLBACK_PADDING
+            canvas.drawBitmap(inner, null, RectF(pad, pad, sizePx - pad, sizePx - pad), Paint(Paint.FILTER_BITMAP_FLAG))
         }
-        canvas.drawCircle(radius, radius, radius, backdrop)
-        val inset = sizePx / ADAPTIVE_INSET_DIVISOR
-        monochrome.colorFilter = PorterDuffColorFilter(tint, PorterDuff.Mode.SRC_IN)
-        monochrome.drawLayer(canvas, -inset, sizePx + inset)
         return output
     }
 
-    /** Escala de grises multiplicada por el color de acento: mantiene la gama del tema. */
-    private fun tintedGrayscale(tint: Int): ColorMatrixColorFilter {
-        val gray = ColorMatrix().apply { setSaturation(0f) }
-        val r = android.graphics.Color.red(tint) / CHANNEL_MAX
-        val g = android.graphics.Color.green(tint) / CHANNEL_MAX
-        val b = android.graphics.Color.blue(tint) / CHANNEL_MAX
-        gray.postConcat(ColorMatrix().apply { setScale(r, g, b, 1f) })
-        return ColorMatrixColorFilter(gray)
+    /** Grises con poco contraste, llevados hacia el color del texto (claro u oscuro según el tema). */
+    private fun softGrayscale(tint: Int): ColorMatrixColorFilter {
+        val matrix = ColorMatrix().apply { setSaturation(0f) }
+        val keep = 1f - FALLBACK_TINT_MIX
+        val r = android.graphics.Color.red(tint) * FALLBACK_TINT_MIX
+        val g = android.graphics.Color.green(tint) * FALLBACK_TINT_MIX
+        val b = android.graphics.Color.blue(tint) * FALLBACK_TINT_MIX
+        matrix.postConcat(
+            ColorMatrix(
+                floatArrayOf(
+                    keep, 0f, 0f, 0f, r,
+                    0f, keep, 0f, 0f, g,
+                    0f, 0f, keep, 0f, b,
+                    0f, 0f, 0f, 1f, 0f,
+                ),
+            ),
+        )
+        return ColorMatrixColorFilter(matrix)
     }
 
     /** Insignia de perfil de trabajo encima del ícono ya recortado. */
@@ -113,7 +130,7 @@ internal class IconRenderer(private val context: Context, private val densityDpi
         const val ADAPTIVE_INSET_DIVISOR = 4
         const val LEGACY_PADDING = 0.16f
         const val LEGACY_BACKGROUND = 0xFFF1F3F4.toInt()
-        const val MINIMAL_BACKDROP_ALPHA = 40
-        const val CHANNEL_MAX = 255f
+        const val FALLBACK_PADDING = 0.14f
+        const val FALLBACK_TINT_MIX = 0.45f
     }
 }

@@ -22,7 +22,7 @@
 | `SET_WALLPAPER` | 3 | Normal | Aplicar fondos incluidos (opcional) | — |
 | `ACCESS_HIDDEN_PROFILES` | 2 | Normal (Android 15+) | Mostrar apps del espacio privado | — |
 | `BIND_NOTIFICATION_LISTENER_SERVICE` (servicio) | 2 | Acceso especial, el usuario lo concede en Ajustes | Notificaciones integradas | — |
-| `BIND_APPWIDGET` / `AppWidgetHost` | 3 | Diálogo de sistema por widget | Widgets | — |
+| `AppWidgetHost` + diálogo `ACTION_APPWIDGET_BIND` | 1 (adelantado, ADR-020) | Consentimiento del sistema por proveedor; **sin permiso en el manifiesto** | Widgets | `BIND_APPWIDGET` (solo para apps del sistema) |
 | `BIND_ACCESSIBILITY_SERVICE` (servicio) | 4 | Acceso especial | **Únicamente** bloquear pantalla con gesto (`GLOBAL_ACTION_LOCK_SCREEN`, API 28+) | Administrador de dispositivo (rompe huella), bajar timeout (altera ajustes) |
 | `INTERNET` | — | — | **No se declara.** Si una función futura lo requiere: ADR + revisión completa | — |
 

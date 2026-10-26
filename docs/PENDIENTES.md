@@ -73,7 +73,29 @@
 - [x] "Empezar" en la introducción cuando Velora ya es el inicio.
 - [ ] Más temas a futuro (p. ej. papel/tinta, atardecer, minimal blanco) y un fondo animado opcional que respete batería y "Quitar animaciones".
 
-## 7. Cierre de la Fase 0 (falta verificar)
+## 7. Pedidos del 2026-10-26 (fotos de referencia)
+
+- [~] Ola grande (media pantalla) y burbuja blanca.
+- [~] Reloj delgado y sencillo, más abajo; estilos sin adornos forzados.
+- [~] Fuente Nunito por defecto.
+- [~] Íconos minimalistas = logo en línea blanco en un círculo translúcido (no "un solo color azul").
+- [~] Temas más sencillos; nuevos Noche y Papel.
+- [~] Ajustes en tarjetas con íconos; menú de app en panel con íconos (ADR-019).
+- [~] Widgets (ADR-020).
+- [~] Calculadora y "Buscar en la web" en el buscador.
+
+### Funciones de Niagara que Velora aún no tiene
+- [ ] **Notificaciones en el inicio** (puntos en las apps, leer y responder): Fase 2, necesita el acceso a notificaciones (opt-in, SEGURIDAD §3.2).
+- [ ] **Reproductor de música** que aparece solo cuando algo suena (Fase 2, mismo acceso).
+- [ ] **Deslizar sobre una app** para ver atajos y notificaciones (pop-ups, Fase 3).
+- [ ] **Carpetas / categorías** ("Añadir a una categoría", Fase 3).
+- [ ] **Doble toque para bloquear** (accesibilidad opt-in, Fase 4).
+- [ ] **Tiempo de uso / freno de uso** por app (Fase 4).
+- [ ] Búsqueda de **contactos** (permiso de contactos: ADR antes).
+- [ ] Favoritos en el alfabeto (la estrella arriba de la A) y acceso a ajustes al final.
+- [ ] Widgets: redimensionar arrastrando y reordenar.
+
+## 8. Cierre de la Fase 0 (falta verificar)
 
 - [ ] Crear el repositorio en GitHub y ver el CI en verde (`.github/workflows/ci.yml`).
 - [ ] Primera medición de arranque con `:macrobenchmark` (necesita un dispositivo conectado).

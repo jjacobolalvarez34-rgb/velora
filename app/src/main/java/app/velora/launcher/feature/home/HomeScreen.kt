@@ -5,6 +5,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,8 +17,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import app.velora.launcher.R
 import app.velora.launcher.core.designsystem.motion.StaggeredEntrance
 import app.velora.launcher.core.designsystem.theme.Spacing
@@ -34,17 +37,34 @@ import app.velora.launcher.feature.home.components.ClockHeader
  * Inicio: reloj arriba y favoritos anclados abajo, en la zona del pulgar (ESTILO §4).
  * Los gestos (deslizar para la lista, mantener para ajustes) los maneja `LauncherScreen`.
  */
+private const val HEADER_TOP_FRACTION = 0.1f
+
+/** El reloj no va pegado arriba: baja un décimo de la pantalla, más cerca del pulgar. */
 @Composable
-fun HomeScreen(uiState: HomeUiState, actions: AppActions, modifier: Modifier = Modifier) {
+private fun homePadding() = PaddingValues(
+    start = Spacing.l,
+    top = LocalConfiguration.current.screenHeightDp.dp * HEADER_TOP_FRACTION,
+    end = Spacing.l + WaveAlphabetWidth,
+    bottom = Spacing.l,
+)
+
+@Composable
+fun HomeScreen(
+    uiState: HomeUiState,
+    actions: AppActions,
+    modifier: Modifier = Modifier,
+    widgets: @Composable () -> Unit = {},
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.safeDrawing)
-            .padding(start = Spacing.l, top = Spacing.xl, end = Spacing.l + WaveAlphabetWidth, bottom = Spacing.l),
+            .padding(homePadding()),
     ) {
         StaggeredEntrance(index = 0) {
             ClockHeader(clock = uiState.clock, style = uiState.clockStyle, battery = uiState.battery)
         }
+        widgets()
         Spacer(Modifier.weight(1f))
         // Agregar o quitar un favorito reacomoda la columna con un resorte, sin saltos.
         Column(
@@ -63,7 +83,7 @@ fun HomeScreen(uiState: HomeUiState, actions: AppActions, modifier: Modifier = M
             uiState.favorites.forEachIndexed { index, app ->
                 key(app.key.stableId) {
                     StaggeredEntrance(index = index + 1) {
-                        AppRow(app = app, isFavorite = true, style = AppRowStyle.Favorite, actions = actions)
+                        AppRow(app = app, style = AppRowStyle.Favorite, actions = actions)
                     }
                 }
             }

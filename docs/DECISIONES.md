@@ -88,6 +88,19 @@ _`compileSdk` actualizado a 37 por ADR-013; `minSdk` y `targetSdk` siguen vigent
 **Por qué:** cero permisos y cero MB: todo el arte pesa unas decenas de KB de código. El wallpaper del usuario no se toca y "Tu fondo" sigue disponible. Diseños propios, no copias de las capturas.
 **Consecuencias:** las barras del sistema usan íconos oscuros en temas claros. Fuente pixel nueva: Silkscreen (OFL, sin nombre reservado, sin modificar). Agregar un tema = colores en `Color.kt` + una función de dibujo + su recomendación.
 
+## ADR-019 · Íconos de Material (`material-icons-core`) — Aceptada (2026-10-26)
+**Contexto:** el autor pidió ajustes y menús como los de su referencia: cada opción con su ícono.
+**Opciones:** A) dibujar íconos a mano. B) Vectores XML copiados de Material Symbols. C) `androidx.compose.material:material-icons-core` (Apache-2.0, ya en la BOM 2026.09.00, versión 1.7.8).
+**Decisión:** C, solo el paquete *core* (nunca *extended*, que pesa varios MB).
+**Por qué:** íconos consistentes y accesibles sin mantener vectores. R8 quita todos los que no se usan.
+**Consecuencias:** si falta un ícono que solo existe en *extended*, se copia ese vector suelto con su licencia, no se agrega el paquete entero.
+
+## ADR-020 · Widgets en el inicio — Aceptada (2026-10-26)
+**Contexto:** el autor pidió widgets (estaban en la Fase 3).
+**Decisión:** un `AppWidgetHost` por proceso (`WidgetHost`, id 1024). Mantener presionado el inicio → "Agregar widget" → selector propio con vistas previas (`installedProviders`) → `bindAppWidgetIdIfAllowed` o el diálogo del sistema `ACTION_APPWIDGET_BIND`, la primera vez por proveedor → configuración del widget, si la tiene. Lista y altos en Room (`widgets`, versión 3, migración automática). Se dibujan con `AndroidView` entre el reloj y los favoritos. En Ajustes → Widgets se cambia el alto o se quitan.
+**Por qué:** cero permisos en el manifiesto (el sistema pide el consentimiento por proveedor). Escuchar solo con el inicio visible (`onStart`/`onStop`) cuida la batería. Los ids huérfanos se liberan al empezar (B-019).
+**Consecuencias:** los resultados del permiso y de la configuración llegan por `onActivityResult` (API clásica, marcada como obsoleta). Pendiente: redimensionar arrastrando y reordenar.
+
 ---
 
 ## Plantilla

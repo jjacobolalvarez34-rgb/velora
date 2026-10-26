@@ -33,6 +33,7 @@ private fun variableFamily(@FontRes resId: Int) = FontFamily(
     },
 )
 
+private val Nunito = variableFamily(R.font.nunito)
 private val PlusJakartaSans = variableFamily(R.font.plus_jakarta_sans)
 private val Figtree = variableFamily(R.font.figtree)
 private val Fraunces = variableFamily(R.font.fraunces)
@@ -43,6 +44,7 @@ private val Pixel = FontFamily(
 )
 
 fun fontFamilyOf(choice: FontChoice): FontFamily = when (choice) {
+    FontChoice.Nunito -> Nunito
     FontChoice.PlusJakartaSans -> PlusJakartaSans
     FontChoice.Figtree -> Figtree
     FontChoice.Fraunces -> Fraunces
@@ -58,6 +60,8 @@ fun fontFamilyOf(choice: FontChoice): FontFamily = when (choice) {
 data class VeloraTypography(
     val clock: TextStyle,
     val clockDay: TextStyle,
+    /** Día de la semana en mayúsculas espaciadas (reloj "Día"). */
+    val weekday: TextStyle,
     val date: TextStyle,
     val favorite: TextStyle,
     val appRow: TextStyle,
@@ -80,9 +84,11 @@ fun veloraTypography(family: FontFamily, shadow: Shadow? = null): VeloraTypograp
         shadow = shadow,
     )
     return VeloraTypography(
-        clock = style(56, 64, FontWeight.Light),
+        // Hora delgada y grande, fecha tranquila debajo: sencillo, sin adornos.
+        clock = style(64, 70, FontWeight.ExtraLight),
         clockDay = style(120, 120, FontWeight.Bold).copy(letterSpacing = 4.sp),
-        date = style(16, 22, FontWeight.Normal),
+        weekday = style(13, 18, FontWeight.SemiBold).copy(letterSpacing = 3.sp),
+        date = style(18, 24, FontWeight.Normal),
         // Más finos y con un poco de aire: se leen igual y se ven más elegantes.
         favorite = style(19, 26, FontWeight.Normal).copy(letterSpacing = 0.2.sp),
         appRow = style(17, 22, FontWeight.Normal).copy(letterSpacing = 0.2.sp),

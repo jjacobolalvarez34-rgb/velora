@@ -87,7 +87,7 @@ internal fun LetterPage(
             )
         }
         items(apps, key = { it.key.stableId }, contentType = { "app" }) { app ->
-            ListApp(app, uiState, actions, animatedItem())
+            ListApp(app, actions, animatedItem())
         }
     }
 }

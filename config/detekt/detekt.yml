@@ -11,6 +11,13 @@ complexity:
     constructorThreshold: 9
   TooManyFunctions:
     ignoreAnnotatedFunctions: ['Preview']
+    # Interfaces de acciones, ViewModels y anfitriones del sistema agrupan muchas operaciones
+    # pequeñas y cohesivas; partirlas solo esparciría la lógica.
+    thresholdInFiles: 13
+    thresholdInClasses: 15
+    thresholdInInterfaces: 15
+    thresholdInObjects: 15
+    ignoreOverridden: true
 
 naming:
   # Los nombres de archivo los fija ESTILO.md (Color.kt, Type.kt, Motion.kt…).

@@ -11,10 +11,11 @@ Velora incluye o usa el siguiente software y recursos de terceros.
 | Fuente **Fraunces** (The Fraunces Project Authors), instancia con solo el eje `wght`, recortada a latino | SIL OFL 1.1 | [docs/licencias/OFL-Fraunces.txt](docs/licencias/OFL-Fraunces.txt) |
 | Fuente **Quicksand** (The Quicksand Project Authors), **sin modificar** (tiene nombre reservado) | SIL OFL 1.1 | [docs/licencias/OFL-Quicksand.txt](docs/licencias/OFL-Quicksand.txt) |
 | Fuente **Silkscreen** (The Silkscreen Project Authors), sin modificar | SIL OFL 1.1 | [docs/licencias/OFL-Silkscreen.txt](docs/licencias/OFL-Silkscreen.txt) |
+| Fuente **Nunito** (The Nunito Project Authors), recortada a latino | SIL OFL 1.1 | [docs/licencias/OFL-Nunito.txt](docs/licencias/OFL-Nunito.txt) |
 
 ## Librerías
 
-- Apache-2.0: AndroidX (Core, Activity, Lifecycle, Room, DataStore, ProfileInstaller, Benchmark), Jetpack Compose y Material 3, Kotlin y kotlinx.coroutines, LeakCanary (solo debug) y Turbine (solo pruebas).
+- Apache-2.0: Material Icons (core), AndroidX (Core, Activity, Lifecycle, Room, DataStore, ProfileInstaller, Benchmark), Jetpack Compose y Material 3, Kotlin y kotlinx.coroutines, LeakCanary (solo debug) y Turbine (solo pruebas).
 - EPL-1.0: JUnit 4 (solo pruebas).
 
 Herramientas de build, que no van en el APK: detekt (Apache-2.0) y ktlint (MIT).

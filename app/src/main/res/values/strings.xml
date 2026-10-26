@@ -112,4 +112,17 @@
     <string name="theme_aurora" translatable="false">Aurora</string>
     <string name="font_pixel" translatable="false">Silkscreen (pixel)</string>
     <string name="welcome_start">Empezar</string>
+    <string name="home_menu_add_widget">Agregar widget</string>
+    <string name="widget_picker_title">Widgets</string>
+    <string name="calculator_copy">Toca para copiar</string>
+    <string name="copied">Copiado: %1$s</string>
+    <string name="web_search">Buscar «%1$s» en la web</string>
+    <string name="theme_night">Noche</string>
+    <string name="theme_paper">Papel</string>
+    <string name="font_nunito" translatable="false">Nunito</string>
+    <string name="settings_widgets">Widgets</string>
+    <string name="settings_widgets_empty">Mantén presionado el inicio y elige «Agregar widget».</string>
+    <string name="settings_widget_taller">Más alto</string>
+    <string name="settings_widget_shorter">Más bajo</string>
+    <string name="settings_widget_remove">Quitar</string>
 </resources>

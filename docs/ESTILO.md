@@ -110,24 +110,48 @@ El elemento firma. Especificación:
 - La insignia de perfil de trabajo se agrega encima del ícono ya recortado (`getUserBadgedIcon`).
 - **No** usar ni imitar los paquetes de íconos de Niagara.
 
+## 6.1 La ola, más grande (2026-10-26)
+
+- El alfabeto se estira hasta **la mitad del ancho de la pantalla** en un arco amplio (σ = 6,5 filas). Las letras crecen poco (1 + 0,35·g): el estiramiento hace el trabajo.
+- La burbuja es **blanca con la letra oscura** sobre el wallpaper (en cada tema, su acento) y queda pasando la cresta, junto al pulgar.
+
+## 6.2 Ajustes y menús (ADR-019)
+
+- Ajustes en **tarjetas** redondeadas (20 dp) con un poco de aire entre ellas; las opciones principales llevan su ícono en un círculo suave.
+- El menú de una app es un **panel desde abajo**: el ícono y el nombre arriba, luego sus atajos, y después Favorito, Información, Ocultar y Desinstalar, cada uno con su ícono. Al final, "Ajustes de Velora".
+- Mantener presionado el inicio abre otro panel: "Agregar widget" y "Ajustes de Velora".
+
 ## 7.0 Temas (ADR-018)
 
 | Tema | Fondo | Texto | Fuente / reloj / íconos recomendados |
 |---|---|---|---|
-| Tu fondo | wallpaper del usuario + velo suave y sombra en el texto | claro | Plus Jakarta Sans / Clásico / Círculo |
-| Sakura | cielo rosa, luna, montaña con nieve, rama con flores, pétalos | oscuro (barras del sistema oscuras) | Figtree / Clásico / Círculo |
-| Bosque | verde azulado, ola lima a la derecha, trama de puntos, rayas | claro | Quicksand / Clásico / Minimalista |
-| Noche pixel | degradado morado, nebulosa, estrellas y planeta en bloques de 4 dp | lavanda | Silkscreen / Clásico / Círculo |
-| Aurora | azul noche con tres luces suaves y estrellas finas | claro | Plus Jakarta Sans / Día / Minimalista |
+| Tu fondo | wallpaper del usuario + velo suave y sombra en el texto | blanco neutro (nunca el azul del sistema) | Nunito / Clásico / Círculo |
+| Noche | negro puro con un brillo tenue | claro | Nunito / Clásico / Minimalista |
+| Papel | crema con renglones muy tenues | tinta oscura | Fraunces / Día / Minimalista |
+| Sakura | cielo rosa, una luna, siete pétalos | oscuro (barras del sistema oscuras) | Nunito / Clásico / Círculo |
+| Bosque | verde profundo con una sola curva fina | claro | Quicksand / Clásico / Minimalista |
+| Aurora | azul noche con tres luces suaves | claro | Nunito / Centrado / Minimalista |
+| Noche pixel | morado con estrellas cuadradas | lavanda | Silkscreen / Clásico / Círculo |
+
+Regla: **sencillo y estético**. Pocas formas, mucho aire: el protagonista es el texto.
+
+- **Íconos minimalistas** = el *logo en línea* de la app (ícono temático de Android 13+) del color del texto, sobre un círculo translúcido (`iconBackdrop`). Las apps que no lo traen: su ícono en grises suaves, mezclado con el color del texto, más chico dentro del mismo círculo.
 
 - Estética más fina: íconos de 34 dp (favoritos) y 30 dp (lista), textos de 19 sp y 17 sp con 0,2 sp de espaciado, filas de 52 dp y 48 dp. Sobre fondos oscuros el texto lleva una sombra suave (desenfoque de 8, caída de 1,5): permite un velo más liviano.
 - **Burbuja del alfabeto**: al arrastrar, un círculo del color de acento (56 dp) con la letra actual sigue al dedo junto a la cresta de la ola, crece desde el 60 % y se desvanece al soltar.
 
 ## 7.1 Reloj (Ajustes → Tema)
 
-- **Clásico** (por defecto): hora grande y fecha debajo, a la izquierda.
-- **Centrado**: hora, y debajo fecha · batería, al centro.
-- **Día**: el día abreviado en grande ("JUE"), cortado por una franja con hora · fecha · batería. La franja borra los píxeles del día que tiene debajo (capa `Offscreen` + `BlendMode.Clear`), y por el corte se ve el wallpaper.
+Sencillo a propósito: hora **delgada y grande** (64 sp, ExtraLight) y fecha tranquila debajo (18 sp). El encabezado baja un décimo de la pantalla: no va pegado arriba.
+
+- **Clásico** (por defecto): "07:58" y "Lunes, 26 de octubre", a la izquierda.
+- **Centrado**: lo mismo al centro, con la batería discreta junto a la fecha.
+- **Día**: "LUNES" en mayúsculas espaciadas y discretas, la hora, y "26 de octubre · 82 %". (El corte con `BlendMode.Clear` de la 0.4.0 se quitó: se veía forzado.)
+
+## 7.2b Buscador
+
+- **Calculadora**: si lo escrito es una cuenta ("12*3", "2,5 x 4"), arriba sale "= 36"; tocarlo lo copia.
+- **Buscar en la web**: última fila de los resultados. La búsqueda la hace la app de búsqueda o el navegador del teléfono; Velora sigue sin `INTERNET`.
 
 ## 7.2 Lista y búsqueda
 

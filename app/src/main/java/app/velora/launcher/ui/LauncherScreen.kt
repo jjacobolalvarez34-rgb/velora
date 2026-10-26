@@ -78,9 +78,10 @@ fun LauncherScreen(
     onOpenSettings: () -> Unit,
     theme: ThemeSettings,
     modifier: Modifier = Modifier,
+    onHomeMenu: () -> Unit = onOpenSettings,
+    widgets: @Composable () -> Unit = {},
 ) {
-    val motion = VeloraTheme.motion
-    drawerState.spec = if (motion.reduced) null else motion.spatialDefault()
+    drawerState.spec = VeloraTheme.motion.let { if (it.reduced) null else it.spatialDefault() }
     val drawerVisible by remember(drawerState) { derivedStateOf { drawerState.isOpen } }
     var activeLetter by remember { mutableIntStateOf(-1) }
 
@@ -96,7 +97,8 @@ fun LauncherScreen(
             actions = actions,
             modifier = Modifier
                 .homeLayer(drawerState)
-                .homeGestures(drawerState, onOpenSettings),
+                .homeGestures(drawerState, onHomeMenu, onOpenSettings),
+            widgets = widgets,
         )
         if (drawerVisible) {
             AppListScreen(
@@ -177,7 +179,11 @@ private fun BoxScope.AlphabetOverlay(list: DrawerList, drawerState: DrawerState,
 
 /** Deslizar hacia arriba abre la lista; mantener presionado abre los ajustes. */
 @Composable
-private fun Modifier.homeGestures(drawerState: DrawerState, onOpenSettings: () -> Unit): Modifier {
+private fun Modifier.homeGestures(
+    drawerState: DrawerState,
+    onHomeMenu: () -> Unit,
+    onOpenSettings: () -> Unit,
+): Modifier {
     val haptics = LocalHapticFeedback.current
     val openSettings = stringResource(R.string.home_open_settings)
     val openApps = stringResource(R.string.home_open_all_apps)
@@ -188,11 +194,11 @@ private fun Modifier.homeGestures(drawerState: DrawerState, onOpenSettings: () -
             orientation = Orientation.Vertical,
             onDragStopped = { velocity -> drawerState.settle(velocity) },
         )
-        .pointerInput(onOpenSettings) {
+        .pointerInput(onHomeMenu) {
             detectTapGestures(
                 onLongPress = {
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onOpenSettings()
+                    onHomeMenu()
                 },
             )
         }

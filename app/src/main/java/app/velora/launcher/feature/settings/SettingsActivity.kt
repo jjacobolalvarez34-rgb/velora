@@ -40,6 +40,8 @@ class SettingsActivity : ComponentActivity() {
         override fun onLeftHanded(enabled: Boolean) = viewModel.onLeftHanded(enabled)
         override fun onFullList(enabled: Boolean) = viewModel.onFullList(enabled)
         override fun onPreset(preset: ThemePreset) = viewModel.onPreset(preset)
+        override fun onWidgetHeight(appWidgetId: Int, heightDp: Int) = viewModel.onWidgetHeight(appWidgetId, heightDp)
+        override fun onRemoveWidget(appWidgetId: Int) = viewModel.onRemoveWidget(appWidgetId)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,12 +52,13 @@ class SettingsActivity : ComponentActivity() {
             val preview by viewModel.preview.collectAsStateWithLifecycle()
             val hidden by viewModel.hidden.collectAsStateWithLifecycle()
             val favorites by viewModel.favoriteApps.collectAsStateWithLifecycle()
+            val widgets by viewModel.widgets.collectAsStateWithLifecycle()
             // La pantalla usa la fuente elegida: se ve el cambio al instante.
             VeloraTheme(font = theme.font, preset = theme.preset) {
                 SettingsScreen(
                     theme = theme,
                     preview = preview,
-                    lists = SettingsLists(favorites = favorites, hidden = hidden),
+                    lists = SettingsLists(favorites = favorites, hidden = hidden, widgets = widgets),
                     actions = actions,
                 )
             }

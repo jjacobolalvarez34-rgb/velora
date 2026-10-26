@@ -1,17 +1,20 @@
 package app.velora.launcher.ui
 
-import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.toArgb
@@ -40,6 +43,7 @@ import app.velora.launcher.core.model.AppShortcut
 import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.ThemeSettings
 import app.velora.launcher.di.AppContainer
+import app.velora.launcher.feature.appmenu.AppMenuSheet
 import app.velora.launcher.feature.appmenu.LocalShortcutsRepository
 import app.velora.launcher.feature.apps.AppActions
 import app.velora.launcher.feature.apps.LocalIconRepository
@@ -54,6 +58,9 @@ import app.velora.launcher.feature.home.HomeUiState
 import app.velora.launcher.feature.home.HomeViewModel
 import app.velora.launcher.feature.welcome.OnboardingScreen
 import app.velora.launcher.feature.welcome.WelcomeScreen
+import app.velora.launcher.feature.widgets.HomeMenuSheet
+import app.velora.launcher.feature.widgets.HomeWidgets
+import app.velora.launcher.feature.widgets.WidgetPickerSheet
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -121,18 +128,9 @@ private fun LauncherRoute(
     val drawerState = rememberDrawerState()
     val listState = rememberLazyListState()
     val search = rememberDrawerSearchState()
-    val opener = rememberAppOpener(container.appLauncher)
-    val actions = remember(opener, homeViewModel) {
-        object : AppActions {
-            override fun open(app: AppEntry, bounds: Rect?) = opener.open(app, bounds)
-            override fun openInfo(app: AppEntry, bounds: Rect?) = opener.openInfo(app, bounds)
-            override fun uninstall(app: AppEntry) = opener.uninstall(app)
-            override fun addFavorite(app: AppEntry) = homeViewModel.onAddFavorite(app.key)
-            override fun removeFavorite(app: AppEntry) = homeViewModel.onRemoveFavorite(app.key)
-            override fun hide(app: AppEntry) = homeViewModel.onHide(app)
-            override fun openShortcut(shortcut: AppShortcut, bounds: Rect?) = opener.openShortcut(shortcut, bounds)
-        }
-    }
+    val sheets = rememberLauncherSheets()
+    val actions = rememberAppActions(container, homeViewModel, sheets)
+    val widgets by container.widgetHost.widgets.collectAsStateWithLifecycle()
     DrawerEffects(drawerState, search, homePresses, drawerViewModel::onQueryChange)
     LauncherScreen(
         home = home,
@@ -143,8 +141,77 @@ private fun LauncherRoute(
         actions = actions,
         onOpenSettings = onOpenSettings,
         theme = theme,
+        onHomeMenu = { sheets.homeMenu = true },
+        widgets = { HomeWidgets(container.widgetHost, widgets) },
     )
+    LauncherSheets(sheets, container, drawer, actions, onOpenSettings)
     IconPrefetch(container, home, drawer, theme.icons)
+}
+
+/** Qué panel está abierto sobre el inicio. */
+@Stable
+private class LauncherSheetsState {
+    var appMenu by mutableStateOf<AppEntry?>(null)
+    var homeMenu by mutableStateOf(false)
+    var widgetPicker by mutableStateOf(false)
+}
+
+@Composable
+private fun rememberLauncherSheets() = remember { LauncherSheetsState() }
+
+@Composable
+private fun rememberAppActions(
+    container: AppContainer,
+    homeViewModel: HomeViewModel,
+    sheets: LauncherSheetsState,
+): AppActions {
+    val opener = rememberAppOpener(container.appLauncher)
+    return remember(opener, homeViewModel, sheets) {
+        object : AppActions {
+            override fun open(app: AppEntry, bounds: Rect?) = opener.open(app, bounds)
+            override fun openInfo(app: AppEntry, bounds: Rect?) = opener.openInfo(app, bounds)
+            override fun uninstall(app: AppEntry) = opener.uninstall(app)
+            override fun addFavorite(app: AppEntry) = homeViewModel.onAddFavorite(app.key)
+            override fun removeFavorite(app: AppEntry) = homeViewModel.onRemoveFavorite(app.key)
+            override fun hide(app: AppEntry) = homeViewModel.onHide(app)
+            override fun openShortcut(shortcut: AppShortcut, bounds: Rect?) = opener.openShortcut(shortcut, bounds)
+            override fun showMenu(app: AppEntry) {
+                sheets.appMenu = app
+            }
+            override fun webSearch(query: String) = opener.webSearch(query)
+            override fun copy(text: String) = opener.copy(text)
+        }
+    }
+}
+
+/** Paneles desde abajo: menú de una app, menú del inicio y selector de widgets. */
+@Composable
+private fun LauncherSheets(
+    sheets: LauncherSheetsState,
+    container: AppContainer,
+    drawer: DrawerUiState,
+    actions: AppActions,
+    onOpenSettings: () -> Unit,
+) {
+    sheets.appMenu?.let { app ->
+        AppMenuSheet(
+            app = app,
+            isFavorite = app.key.stableId in drawer.favoriteIds,
+            actions = actions,
+            onOpenSettings = onOpenSettings,
+            onDismiss = { sheets.appMenu = null },
+        )
+    }
+    if (sheets.homeMenu) {
+        HomeMenuSheet(
+            onAddWidget = { sheets.widgetPicker = true },
+            onOpenSettings = onOpenSettings,
+            onDismiss = { sheets.homeMenu = false },
+        )
+    }
+    if (sheets.widgetPicker) {
+        WidgetPickerSheet(container.widgetHost, onDismiss = { sheets.widgetPicker = false })
+    }
 }
 
 /**
@@ -154,13 +221,16 @@ private fun LauncherRoute(
 @Composable
 private fun IconPrefetch(container: AppContainer, home: HomeUiState, drawer: DrawerUiState, style: IconStyle) {
     if (style == IconStyle.None) return
-    val tint = VeloraTheme.onWallpaper.accent.toArgb()
+    val tint = VeloraTheme.onWallpaper.content.toArgb()
+    val backdrop = VeloraTheme.onWallpaper.iconBackdrop.toArgb()
     val density = LocalDensity.current
     val favoritePx = with(density) { Sizes.favoriteIcon.roundToPx() }
     val listPx = with(density) { Sizes.listIcon.roundToPx() }
-    LaunchedEffect(home.favorites, drawer.list, style, tint, favoritePx, listPx) {
-        val favorites = home.favorites.map { IconRequest(it.key, favoritePx, style, tint) }
-        val everything = drawer.list.byLetter.values.flatten().map { IconRequest(it.key, listPx, style, tint) }
+    LaunchedEffect(home.favorites, drawer.list, style, tint, backdrop, favoritePx, listPx) {
+        val favorites = home.favorites.map { IconRequest(it.key, favoritePx, style, tint, backdrop) }
+        val everything = drawer.list.byLetter.values.flatten().map {
+            IconRequest(it.key, listPx, style, tint, backdrop)
+        }
         container.iconRepository.prefetch(favorites + everything)
     }
 }
@@ -169,8 +239,9 @@ private fun IconPrefetch(container: AppContainer, home: HomeUiState, drawer: Dra
 @Composable
 private fun SystemBarsAppearance(lightBackground: Boolean) {
     val view = LocalView.current
+    val activity = LocalActivity.current
     LaunchedEffect(lightBackground) {
-        val window = (view.context as? Activity)?.window ?: return@LaunchedEffect
+        val window = activity?.window ?: return@LaunchedEffect
         WindowCompat.getInsetsController(window, view).apply {
             isAppearanceLightStatusBars = lightBackground
             isAppearanceLightNavigationBars = lightBackground

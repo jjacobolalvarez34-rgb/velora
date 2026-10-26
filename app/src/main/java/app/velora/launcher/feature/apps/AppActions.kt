@@ -19,4 +19,13 @@ interface AppActions {
     fun removeFavorite(app: AppEntry)
     fun hide(app: AppEntry)
     fun openShortcut(shortcut: AppShortcut, bounds: Rect?)
+
+    /** Mantener presionada: abre el panel de la app. */
+    fun showMenu(app: AppEntry)
+
+    /** "Buscar en la web" desde el buscador (otra app hace la búsqueda; Velora no usa red). */
+    fun webSearch(query: String)
+
+    /** Copiar el resultado de la calculadora. */
+    fun copy(text: String)
 }

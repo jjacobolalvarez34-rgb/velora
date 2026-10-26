@@ -57,6 +57,25 @@ class HomeActivity : ComponentActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        // Los widgets solo se actualizan con el inicio visible (batería, SEGURIDAD §3.4).
+        container.widgetHost.startListening()
+    }
+
+    override fun onStop() {
+        container.widgetHost.stopListening()
+        super.onStop()
+    }
+
+    @Deprecated("El permiso y la configuración de widgets llegan por la API clásica de resultados")
+    @Suppress("DEPRECATION")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (!container.widgetHost.onActivityResult(this, requestCode, resultCode)) {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         // Si veníamos de otra app no se anima: solo se deja el estado raíz (ARQUITECTURA §5).

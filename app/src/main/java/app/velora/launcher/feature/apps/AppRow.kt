@@ -43,7 +43,6 @@ import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.AppKey
 import app.velora.launcher.core.model.AppShortcut
 import app.velora.launcher.core.model.IconStyle
-import app.velora.launcher.feature.appmenu.AppMenu
 
 /** Dónde se usa la fila: cambia tamaños y tipografía (ESTILO §3 y §4). */
 enum class AppRowStyle { Favorite, List }
@@ -63,7 +62,6 @@ private class RowPosition {
 @Composable
 fun AppRow(
     app: AppEntry,
-    isFavorite: Boolean,
     style: AppRowStyle,
     actions: AppActions,
     modifier: Modifier = Modifier,
@@ -72,7 +70,6 @@ fun AppRow(
     val position = remember { RowPosition() }
     val interaction = remember { MutableInteractionSource() }
     val scale by pressScale(interaction)
-    var menuOpen by rememberSaveable(app.key.stableId) { mutableStateOf(false) }
     val workDescription = stringResource(R.string.app_work_profile_description, app.label)
 
     Box(modifier = modifier) {
@@ -91,21 +88,13 @@ fun AppRow(
                     interactionSource = interaction,
                     indication = null,
                     onClick = { actions.open(app, position.bounds()) },
-                    onLongClick = { menuOpen = true },
+                    onLongClick = { actions.showMenu(app) },
                 )
                 .workProfileSemantics(app.isWorkProfile, workDescription)
                 .padding(vertical = Spacing.xs),
         ) {
             AppRowContent(app, style)
         }
-        AppMenu(
-            expanded = menuOpen,
-            app = app,
-            isFavorite = isFavorite,
-            actions = actions,
-            bounds = position::bounds,
-            onDismiss = { menuOpen = false },
-        )
     }
 }
 
@@ -165,6 +154,9 @@ internal object PreviewAppActions : AppActions {
     override fun removeFavorite(app: AppEntry) = Unit
     override fun hide(app: AppEntry) = Unit
     override fun openShortcut(shortcut: AppShortcut, bounds: Rect?) = Unit
+    override fun showMenu(app: AppEntry) = Unit
+    override fun webSearch(query: String) = Unit
+    override fun copy(text: String) = Unit
 }
 
 internal fun previewApp(label: String) = AppEntry(
@@ -182,7 +174,7 @@ internal fun previewApp(label: String) = AppEntry(
 private fun AppRowPreview() {
     VeloraTheme(reducedMotion = true) {
         Box(Modifier.background(VeloraTheme.onWallpaper.drawerScrim).padding(Spacing.m)) {
-            AppRow(previewApp("Cámara"), isFavorite = false, style = AppRowStyle.List, actions = PreviewAppActions)
+            AppRow(previewApp("Cámara"), style = AppRowStyle.List, actions = PreviewAppActions)
         }
     }
 }

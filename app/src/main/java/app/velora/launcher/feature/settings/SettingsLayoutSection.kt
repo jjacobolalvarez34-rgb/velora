@@ -3,19 +3,26 @@ package app.velora.launcher.feature.settings
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Face
+import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import app.velora.launcher.R
+import app.velora.launcher.core.data.favorites.WidgetsRepository
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.TextSize
 import app.velora.launcher.core.model.ThemeSettings
@@ -29,6 +36,7 @@ internal fun LazyListScope.layoutSection(theme: ThemeSettings, actions: Settings
             subtitle = stringResource(R.string.settings_left_handed_summary),
             checked = theme.leftHanded,
             onChange = actions::onLeftHanded,
+            icon = Icons.Outlined.Face,
         )
     }
     item(key = "full-list") {
@@ -37,6 +45,7 @@ internal fun LazyListScope.layoutSection(theme: ThemeSettings, actions: Settings
             subtitle = stringResource(R.string.settings_full_list_summary),
             checked = theme.fullList,
             onChange = actions::onFullList,
+            icon = Icons.Outlined.Menu,
         )
     }
     item(key = "text-size") { SectionTitle(R.string.settings_text_size) }
@@ -64,19 +73,67 @@ internal fun LazyListScope.favoritesSection(favorites: List<AppEntry>, actions: 
                     onMove = { offset -> actions.onMoveFavorite(app, offset) },
                 )
             },
-            colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
+            colors = cardColors(),
+            modifier = Modifier.settingsCard(),
+        )
+    }
+}
+
+/** Widgets del inicio: más alto, más bajo o quitar (agregar se hace manteniendo presionado el inicio). */
+internal fun LazyListScope.widgetsSection(widgets: List<WidgetSetting>, actions: SettingsActions) {
+    item(key = "widgets") { SectionTitle(R.string.settings_widgets) }
+    if (widgets.isEmpty()) {
+        item(key = "widgets-empty") { PlainRow(stringResource(R.string.settings_widgets_empty)) }
+    }
+    items(widgets.size, key = { "widget-${widgets[it].appWidgetId}" }) { index ->
+        val widget = widgets[index]
+        ListItem(
+            headlineContent = { Text(widget.label) },
+            supportingContent = {
+                Row {
+                    TextButton(onClick = {
+                        actions.onWidgetHeight(
+                            widget.appWidgetId,
+                            widget.heightDp - WidgetsRepository.HEIGHT_STEP_DP,
+                        )
+                    }) {
+                        Text(stringResource(R.string.settings_widget_shorter))
+                    }
+                    TextButton(onClick = {
+                        actions.onWidgetHeight(
+                            widget.appWidgetId,
+                            widget.heightDp + WidgetsRepository.HEIGHT_STEP_DP,
+                        )
+                    }) {
+                        Text(stringResource(R.string.settings_widget_taller))
+                    }
+                    TextButton(onClick = { actions.onRemoveWidget(widget.appWidgetId) }) {
+                        Text(stringResource(R.string.settings_widget_remove))
+                    }
+                }
+            },
+            leadingContent = { IconCircle(Icons.Outlined.Add) },
+            colors = cardColors(),
+            modifier = Modifier.settingsCard(),
         )
     }
 }
 
 @Composable
-private fun SwitchOption(title: String, subtitle: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+private fun SwitchOption(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onChange: (Boolean) -> Unit,
+    icon: ImageVector? = null,
+) {
     ListItem(
         headlineContent = { Text(title) },
         supportingContent = { Text(subtitle) },
+        leadingContent = icon?.let { { IconCircle(it) } },
         trailingContent = { Switch(checked = checked, onCheckedChange = null) },
-        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
-        modifier = Modifier.toggleable(value = checked, role = Role.Switch, onValueChange = onChange),
+        colors = cardColors(),
+        modifier = Modifier.settingsCard().toggleable(value = checked, role = Role.Switch, onValueChange = onChange),
     )
 }
 
@@ -112,7 +169,8 @@ private fun MoveButtons(label: String, canMoveUp: Boolean, canMoveDown: Boolean,
 private fun PlainRow(text: String) {
     ListItem(
         headlineContent = { Text(text) },
-        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
+        colors = cardColors(),
+        modifier = Modifier.settingsCard(),
     )
 }
 

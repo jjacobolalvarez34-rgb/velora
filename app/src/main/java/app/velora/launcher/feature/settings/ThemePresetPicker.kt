@@ -106,6 +106,8 @@ private fun MiniHome() {
 
 internal fun presetName(preset: ThemePreset): Int = when (preset) {
     ThemePreset.Wallpaper -> R.string.theme_wallpaper
+    ThemePreset.Night -> R.string.theme_night
+    ThemePreset.Paper -> R.string.theme_paper
     ThemePreset.Sakura -> R.string.theme_sakura
     ThemePreset.Forest -> R.string.theme_forest
     ThemePreset.PixelNight -> R.string.theme_pixel_night

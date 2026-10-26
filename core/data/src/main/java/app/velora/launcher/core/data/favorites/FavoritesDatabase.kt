@@ -68,20 +68,50 @@ interface HiddenAppsDao {
     suspend fun delete(stableId: String)
 }
 
+/** Un widget del inicio: su id del sistema, quién lo provee, su alto y su orden (ADR-020). */
+@Entity(tableName = "widgets")
+data class WidgetEntity(
+    @PrimaryKey val appWidgetId: Int,
+    /** `ComponentName.flattenToString()` del proveedor. */
+    val provider: String,
+    val heightDp: Int,
+    val position: Int,
+)
+
+@Dao
+interface WidgetsDao {
+    @Query("SELECT * FROM widgets ORDER BY position")
+    fun observe(): Flow<List<WidgetEntity>>
+
+    @Query("SELECT COALESCE(MAX(position), -1) FROM widgets")
+    suspend fun maxPosition(): Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(widget: WidgetEntity)
+
+    @Query("UPDATE widgets SET heightDp = :heightDp WHERE appWidgetId = :appWidgetId")
+    suspend fun setHeight(appWidgetId: Int, heightDp: Int)
+
+    @Query("DELETE FROM widgets WHERE appWidgetId = :appWidgetId")
+    suspend fun delete(appWidgetId: Int)
+}
+
 /**
- * Base de datos que **sí** se respalda (favoritos, ocultas; luego carpetas). SEGURIDAD §4.
- * Versión 2: se agregó `hidden_apps` (migración automática, sin perder favoritos).
+ * Base de datos que **sí** se respalda (favoritos, ocultas, widgets; luego carpetas). SEGURIDAD §4.
+ * Versión 2: `hidden_apps`. Versión 3: `widgets`. Migraciones automáticas, sin perder nada.
  */
 @Database(
-    entities = [FavoriteEntity::class, HiddenAppEntity::class],
-    version = 2,
+    entities = [FavoriteEntity::class, HiddenAppEntity::class, WidgetEntity::class],
+    version = 3,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2)],
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3)],
 )
 abstract class VeloraDatabase : RoomDatabase() {
     abstract fun favorites(): FavoritesDao
 
     abstract fun hiddenApps(): HiddenAppsDao
+
+    abstract fun widgets(): WidgetsDao
 
     companion object {
         private const val NAME = "velora.db"

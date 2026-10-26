@@ -34,8 +34,10 @@ fun AppIcon(key: AppKey, size: Dp, modifier: Modifier = Modifier) {
     val icons = LocalIconRepository.current
     val sizePx = with(LocalDensity.current) { size.roundToPx() }
     val style = LocalIconStyle.current
-    val tint = VeloraTheme.onWallpaper.accent.toArgb()
-    val request = remember(key, sizePx, style, tint) { IconRequest(key, sizePx, style, tint) }
+    val colors = VeloraTheme.onWallpaper
+    val tint = colors.content.toArgb()
+    val backdrop = colors.iconBackdrop.toArgb()
+    val request = remember(key, sizePx, style, tint, backdrop) { IconRequest(key, sizePx, style, tint, backdrop) }
     val bitmap: ImageBitmap? by produceState(icons?.cached(request), icons, request) {
         if (value == null && icons != null) value = icons.load(request)
     }

@@ -48,8 +48,7 @@ fun VeloraTheme(
         else -> VeloraLightColors
     }
     // Sobre el wallpaper siempre hay velo oscuro: el acento es el tono claro, en ambos modos.
-    val accent = if (dynamic) dynamicDarkColorScheme(context).primary else VeloraDarkColors.primary
-    val onWallpaper = remember(accent, preset) { onWallpaperColorsFor(preset, accent) }
+    val onWallpaper = onWallpaperColorsFor(preset)
     val family = fontFamilyOf(font)
     val typography = remember(family, onWallpaper) { veloraTypography(family, textShadowOf(onWallpaper)) }
     val material = remember(family) { materialTypography(family) }
@@ -64,9 +63,11 @@ fun VeloraTheme(
     }
 }
 
-/** Colores sobre el fondo: los del tema, o los del wallpaper con el acento de Material You. */
-private fun onWallpaperColorsFor(preset: ThemePreset, wallpaperAccent: Color): OnWallpaperColors = when (preset) {
-    ThemePreset.Wallpaper -> DefaultOnWallpaperColors.copy(accent = wallpaperAccent)
+/** Colores sobre el fondo de cada tema; con el wallpaper, blanco neutro (nunca el azul del sistema). */
+private fun onWallpaperColorsFor(preset: ThemePreset): OnWallpaperColors = when (preset) {
+    ThemePreset.Wallpaper -> DefaultOnWallpaperColors
+    ThemePreset.Night -> PresetColors.night
+    ThemePreset.Paper -> PresetColors.paper
     ThemePreset.Sakura -> PresetColors.sakura
     ThemePreset.Forest -> PresetColors.forest
     ThemePreset.PixelNight -> PresetColors.pixelNight

@@ -65,8 +65,10 @@ data class OnWallpaperColors(
     val drawerScrim: Color,
     /** Fondo del buscador y de elementos elevados sobre el velo. */
     val surface: Color,
-    /** Único acento sobre el fondo (íconos minimalistas, burbuja del alfabeto). */
+    /** Único acento sobre el fondo (burbuja del alfabeto, resaltados). */
     val accent: Color,
+    /** Círculo translúcido detrás de los íconos minimalistas. */
+    val iconBackdrop: Color = Color(0x2EFFFFFF),
     /** Texto sobre el acento (la letra dentro de la burbuja). */
     val onAccent: Color = Slate10,
     /** Sombra suave del texto: legible sobre cualquier fondo sin un velo pesado. */
@@ -82,90 +84,111 @@ internal val DefaultOnWallpaperColors = OnWallpaperColors(
     scrimBottom = Color(0x6B000000),
     drawerScrim = Color(0xC7000000),
     surface = Color(0x24FFFFFF),
-    accent = Steel80,
+    // Blanco neutro: sobre cualquier wallpaper, como la burbuja y los íconos en línea de referencia.
+    accent = Color(0xFFF4F4F4),
     textShadow = Color(0x8C000000),
 )
 
 /** Colores de cada tema (ADR-018): texto, acento y velos sobre su fondo dibujado. */
 internal object PresetColors {
-    val sakura = OnWallpaperColors(
-        content = Color(0xFF2A2238),
-        contentVariant = Color(0xB82A2238),
+    val night = OnWallpaperColors(
+        content = Color(0xFFF2F2F2),
+        contentVariant = Color(0xB3F2F2F2),
         scrimTop = Color.Transparent,
         scrimBottom = Color.Transparent,
-        drawerScrim = Color(0xE6FFF6F8),
-        surface = Color(0x1A2A2238),
-        accent = Color(0xFFD9577A),
+        drawerScrim = Color(0xF2050507),
+        surface = Color(0x1FFFFFFF),
+        accent = Color(0xFFF2F2F2),
+        iconBackdrop = Color(0x26FFFFFF),
+    )
+    val paper = OnWallpaperColors(
+        content = Color(0xFF2B2620),
+        contentVariant = Color(0xB32B2620),
+        scrimTop = Color.Transparent,
+        scrimBottom = Color.Transparent,
+        drawerScrim = Color(0xF2F3EEE5),
+        surface = Color(0x142B2620),
+        accent = Color(0xFF2B2620),
+        onAccent = Color(0xFFF3EEE5),
+        iconBackdrop = Color(0x142B2620),
+        isLight = true,
+    )
+    val sakura = OnWallpaperColors(
+        content = Color(0xFF2E2433),
+        contentVariant = Color(0xB82E2433),
+        scrimTop = Color.Transparent,
+        scrimBottom = Color.Transparent,
+        drawerScrim = Color(0xEBFFF6F8),
+        surface = Color(0x1A2E2433),
+        accent = Color(0xFFC75B7A),
         onAccent = Color(0xFFFFFFFF),
+        iconBackdrop = Color(0x1AC75B7A),
         isLight = true,
     )
     val forest = OnWallpaperColors(
-        content = Color(0xFFF1F7E8),
-        contentVariant = Color(0xBFF1F7E8),
+        content = Color(0xFFEFF5EA),
+        contentVariant = Color(0xBFEFF5EA),
         scrimTop = Color.Transparent,
-        scrimBottom = Color(0x330B2224),
-        drawerScrim = Color(0xEB0F2A2C),
-        surface = Color(0x1FF1F7E8),
-        accent = Color(0xFFC4E04B),
-        onAccent = Color(0xFF0F2A2C),
-        textShadow = Color(0x59000000),
-    )
-    val pixelNight = OnWallpaperColors(
-        content = Color(0xFFF2E9FF),
-        contentVariant = Color(0xBFF2E9FF),
-        scrimTop = Color.Transparent,
-        scrimBottom = Color(0x400B0620),
-        drawerScrim = Color(0xEB0B0620),
-        surface = Color(0x1FF2E9FF),
-        accent = Color(0xFFC86BFA),
-        onAccent = Color(0xFF0B0620),
-        textShadow = Color(0x99000000),
+        scrimBottom = Color.Transparent,
+        drawerScrim = Color(0xF00E2321),
+        surface = Color(0x1FEFF5EA),
+        accent = Color(0xFFD7E8B0),
+        onAccent = Color(0xFF0E2321),
+        iconBackdrop = Color(0x26D7E8B0),
+        textShadow = Color(0x40000000),
     )
     val aurora = OnWallpaperColors(
         content = Color(0xFFFFFFFF),
         contentVariant = Color(0xC7FFFFFF),
         scrimTop = Color.Transparent,
-        scrimBottom = Color(0x40070B1F),
+        scrimBottom = Color.Transparent,
         drawerScrim = Color(0xEB070B1F),
         surface = Color(0x1FFFFFFF),
-        accent = Color(0xFF7DE3D1),
-        onAccent = Color(0xFF070B1F),
-        textShadow = Color(0x80000000),
+        accent = Color(0xFFFFFFFF),
+        iconBackdrop = Color(0x29FFFFFF),
+        textShadow = Color(0x66000000),
+    )
+    val pixelNight = OnWallpaperColors(
+        content = Color(0xFFF2E9FF),
+        contentVariant = Color(0xBFF2E9FF),
+        scrimTop = Color.Transparent,
+        scrimBottom = Color.Transparent,
+        drawerScrim = Color(0xEB0B0620),
+        surface = Color(0x1FF2E9FF),
+        accent = Color(0xFFF2E9FF),
+        onAccent = Color(0xFF0B0620),
+        iconBackdrop = Color(0x29F2E9FF),
+        textShadow = Color(0x99000000),
     )
 }
 
-/** Colores de las ilustraciones de fondo de cada tema. */
+/** Colores de las ilustraciones de fondo: pocas formas, mucho aire. */
 internal object ArtColors {
-    val sakuraSkyTop = Color(0xFFFDF3F6)
-    val sakuraSkyBottom = Color(0xFFF6D6E2)
-    val sakuraMoon = Color(0xE6FFFFFF)
-    val sakuraMountain = Color(0xFFC3D9F1)
-    val sakuraMountainShade = Color(0xFFA9C5E7)
-    val sakuraSnow = Color(0xFFF7FBFF)
-    val sakuraBranch = Color(0xFF3A2E44)
-    val sakuraPetal = Color(0xFFF3A3BB)
-    val sakuraPetalLight = Color(0xFFF9C9D7)
+    val nightBase = Color(0xFF050507)
+    val nightGlow = Color(0x14FFFFFF)
 
-    val forestBackground = Color(0xFF0F2A2C)
-    val forestWaveLight = Color(0xFFD3E23A)
-    val forestWaveDark = Color(0xFF5FB043)
-    val forestDot = Color(0x40C4E04B)
-    val forestStripe = Color(0x80C4E04B)
+    val paperBase = Color(0xFFF3EEE5)
+    val paperShade = Color(0x0F2B2620)
+    val paperLine = Color(0x0D2B2620)
 
-    val pixelTop = Color(0xFF0B0620)
-    val pixelBottom = Color(0xFF241046)
-    val pixelNebula = Color(0x807A1FA2)
-    val pixelStar = Color(0xFFEBDDFF)
-    val pixelPlanetLight = Color(0xFF8E6BE8)
-    val pixelPlanetDark = Color(0xFF3B2A78)
-    val pixelRing = Color(0xFFC86BFA)
+    val sakuraSkyTop = Color(0xFFFFF6F8)
+    val sakuraSkyBottom = Color(0xFFF7DCE6)
+    val sakuraMoon = Color(0xB3FFFFFF)
+    val sakuraPetal = Color(0x8CF0A3B8)
+
+    val forestTop = Color(0xFF0E2321)
+    val forestBottom = Color(0xFF173A33)
+    val forestCurve = Color(0x33D7E8B0)
 
     val auroraTop = Color(0xFF070B1F)
     val auroraBottom = Color(0xFF0E1838)
-    val auroraTeal = Color(0x732DD4BF)
-    val auroraViolet = Color(0x668B5CF6)
-    val auroraBlue = Color(0x593B82F6)
-    val auroraStar = Color(0x99FFFFFF)
+    val auroraTeal = Color(0x592DD4BF)
+    val auroraViolet = Color(0x4D8B5CF6)
+    val auroraBlue = Color(0x403B82F6)
+
+    val pixelTop = Color(0xFF0B0620)
+    val pixelBottom = Color(0xFF241046)
+    val pixelStar = Color(0xFFEBDDFF)
 }
 
 /** Colores de marca (landing), tomados del logo: cinta plateada sobre negro. */

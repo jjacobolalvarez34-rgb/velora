@@ -59,7 +59,7 @@ class IconRepository(
 
     private suspend fun render(request: IconRequest, info: LauncherActivityInfo): ImageBitmap? {
         val bitmap = withContext(Dispatchers.Default) {
-            runCatching { renderer.render(info, request.sizePx, request.style, request.tint) }
+            runCatching { renderer.render(info, request.sizePx, request.style, request.tint, request.backdrop) }
                 .onFailure { Logger.w(TAG, it) { "No se pudo dibujar el ícono de ${request.key.packageName}" } }
                 .getOrNull()
         } ?: return null
@@ -102,12 +102,15 @@ class IconRepository(
     }
 }
 
-/** Qué ícono pedir: la app, el tamaño final en píxeles, el estilo y el color de acento (ARGB). */
-data class IconRequest(val key: AppKey, val sizePx: Int, val style: IconStyle, val tint: Int) {
+/**
+ * Qué ícono pedir: la app, el tamaño final en píxeles, el estilo, y para los minimalistas el
+ * color del logo en línea y el del círculo de fondo (ARGB).
+ */
+data class IconRequest(val key: AppKey, val sizePx: Int, val style: IconStyle, val tint: Int, val backdrop: Int) {
     /** Nombre en disco y clave en memoria: empieza por el paquete para poder borrarlo junto. */
     val fileName: String = IconDiskCache.packagePrefix(key.packageName) +
         "${key.className.hashCode().toUInt().toString(HEX)}_${key.userSerial}_${style.name}_" +
-        "${tint.toUInt().toString(HEX)}@$sizePx.png"
+        "${tint.toUInt().toString(HEX)}_${backdrop.toUInt().toString(HEX)}@$sizePx.png"
 
     private companion object {
         const val HEX = 16

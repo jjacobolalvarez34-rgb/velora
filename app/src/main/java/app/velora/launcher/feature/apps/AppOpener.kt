@@ -1,9 +1,14 @@
 package app.velora.launcher.feature.apps
 
 import android.app.ActivityOptions
+import android.app.SearchManager
 import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.Rect
+import android.net.Uri
 import android.view.View
 import android.widget.Toast
 import androidx.compose.runtime.Composable
@@ -49,6 +54,27 @@ class AppOpener(private val context: Context, private val view: View, private va
 
     fun openInfo(app: AppEntry, bounds: ComposeRect?) {
         report(app, launcher.openAppInfo(app.key, bounds?.toAndroidRect()?.toScreen()))
+    }
+
+    /** La búsqueda la hace la app de búsqueda o el navegador del teléfono: Velora no usa red. */
+    fun webSearch(query: String) {
+        val search = Intent(Intent.ACTION_WEB_SEARCH).putExtra(SearchManager.QUERY, query)
+        val browser = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=" + Uri.encode(query)))
+        val opened = listOf(search, browser).any { intent ->
+            try {
+                context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                true
+            } catch (e: ActivityNotFoundException) {
+                Logger.w(TAG, e) { "Sin app para buscar en la web" }
+                false
+            }
+        }
+        if (!opened) Toast.makeText(context, R.string.error_open_system_settings, Toast.LENGTH_SHORT).show()
+    }
+
+    fun copy(text: String) {
+        context.getSystemService(ClipboardManager::class.java)?.setPrimaryClip(ClipData.newPlainText(text, text))
+        Toast.makeText(context, context.getString(R.string.copied, text), Toast.LENGTH_SHORT).show()
     }
 
     fun uninstall(app: AppEntry) {
