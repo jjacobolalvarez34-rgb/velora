@@ -35,7 +35,7 @@ class WidgetHost(context: Context, private val repository: WidgetsRepository, pr
 
     private val appContext = context.applicationContext
     private val manager = AppWidgetManager.getInstance(appContext)
-    private val host = AppWidgetHost(appContext, HOST_ID)
+    private val host: AppWidgetHost = VeloraAppWidgetHost(appContext, HOST_ID)
 
     /** Lo que se está agregando mientras el sistema pide permiso o el widget se configura. */
     private var pending: Pair<Int, AppWidgetProviderInfo>? = null

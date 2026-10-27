@@ -2,6 +2,9 @@
 # Solo se listan las diferencias.
 
 complexity:
+  CyclomaticComplexMethod:
+    # Un `when` que asigna un valor a cada tema (enum → color o texto) no es lógica compleja.
+    ignoreSimpleWhenEntries: true
   LongMethod:
     threshold: 40
   LongParameterList:

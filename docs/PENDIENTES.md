@@ -2,7 +2,7 @@
 
 > Lista viva de lo que falta, en orden. Al terminar un punto: marcarlo `[x]` con fecha y moverlo a `ROADMAP.md` si corresponde.
 > `[~]` = código hecho y probado en la JVM; falta verlo en el teléfono.
-> Última actualización: 2026-10-26 (0.6.0).
+> Última actualización: 2026-10-27 (0.7.0).
 
 ## 1. Prueba en el teléfono de la 0.1.0
 
@@ -36,7 +36,7 @@
 - [~] Atajos de la app arriba del menú (`LauncherApps.getShortcuts`, B-018; solo si Velora es el inicio predeterminado).
 - [~] Ajustes → Diseño: modo zurdo (todo el inicio espejado) y tamaño de texto (pequeño/normal/grande); Ajustes → Favoritos: subir y bajar.
 - [ ] Onboarding: elegir favoritos la primera vez.
-- [ ] Animación de back predictivo al cerrar la lista.
+- [~] Atrás predictivo al cerrar la lista (0.7.0).
 - [ ] Baseline Profile de los flujos nuevos (abrir lista, arrastrar alfabeto, buscar) y medir los presupuestos de RENDIMIENTO §2.
 - [ ] Caché de íconos en disco.
 
@@ -71,7 +71,7 @@
 - [~] Estética más fina: íconos y textos más chicos, sombra suave en vez de velo pesado.
 - [~] Temas completos: Tu fondo, Sakura, Bosque, Noche pixel, Aurora (ADR-018), con miniaturas en Ajustes.
 - [x] "Empezar" en la introducción cuando Velora ya es el inicio.
-- [ ] Más temas a futuro (p. ej. papel/tinta, atardecer, minimal blanco) y un fondo animado opcional que respete batería y "Quitar animaciones".
+- [~] Más temas: Atardecer, Océano, Nieve y Café (0.7.0). A futuro: y un fondo animado opcional que respete batería y "Quitar animaciones".
 
 ## 7. Pedidos del 2026-10-26 (fotos de referencia)
 
@@ -85,15 +85,24 @@
 - [~] Calculadora y "Buscar en la web" en el buscador.
 
 ### Funciones de Niagara que Velora aún no tiene
-- [~] **Notificaciones en el inicio**: punto en cada app y último aviso bajo los favoritos (ADR-023, 0.6.0). Falta: leer y responder desde el inicio.
+- [~] **Notificaciones en el inicio**: punto en cada app y último aviso bajo los favoritos (ADR-023, 0.6.0); leerlas, abrirlas, descartarlas y responder desde el panel de la app (0.7.0).
 - [~] **Reproductor de música** que aparece solo cuando algo suena (0.6.0, mismo acceso).
-- [~] **Deslizar sobre una app** hacia el centro abre su panel con atajos (0.6.0). Falta: notificaciones en el panel.
-- [ ] **Carpetas / categorías** ("Añadir a una categoría", Fase 3).
+- [~] **Deslizar sobre una app** hacia el centro abre su panel con atajos y sus notificaciones (0.7.0).
+- [~] **Carpetas** (0.7.0, ADR-026): "Añadir a carpeta", arriba de los favoritos, renombrar y eliminar.
 - [~] **Doble toque para bloquear** (accesibilidad opt-in, adelantado a 0.6.0).
-- [ ] **Tiempo de uso / freno de uso** por app (Fase 4).
-- [ ] Búsqueda de **contactos** (permiso de contactos: ADR antes).
+- [~] **Tiempo de uso** de hoy en el panel de cada app (0.7.0, ADR-024). Falta: freno de uso (avisar al pasar un límite).
+- [~] Búsqueda de **contactos** (0.7.0, ADR-025).
 - [~] Favoritos en el alfabeto: la estrella arriba de la primera letra (0.6.0). Falta: acceso a ajustes al final.
-- [~] Widgets: reordenar con flechas en Ajustes (0.6.0). Falta: redimensionar arrastrando.
+- [~] Widgets: reordenar, redimensionar arrastrando y quitar desde el inicio (0.7.0).
+- [~] **Quitar widgets desde el inicio** (hecho en 0.7.0: mantener presionado → "Quitar widget" en rojo; pedido 2026-10-26): hoy solo se puede en Ajustes → Widgets → "Quitar". Idea: mantener presionado un widget → panel desde abajo con "Quitar", "Más alto/Más bajo" y "Mover". Al quitar, liberar el `appWidgetId` (B-019). Hay que ver que mantener presionado no choque con los widgets que usan su propio toque largo.
+
+## 7c. Pedidos del 2026-10-27 — 0.7.0
+
+- [~] Noche pixel con más definición: cielo en tres tonos, nebulosa tramada, estrellas en cruz, luna escalonada con cráteres, montañas de píxeles y letras con sombra dura (sin desenfoque).
+- [~] Temas nuevos: Galaxia, Neón (texto que brilla), Matcha y Lavanda; antes Atardecer, Océano, Nieve y Café.
+- [~] Compartir temas de Velora: guardar en `.velora-theme` y abrir uno compartido (ADR-027).
+- [ ] **Packs de íconos de terceros** (los de la Play Store que usan muchos launchers): siguiente paso para acercarse a los setups de la comunidad sin copiar nada de Niagara.
+- Aclaración: no se importan temas de Niagara (ADR-027): su formato es propio y los recursos tienen dueño.
 
 ## 7b. Pedidos del 2026-10-26 (tarde) — 0.6.0
 

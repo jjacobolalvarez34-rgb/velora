@@ -1,5 +1,6 @@
 package app.velora.launcher.feature.settings
 
+import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -44,7 +45,9 @@ class SettingsActivity : ComponentActivity() {
         SettingsViewModel.factory((application as VeloraApplication).container)
     }
 
-    private val widgetHost get() = (application as VeloraApplication).container.widgetHost
+    private val container get() = (application as VeloraApplication).container
+
+    private val widgetHost get() = container.widgetHost
 
     private var status by mutableStateOf(FeatureStatus(lockSupported = LockAccessibilityService.isSupported))
 
@@ -52,6 +55,21 @@ class SettingsActivity : ComponentActivity() {
     private val pickPhoto = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         uri?.let(::importPhoto)
     }
+
+    /** El permiso de contactos se pide solo después del aviso destacado (ADR-025). */
+    private val askContacts = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        status = status.copy(contactsPermission = granted)
+        // Si ya lo negó dos veces el sistema no vuelve a preguntar: se abre la ficha de la app.
+        if (!granted && !shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS)) {
+            openSystemScreen(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))
+        }
+    }
+
+    private val sharing = ThemeSharing(
+        activity = this,
+        current = { viewModel.theme.value },
+        apply = { theme, photo -> viewModel.onSharedTheme(theme, photo) },
+    )
 
     private val actions = object : SettingsActions {
         override fun onFont(font: FontChoice) = viewModel.onFont(font)
@@ -74,6 +92,10 @@ class SettingsActivity : ComponentActivity() {
         override fun onPickPhoto() {
             pickPhoto.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
+
+        override fun onExportTheme() = sharing.export()
+
+        override fun onImportTheme() = sharing.import()
 
         override fun onRemovePhoto() {
             viewModel.onPhotoBackground(null)
@@ -112,8 +134,22 @@ class SettingsActivity : ComponentActivity() {
         }
 
         override fun onDoubleTapLock(enabled: Boolean) {
-            viewModel.onDoubleTapLock(enabled)
+            viewModel.onFeature(Feature.DoubleTapLock, enabled)
             if (enabled && !status.lockService) onLockAccess()
+        }
+
+        override fun onUsageTime(enabled: Boolean) {
+            viewModel.onFeature(Feature.UsageTime, enabled)
+            if (enabled && !status.usageAccess) onUsageAccess()
+        }
+
+        override fun onUsageAccess() {
+            openSystemScreen(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+        }
+
+        override fun onContactsSearch(enabled: Boolean) {
+            viewModel.onFeature(Feature.ContactsSearch, enabled)
+            if (enabled && !status.contactsPermission) askContacts.launch(Manifest.permission.READ_CONTACTS)
         }
 
         override fun onLockAccess() {
@@ -158,6 +194,8 @@ class SettingsActivity : ComponentActivity() {
                         packageName in NotificationManagerCompat.getEnabledListenerPackages(this@SettingsActivity),
                     lockService = LockAccessibilityService.isEnabled(this@SettingsActivity),
                     lockSupported = LockAccessibilityService.isSupported,
+                    usageAccess = container.usageRepository.hasAccess(),
+                    contactsPermission = container.contactsRepository.hasPermission(),
                 )
             }
         }
@@ -174,8 +212,8 @@ class SettingsActivity : ComponentActivity() {
         }
     }
 
-    private fun openSystemScreen(action: String) {
-        if (!tryStart(Intent(action)) && !tryStart(Intent(Settings.ACTION_SETTINGS))) {
+    private fun openSystemScreen(action: String, data: Uri? = null) {
+        if (!tryStart(Intent(action, data)) && !tryStart(Intent(Settings.ACTION_SETTINGS))) {
             Toast.makeText(this, R.string.error_open_system_settings, Toast.LENGTH_SHORT).show()
         }
     }

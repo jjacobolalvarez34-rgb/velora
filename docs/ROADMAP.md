@@ -44,21 +44,21 @@
 ## Fase 2 — Contexto (3–4 semanas)
 - [~] Listener de notificaciones opt-in + aviso destacado en Ajustes (ADR-023, 0.6.0)
 - [~] Punto por app y último aviso bajo los favoritos (0.6.0)
-- [ ] Respuesta rápida
+- [~] Respuesta rápida desde el panel de la app (0.7.0)
 - [~] Reproductor de medios contextual (`MediaSessionManager` vía listener, 0.6.0)
 - [~] Apps recién instaladas (0.3.0)
 - [ ] Espacio privado Android 15+ (B-016)
 
 ## Fase 3 — Organización (4–6 semanas)
-- [~] Deslizar una app hacia el centro abre su panel (atajos, favorito…) (0.6.0). Falta: notificaciones dentro del panel.
-- [ ] Carpetas
-- [~] Widgets con `AppWidgetHost` (B-019, ADR-020), con orden y alto en Ajustes. Falta: redimensionar arrastrando.
+- [~] Deslizar una app hacia el centro abre su panel con atajos y notificaciones (0.7.0).
+- [~] Carpetas (0.7.0, ADR-026)
+- [~] Widgets con `AppWidgetHost` (B-019, ADR-020), con orden y alto en Ajustes. Desde 0.7.0 se editan en el inicio: quitar, mover y redimensionar arrastrando.
 - [ ] Paquetes de íconos de terceros; formas de ícono
 - [ ] Fuente opcional (descargable)
 
 ## Fase 4 — Bienestar y robustez (3–4 semanas)
 - [~] Bloqueo con doble toque vía accesibilidad opt-in (SEGURIDAD §3.3, adelantado a 0.6.0)
-- [ ] Freno de uso por app (local)
+- [~] Tiempo de uso de hoy por app (0.7.0, ADR-024). Falta el freno.
 - [ ] Respaldo con Android Backup + exportar/importar JSON
 - [ ] Página de ayuda por fabricante
 

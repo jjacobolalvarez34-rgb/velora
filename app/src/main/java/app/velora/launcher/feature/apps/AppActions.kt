@@ -1,5 +1,6 @@
 package app.velora.launcher.feature.apps
 
+import android.net.Uri
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.geometry.Rect
 import app.velora.launcher.core.model.AppEntry
@@ -28,4 +29,7 @@ interface AppActions {
 
     /** Copiar el resultado de la calculadora. */
     fun copy(text: String)
+
+    /** Abrir un contacto del buscador en la app de Contactos. */
+    fun openContact(uri: Uri)
 }

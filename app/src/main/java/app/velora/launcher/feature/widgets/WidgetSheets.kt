@@ -1,14 +1,11 @@
 package app.velora.launcher.feature.widgets
 
-import android.view.View
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,11 +22,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -38,10 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import app.velora.launcher.R
-import app.velora.launcher.core.data.favorites.WidgetEntity
-import app.velora.launcher.core.designsystem.theme.Shapes
 import app.velora.launcher.core.designsystem.theme.Spacing
 import app.velora.launcher.feature.appmenu.MenuItem
 
@@ -116,27 +108,4 @@ private fun WidgetOptionRow(host: WidgetHost, option: WidgetOption, onClick: () 
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier.clickable(onClick = onClick),
     )
-}
-
-/**
- * Los widgets del inicio, uno debajo del otro, con el alto elegido en Ajustes. Son `View`s
- * del sistema dentro de Compose; si su app ya no los ofrece, no se dibujan (y se limpian, B-019).
- */
-@Composable
-fun HomeWidgets(host: WidgetHost, widgets: List<WidgetEntity>, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        widgets.forEach { widget ->
-            key(widget.appWidgetId) {
-                AndroidView(
-                    factory = { context -> host.createView(context, widget.appWidgetId) ?: View(context) },
-                    modifier = Modifier
-                        .padding(vertical = Spacing.xs)
-                        .fillMaxWidth()
-                        .heightIn(min = 1.dp)
-                        .height(widget.heightDp.dp)
-                        .clip(Shapes.menu),
-                )
-            }
-        }
-    }
 }

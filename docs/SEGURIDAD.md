@@ -24,6 +24,8 @@
 | `BIND_NOTIFICATION_LISTENER_SERVICE` (servicio) | 2 (implementado en 0.6.0, ADR-023) | Acceso especial, el usuario lo concede en Ajustes | Puntos de notificación, último aviso bajo favoritos y reproductor (sesiones de música con el mismo acceso) | — |
 | `AppWidgetHost` + diálogo `ACTION_APPWIDGET_BIND` | 1 (adelantado, ADR-020) | Consentimiento del sistema por proveedor; **sin permiso en el manifiesto** | Widgets | `BIND_APPWIDGET` (solo para apps del sistema) |
 | `BIND_ACCESSIBILITY_SERVICE` (servicio) | 4 (adelantado a 0.6.0) | Acceso especial | **Únicamente** bloquear pantalla con gesto (`GLOBAL_ACTION_LOCK_SCREEN`, API 28+) | Administrador de dispositivo (rompe huella), bajar timeout (altera ajustes) |
+| `READ_CONTACTS` | 0.7.0 (ADR-025) | Peligroso, en tiempo de ejecución, opt-in tras aviso | Contactos en el buscador (solo el nombre) | Índice propio de contactos (copiaría datos) |
+| `PACKAGE_USAGE_STATS` | 0.7.0 (ADR-024) | Acceso especial, el usuario lo concede en Ajustes | Tiempo de uso de hoy en el panel de cada app | — |
 | `INTERNET` | — | — | **No se declara.** Si una función futura lo requiere: ADR + revisión completa | — |
 
 Cualquier otro permiso requiere ADR.
@@ -71,6 +73,8 @@ Cualquier otro permiso requiere ADR.
 | Íconos renderizados | Caché interna | Bajo | No |
 | Foto de fondo elegida (reducida) | `files/backgrounds/` | Medio (foto personal) | **No** (excluida en `backup_rules`/`data_extraction_rules`) |
 | Notificaciones | Solo memoria | **Alto** | Nunca |
+| Carpetas (nombre y apps) | Room | Medio | Sí |
+| Contactos y tiempo de uso | No se guardan: se consultan al momento | Alto | Nunca |
 | Contadores de uso por app (para sugerencias / freno de uso) | Room | Medio | Opcional, desactivado por defecto |
 
 - `android:allowBackup="true"` con `dataExtractionRules`/`fullBackupContent` que **excluyen** cachés y bases de íconos.

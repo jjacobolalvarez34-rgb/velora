@@ -7,6 +7,8 @@ import androidx.compose.runtime.Immutable
  * guarda en disco ni en logs (SEGURIDAD §3.2).
  *
  * @property title título de la más reciente, o null si es privada (se muestra "Nueva notificación").
+ * @property key clave del sistema (`StatusBarNotification.key`), para abrirla o responderla.
+ * @property canReply trae una respuesta rápida (`RemoteInput`).
  */
 @Immutable
 data class AppNotification(
@@ -16,6 +18,8 @@ data class AppNotification(
     val title: String?,
     val text: String?,
     val postedAtMs: Long,
+    val key: String = "",
+    val canReply: Boolean = false,
 )
 
 /** Lo que suena ahora, para el reproductor del inicio. */

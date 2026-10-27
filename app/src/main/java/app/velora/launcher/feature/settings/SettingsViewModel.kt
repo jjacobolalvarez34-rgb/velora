@@ -9,6 +9,7 @@ import app.velora.launcher.core.data.clock.ClockRepository
 import app.velora.launcher.core.data.favorites.FavoritesRepository
 import app.velora.launcher.core.data.favorites.HiddenAppsRepository
 import app.velora.launcher.core.data.prefs.PrefsRepository
+import app.velora.launcher.core.data.prefs.SharedTheme
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.ClockStyle
 import app.velora.launcher.core.model.FontChoice
@@ -29,6 +30,9 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+/** Funciones que se encienden con un interruptor y un acceso del sistema. */
+enum class Feature { DoubleTapLock, UsageTime, ContactsSearch }
 
 /** Vista previa del reloj con la hora y la batería reales. */
 data class ClockPreview(val clock: ClockText = ClockText(), val battery: Int? = null)
@@ -89,9 +93,25 @@ class SettingsViewModel(
         then()
     }
 
-    fun onDoubleTapLock(enabled: Boolean) = save { prefs.setDoubleTapLock(enabled) }
+    /** Funciones opt-in de un solo interruptor. */
+    fun onFeature(feature: Feature, enabled: Boolean) = save {
+        when (feature) {
+            Feature.DoubleTapLock -> prefs.setDoubleTapLock(enabled)
+            Feature.UsageTime -> prefs.setUsageTime(enabled)
+            Feature.ContactsSearch -> prefs.setContactsSearch(enabled)
+        }
+    }
 
     fun onPhotoBackground(path: String?) = save { prefs.setPhotoBackground(path) }
+
+    /** Un tema compartido: su tema base y encima lo que eligió quien lo compartió (ADR-027). */
+    fun onSharedTheme(theme: SharedTheme, photoPath: String?) = save {
+        prefs.applyPreset(theme.preset)
+        theme.font?.let { prefs.setFont(it) }
+        theme.clock?.let { prefs.setClockStyle(it) }
+        theme.icons?.let { prefs.setIconStyle(it) }
+        prefs.setPhotoBackground(photoPath)
+    }
 
     fun onFont(font: FontChoice) = save { prefs.setFont(font) }
 

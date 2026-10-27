@@ -121,6 +121,31 @@ _`compileSdk` actualizado a 37 por ADR-013; `minSdk` y `targetSdk` siguen vigent
 **Por qué:** es la única vía de Android para estas funciones; todo queda en memoria y en el teléfono.
 **Consecuencias:** nada de notificaciones en disco ni en logs (REGLAS). Si el usuario quita el acceso, los puntos desaparecen y Ajustes muestra "Falta el acceso". Algunos fabricantes apagan la accesibilidad (B-002): el doble toque avisa y abre Accesibilidad.
 
+## ADR-024 · Tiempo de uso por app — Aceptada (2026-10-27)
+**Contexto:** el autor pidió todo lo pendiente; "tiempo de uso" estaba en la Fase 4.
+**Opciones:** A) contar nosotros (no sabemos cuándo se usa otra app sin un servicio). B) `UsageStatsManager` con el acceso especial `PACKAGE_USAGE_STATS`, que concede el usuario en Ajustes.
+**Decisión:** B, opt-in con aviso destacado. Solo se consulta `queryAndAggregateUsageStats` de hoy al abrir el panel de una app, en `Dispatchers.IO`; se muestra "Hoy: 1 h 20 min". Nada se guarda ni sale del teléfono.
+**Por qué:** es la vía del sistema; sin el acceso la función no hace nada.
+**Consecuencias:** `tools:ignore="ProtectedPermissions"` en el manifiesto (el permiso se concede como acceso especial). El "freno de uso" (avisar al pasar un límite) queda pendiente.
+
+## ADR-025 · Contactos en el buscador — Aceptada (2026-10-27)
+**Contexto:** búsqueda de contactos, pendiente desde la comparación con Niagara.
+**Decisión:** `READ_CONTACTS` en tiempo de ejecución, pedido solo después del aviso destacado en Ajustes → Funciones. `ContactsRepository` consulta `Contacts.CONTENT_FILTER_URI` (solo `_ID` y nombre, máximo 4) en `Dispatchers.IO`; tocar abre la ficha en la app de Contactos (`ACTION_VIEW`). Si el usuario lo niega dos veces, se abre la ficha de Velora en Ajustes.
+**Por qué:** el filtro del proveedor es rápido y no requiere copiar nada; sin permiso la consulta no ocurre.
+**Consecuencias:** nada de números ni correos en memoria; no se indexa ni se guarda.
+
+## ADR-026 · Carpetas y edición de widgets en el inicio — Aceptada (2026-10-27)
+**Decisión:** carpetas en Room (versión 4, `folders` y `folder_apps`, migración automática): se crean desde el panel de una app ("Añadir a carpeta"), aparecen arriba de los favoritos con un mosaico de 4 íconos y se abren en un panel (sacar apps, renombrar, eliminar). Widgets: `VeloraAppWidgetHost` crea `LongPressWidgetHostView`, que detecta el toque largo antes que el widget; el widget queda en modo edición con "Quitar widget" en rojo, flechas para moverlo y una barra para cambiar el alto arrastrando.
+**Por qué:** las mismas tablas que favoritos (solo identidad, nunca `Intent`); los widgets son `View`s y Compose no ve su toque largo sin interceptarlo.
+**Consecuencias:** Ajustes → Widgets sigue sirviendo para lo mismo.
+
+## ADR-027 · Temas compartibles de Velora (y no los de Niagara) — Aceptada (2026-10-27)
+**Contexto:** el autor pidió poder usar en Velora los temas de la comunidad de Niagara, porque "son públicos".
+**Opciones:** A) leer los archivos o respaldos de Niagara. B) Un formato propio para compartir temas entre usuarios de Velora. C) Soportar packs de íconos de terceros (formato común de launchers, Play Store).
+**Decisión:** B ahora y C como siguiente paso. Se rechaza A: que algo esté publicado no da licencia para usarlo; los fondos, packs y fuentes de esos temas son de sus autores, y el formato de Niagara es propio y no está documentado (habría que hacerle ingeniería inversa, contra REGLAS §6 "No copiar nada de Niagara"). El formato `.velora-theme` es texto plano, una clave por línea (`velora-theme 1`, `preset=`, `font=`, `clock=`, `icons=`, `photo=` en Base64). Se exporta e importa con el selector de archivos del sistema (sin permisos). Al importar: límite de 8 MB, solo nombres conocidos de Velora (lo demás se ignora), la foto se decodifica y reduce como cualquier foto propia.
+**Por qué:** la comunidad puede compartir temas sin riesgo legal ni de seguridad: el archivo no puede ejecutar nada.
+**Consecuencias:** pruebas en `ThemeFileTest`. Un tema importado incluye la foto de quien lo compartió: es responsabilidad de esa persona tener derecho a compartirla.
+
 ---
 
 ## Plantilla

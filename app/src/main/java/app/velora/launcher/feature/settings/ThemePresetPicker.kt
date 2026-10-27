@@ -110,6 +110,14 @@ internal fun presetName(preset: ThemePreset): Int = when (preset) {
     ThemePreset.Paper -> R.string.theme_paper
     ThemePreset.Sakura -> R.string.theme_sakura
     ThemePreset.Forest -> R.string.theme_forest
+    ThemePreset.Sunset -> R.string.theme_sunset
+    ThemePreset.Ocean -> R.string.theme_ocean
+    ThemePreset.Snow -> R.string.theme_snow
+    ThemePreset.Coffee -> R.string.theme_coffee
+    ThemePreset.Galaxy -> R.string.theme_galaxy
+    ThemePreset.Neon -> R.string.theme_neon
+    ThemePreset.Matcha -> R.string.theme_matcha
+    ThemePreset.Lavender -> R.string.theme_lavender
     ThemePreset.PixelNight -> R.string.theme_pixel_night
     ThemePreset.Ash -> R.string.theme_ash
     ThemePreset.Aurora -> R.string.theme_aurora

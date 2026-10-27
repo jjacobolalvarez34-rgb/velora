@@ -3,11 +3,15 @@ package app.velora.launcher.feature.settings
 import androidx.annotation.StringRes
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -26,11 +30,16 @@ import app.velora.launcher.core.model.ThemeSettings
 interface FeatureActions {
     fun onPickPhoto()
     fun onRemovePhoto()
+    fun onExportTheme()
+    fun onImportTheme()
     fun onSystemWallpaper()
     fun onNotifications(enabled: Boolean)
     fun onNotificationAccess()
     fun onDoubleTapLock(enabled: Boolean)
     fun onLockAccess()
+    fun onUsageTime(enabled: Boolean)
+    fun onUsageAccess()
+    fun onContactsSearch(enabled: Boolean)
 }
 
 /** Si el sistema ya dio el acceso que cada función necesita. Se vuelve a leer al regresar a Ajustes. */
@@ -40,6 +49,8 @@ data class FeatureStatus(
     val lockService: Boolean = false,
     /** El gesto de bloqueo existe desde Android 9. */
     val lockSupported: Boolean = true,
+    val usageAccess: Boolean = false,
+    val contactsPermission: Boolean = false,
 )
 
 /** Fondo: una foto propia encima del tema elegido (ADR-022), o el fondo del teléfono. */
@@ -75,6 +86,27 @@ internal fun LazyListScope.backgroundSection(theme: ThemeSettings, actions: Feat
     }
 }
 
+/** Compartir temas de Velora con otros usuarios de Velora (ADR-027). */
+internal fun LazyListScope.shareSection(actions: FeatureActions) {
+    item(key = "share") { SectionTitle(R.string.settings_share_themes) }
+    item(key = "share-export") {
+        Option(
+            title = stringResource(R.string.settings_theme_export),
+            subtitle = stringResource(R.string.settings_theme_export_summary),
+            onClick = actions::onExportTheme,
+            icon = Icons.Outlined.Share,
+        )
+    }
+    item(key = "share-import") {
+        Option(
+            title = stringResource(R.string.settings_theme_import),
+            subtitle = stringResource(R.string.settings_theme_import_summary),
+            onClick = actions::onImportTheme,
+            icon = Icons.Outlined.Add,
+        )
+    }
+}
+
 /**
  * Notificaciones en el inicio y doble toque para bloquear. Antes de encender cualquiera se explica
  * qué acceso pide y para qué (SEGURIDAD §3: aviso destacado antes del diálogo del sistema).
@@ -102,6 +134,56 @@ internal fun LazyListScope.featuresSection(theme: ThemeSettings, status: Feature
         }
     }
     if (status.lockSupported) lockItems(theme, status, actions)
+    usageItems(theme, status, actions)
+    contactsItems(theme, status, actions)
+}
+
+/** Tiempo de uso de hoy en el panel de cada app (ADR-024). */
+private fun LazyListScope.usageItems(theme: ThemeSettings, status: FeatureStatus, actions: FeatureActions) {
+    item(key = "usage-time") {
+        DisclosedSwitch(
+            title = R.string.settings_usage_time,
+            summary = R.string.settings_usage_time_summary,
+            disclosure = R.string.settings_usage_time_disclosure,
+            checked = theme.usageTime,
+            onChange = actions::onUsageTime,
+            icon = Icons.Outlined.DateRange,
+        )
+    }
+    if (theme.usageTime && !status.usageAccess) {
+        item(key = "usage-access") {
+            Option(
+                title = stringResource(R.string.settings_access_missing),
+                subtitle = stringResource(R.string.settings_usage_time_access),
+                onClick = actions::onUsageAccess,
+                icon = Icons.Outlined.Settings,
+            )
+        }
+    }
+}
+
+/** Contactos en el buscador (ADR-025). */
+private fun LazyListScope.contactsItems(theme: ThemeSettings, status: FeatureStatus, actions: FeatureActions) {
+    item(key = "contacts-search") {
+        DisclosedSwitch(
+            title = R.string.settings_contacts,
+            summary = R.string.settings_contacts_summary,
+            disclosure = R.string.settings_contacts_disclosure,
+            checked = theme.contactsSearch,
+            onChange = actions::onContactsSearch,
+            icon = Icons.Outlined.Person,
+        )
+    }
+    if (theme.contactsSearch && !status.contactsPermission) {
+        item(key = "contacts-access") {
+            Option(
+                title = stringResource(R.string.settings_access_missing),
+                subtitle = stringResource(R.string.settings_contacts_access),
+                onClick = { actions.onContactsSearch(true) },
+                icon = Icons.Outlined.Settings,
+            )
+        }
+    }
 }
 
 private fun LazyListScope.lockItems(theme: ThemeSettings, status: FeatureStatus, actions: FeatureActions) {

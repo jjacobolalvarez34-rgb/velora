@@ -133,7 +133,15 @@ El elemento firma. Especificación:
 | Sakura | cielo rosa, una luna, siete pétalos | oscuro (barras del sistema oscuras) | Nunito / Clásico / Círculo |
 | Bosque | verde profundo con una sola curva fina | claro | Quicksand / Clásico / Minimalista |
 | Aurora | azul noche con tres luces suaves | claro | Nunito / Centrado / Minimalista |
-| Noche pixel | morado con estrellas cuadradas | lavanda | Silkscreen / Clásico / Círculo |
+| Noche pixel | cielo en tres tonos, nebulosa tramada, estrellas en cruz, luna con cráteres y montañas, todo en la misma rejilla | casi blanco con sombra dura de píxel; acento amarillo luna | Silkscreen / Clásico / Círculo |
+| Atardecer | durazno a rosa, sol bajo y horizonte | tinta ciruela | Fraunces / Centrado / Minimalista |
+| Océano | azul petróleo con dos olas finas | espuma | Figtree / Clásico / Minimalista |
+| Nieve | blanco casi puro | carbón | Plus Jakarta Sans / Clásico / Minimalista |
+| Café | marrón tostado con un brillo cálido | crema | Fraunces / Día / Minimalista |
+| Galaxia | nebulosas magenta y turquesa, brazo de estrellas, planeta con anillo | blanco con sombra profunda | Figtree / Centrado / Minimalista |
+| Neón | sol rayado y cuadrícula en perspectiva | blanco con brillo magenta | Plus Jakarta Sans / Centrado / Minimalista |
+| Matcha | crema verdosa con un cuenco y una hoja | verde bosque | Quicksand / Clásico / Minimalista |
+| Lavanda | lila con manchas de acuarela | violeta profundo | Nunito / Día / Minimalista |
 | Ceniza | cenizas cálidas, una hoguera abajo, brasas que flotan, viñeta | hueso/pergamino, acento brasa | Cinzel / Día / Minimalista |
 
 - **Ceniza** es un tema de fantasía oscura propio (sin nombres, logos ni arte de ningún juego): fuente romana grabada (Cinzel, OFL), círculos de íconos de hierro y glifos color hueso.
@@ -142,6 +150,8 @@ El elemento firma. Especificación:
 Regla: **sencillo y estético**. Pocas formas, mucho aire: el protagonista es el texto.
 
 - **Íconos minimalistas** = círculo claro lleno con el glifo oscuro (o al revés en temas claros), iguales para todas las apps aunque no traigan ícono temático (ADR-021).
+- **Carpetas** (ADR-026): fila igual a un favorito, con un mosaico de hasta 4 íconos en un círculo suave y "N apps" debajo.
+- **Editar un widget**: mantenerlo presionado lo marca con un borde del acento; debajo, "Quitar widget" en rojo (lo más visible), flechas y "Listo", y una barra para arrastrar el alto.
 - **Notificaciones** (ADR-023): un punto de 7 dp del color de acento junto al nombre; en favoritos, el título del último aviso en una línea (`caption`). El reproductor aparece bajo el reloj creciendo en altura (`spatialDefault`) y se va igual.
 
 - Estética más fina: íconos de 34 dp (favoritos) y 30 dp (lista), textos de 19 sp y 17 sp con 0,2 sp de espaciado, filas de 52 dp y 48 dp. Sobre fondos oscuros el texto lleva una sombra suave (desenfoque de 8, caída de 1,5): permite un velo más liviano.

@@ -1,6 +1,7 @@
 package app.velora.launcher.feature.apps
 
 import android.content.res.Configuration
+import android.net.Uri
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -219,6 +220,7 @@ internal object PreviewAppActions : AppActions {
     override fun showMenu(app: AppEntry) = Unit
     override fun webSearch(query: String) = Unit
     override fun copy(text: String) = Unit
+    override fun openContact(uri: Uri) = Unit
 }
 
 internal fun previewApp(label: String) = AppEntry(

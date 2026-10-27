@@ -25,12 +25,14 @@ import app.velora.launcher.R
 import app.velora.launcher.core.designsystem.motion.StaggeredEntrance
 import app.velora.launcher.core.designsystem.theme.Spacing
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
+import app.velora.launcher.core.model.AppFolder
 import app.velora.launcher.feature.apps.AppActions
 import app.velora.launcher.feature.apps.AppRow
 import app.velora.launcher.feature.apps.AppRowStyle
 import app.velora.launcher.feature.apps.PreviewAppActions
 import app.velora.launcher.feature.apps.previewApp
 import app.velora.launcher.feature.drawer.WaveAlphabetWidth
+import app.velora.launcher.feature.folders.FolderRow
 import app.velora.launcher.feature.home.components.ClockHeader
 
 /**
@@ -54,6 +56,8 @@ fun HomeScreen(
     actions: AppActions,
     modifier: Modifier = Modifier,
     widgets: @Composable () -> Unit = {},
+    folders: List<AppFolder> = emptyList(),
+    onOpenFolder: (AppFolder) -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -66,25 +70,42 @@ fun HomeScreen(
         }
         widgets()
         Spacer(Modifier.weight(1f))
-        // Agregar o quitar un favorito reacomoda la columna con un resorte, sin saltos.
-        Column(
-            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-            modifier = Modifier.animateContentSize(VeloraTheme.motion.spatialDefault()),
-        ) {
-            if (uiState.favorites.isEmpty()) {
-                StaggeredEntrance(index = 1) {
-                    Text(
-                        text = stringResource(R.string.home_favorites_empty),
-                        style = VeloraTheme.typography.caption,
-                        color = VeloraTheme.onWallpaper.contentVariant,
-                    )
-                }
+        FavoritesColumn(uiState, actions, folders, onOpenFolder)
+    }
+}
+
+/** Carpetas y favoritos, abajo en la zona del pulgar. */
+@Composable
+private fun FavoritesColumn(
+    uiState: HomeUiState,
+    actions: AppActions,
+    folders: List<AppFolder>,
+    onOpenFolder: (AppFolder) -> Unit,
+) {
+    // Agregar o quitar un favorito reacomoda la columna con un resorte, sin saltos.
+    Column(
+        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+        modifier = Modifier.animateContentSize(VeloraTheme.motion.spatialDefault()),
+    ) {
+        // Las carpetas van arriba de los favoritos, con la misma altura de fila.
+        folders.forEachIndexed { index, folder ->
+            key("folder-${folder.id}") {
+                StaggeredEntrance(index = index + 1) { FolderRow(folder, onOpen = { onOpenFolder(folder) }) }
             }
-            uiState.favorites.forEachIndexed { index, app ->
-                key(app.key.stableId) {
-                    StaggeredEntrance(index = index + 1) {
-                        AppRow(app = app, style = AppRowStyle.Favorite, actions = actions)
-                    }
+        }
+        if (uiState.favorites.isEmpty() && folders.isEmpty()) {
+            StaggeredEntrance(index = 1) {
+                Text(
+                    text = stringResource(R.string.home_favorites_empty),
+                    style = VeloraTheme.typography.caption,
+                    color = VeloraTheme.onWallpaper.contentVariant,
+                )
+            }
+        }
+        uiState.favorites.forEachIndexed { index, app ->
+            key(app.key.stableId) {
+                StaggeredEntrance(index = index + 1) {
+                    AppRow(app = app, style = AppRowStyle.Favorite, actions = actions)
                 }
             }
         }

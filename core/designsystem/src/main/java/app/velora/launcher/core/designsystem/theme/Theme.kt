@@ -70,6 +70,14 @@ private fun onWallpaperColorsFor(preset: ThemePreset): OnWallpaperColors = when 
     ThemePreset.Paper -> PresetColors.paper
     ThemePreset.Sakura -> PresetColors.sakura
     ThemePreset.Forest -> PresetColors.forest
+    ThemePreset.Sunset -> PresetColors.sunset
+    ThemePreset.Ocean -> PresetColors.ocean
+    ThemePreset.Snow -> PresetColors.snow
+    ThemePreset.Coffee -> PresetColors.coffee
+    ThemePreset.Galaxy -> PresetColors.galaxy
+    ThemePreset.Neon -> PresetColors.neon
+    ThemePreset.Matcha -> PresetColors.matcha
+    ThemePreset.Lavender -> PresetColors.lavender
     ThemePreset.PixelNight -> PresetColors.pixelNight
     ThemePreset.Ash -> PresetColors.ash
     ThemePreset.Aurora -> PresetColors.aurora
@@ -78,8 +86,16 @@ private fun onWallpaperColorsFor(preset: ThemePreset): OnWallpaperColors = when 
 private const val SHADOW_BLUR = 8f
 private const val SHADOW_DROP = 1.5f
 
-private fun textShadowOf(colors: OnWallpaperColors): Shadow? =
-    colors.textShadow.takeIf { it.alpha > 0f }?.let { Shadow(it, Offset(0f, SHADOW_DROP), SHADOW_BLUR) }
+/** Brillo de neón, sombra dura (pixel) o la sombra suave de siempre. */
+private fun textShadowOf(colors: OnWallpaperColors): Shadow? = when {
+    colors.textGlow.alpha > 0f -> Shadow(colors.textGlow, Offset.Zero, GLOW_BLUR)
+    colors.textShadow.alpha == 0f -> null
+    colors.crispShadow -> Shadow(colors.textShadow, Offset(CRISP_DROP, CRISP_DROP), 0f)
+    else -> Shadow(colors.textShadow, Offset(0f, SHADOW_DROP), SHADOW_BLUR)
+}
+
+private const val GLOW_BLUR = 14f
+private const val CRISP_DROP = 3f
 
 /** Acceso a los tokens propios de Velora (lo que Material 3 no cubre). */
 object VeloraTheme {

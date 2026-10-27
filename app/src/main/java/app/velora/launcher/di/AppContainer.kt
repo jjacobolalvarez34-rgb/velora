@@ -11,7 +11,9 @@ import app.velora.launcher.core.data.battery.BatteryRepository
 import app.velora.launcher.core.data.battery.SystemBatteryRepository
 import app.velora.launcher.core.data.clock.ClockRepository
 import app.velora.launcher.core.data.clock.SystemClockRepository
+import app.velora.launcher.core.data.contacts.ContactsRepository
 import app.velora.launcher.core.data.favorites.FavoritesRepository
+import app.velora.launcher.core.data.favorites.FoldersRepository
 import app.velora.launcher.core.data.favorites.HiddenAppsRepository
 import app.velora.launcher.core.data.favorites.UserListsStore
 import app.velora.launcher.core.data.home.DefaultHomeRepository
@@ -19,6 +21,7 @@ import app.velora.launcher.core.data.home.SystemDefaultHomeRepository
 import app.velora.launcher.core.data.notifications.NotificationsRepository
 import app.velora.launcher.core.data.prefs.DataStorePrefsRepository
 import app.velora.launcher.core.data.prefs.PrefsRepository
+import app.velora.launcher.core.data.usage.UsageRepository
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.feature.widgets.WidgetHost
 import kotlinx.coroutines.CoroutineScope
@@ -67,6 +70,13 @@ class AppContainer(context: Context) {
     }
 
     val favoritesRepository: FavoritesRepository by lazy { userLists.favorites(visibleApps) }
+
+    val foldersRepository: FoldersRepository by lazy { userLists.folders(visibleApps) }
+
+    /** Tiempo de uso (ADR-024) y contactos (ADR-025): opt-in, sin leer nada hasta que se activan. */
+    val usageRepository: UsageRepository by lazy { UsageRepository(appContext) }
+
+    val contactsRepository: ContactsRepository by lazy { ContactsRepository(appContext) }
 
     val shortcutsRepository: ShortcutsRepository by lazy {
         ShortcutsRepository(appContext, userFor = { systemApps.userFor(it) })

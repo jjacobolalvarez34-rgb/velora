@@ -72,6 +72,15 @@ class AppOpener(private val context: Context, private val view: View, private va
         if (!opened) Toast.makeText(context, R.string.error_open_system_settings, Toast.LENGTH_SHORT).show()
     }
 
+    fun openContact(uri: Uri) {
+        try {
+            context.startActivity(Intent(Intent.ACTION_VIEW, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        } catch (e: ActivityNotFoundException) {
+            Logger.w(TAG, e) { "Sin app de contactos" }
+            Toast.makeText(context, R.string.error_open_system_settings, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     fun copy(text: String) {
         context.getSystemService(ClipboardManager::class.java)?.setPrimaryClip(ClipData.newPlainText(text, text))
         Toast.makeText(context, context.getString(R.string.copied, text), Toast.LENGTH_SHORT).show()

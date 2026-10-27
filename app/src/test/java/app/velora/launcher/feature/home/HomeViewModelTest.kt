@@ -126,6 +126,12 @@ class HomeViewModelTest {
         override suspend fun setDoubleTapLock(enabled: Boolean) {
             theme.value = theme.value.copy(doubleTapLock = enabled)
         }
+        override suspend fun setUsageTime(enabled: Boolean) {
+            theme.value = theme.value.copy(usageTime = enabled)
+        }
+        override suspend fun setContactsSearch(enabled: Boolean) {
+            theme.value = theme.value.copy(contactsSearch = enabled)
+        }
         override val onboardingDone = MutableStateFlow(true)
         override suspend fun setOnboardingDone() {
             onboardingDone.value = true

@@ -101,13 +101,23 @@ interface WidgetsDao {
 
 /**
  * Base de datos que **sí** se respalda (favoritos, ocultas, widgets; luego carpetas). SEGURIDAD §4.
- * Versión 2: `hidden_apps`. Versión 3: `widgets`. Migraciones automáticas, sin perder nada.
+ * Versión 2: `hidden_apps`. Versión 3: `widgets`. Versión 4: carpetas. Migraciones automáticas, sin perder nada.
  */
 @Database(
-    entities = [FavoriteEntity::class, HiddenAppEntity::class, WidgetEntity::class],
-    version = 3,
+    entities = [
+        FavoriteEntity::class,
+        HiddenAppEntity::class,
+        WidgetEntity::class,
+        FolderEntity::class,
+        FolderAppEntity::class,
+    ],
+    version = 4,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3)],
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2),
+        AutoMigration(from = 2, to = 3),
+        AutoMigration(from = 3, to = 4),
+    ],
 )
 abstract class VeloraDatabase : RoomDatabase() {
     abstract fun favorites(): FavoritesDao
@@ -115,6 +125,8 @@ abstract class VeloraDatabase : RoomDatabase() {
     abstract fun hiddenApps(): HiddenAppsDao
 
     abstract fun widgets(): WidgetsDao
+
+    abstract fun folders(): FoldersDao
 
     companion object {
         private const val NAME = "velora.db"

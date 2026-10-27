@@ -42,6 +42,7 @@ import app.velora.launcher.core.designsystem.components.ThemeBackground
 import app.velora.launcher.core.designsystem.theme.Sizes
 import app.velora.launcher.core.designsystem.theme.Spacing
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
+import app.velora.launcher.core.model.AppFolder
 import app.velora.launcher.core.model.ThemeSettings
 import app.velora.launcher.feature.apps.AppActions
 import app.velora.launcher.feature.drawer.AppListScreen
@@ -83,6 +84,8 @@ fun LauncherScreen(
     widgets: @Composable () -> Unit = {},
     photo: ImageBitmap? = null,
     onDoubleTap: (() -> Unit)? = null,
+    folders: List<AppFolder> = emptyList(),
+    onOpenFolder: (AppFolder) -> Unit = {},
 ) {
     drawerState.spec = VeloraTheme.motion.let { if (it.reduced) null else it.spatialDefault() }
     val drawerVisible by remember(drawerState) { derivedStateOf { drawerState.isOpen } }
@@ -102,18 +105,11 @@ fun LauncherScreen(
                 .homeLayer(drawerState)
                 .homeGestures(drawerState, onHomeMenu, onOpenSettings, onDoubleTap),
             widgets = widgets,
+            folders = folders,
+            onOpenFolder = onOpenFolder,
         )
         if (drawerVisible) {
-            AppListScreen(
-                uiState = drawer,
-                listState = listState,
-                search = search,
-                actions = actions,
-                nestedScrollConnection = drawerState.nestedScroll,
-                fullList = theme.fullList,
-                activeSection = { drawer.list.letters.getOrNull(activeLetter) },
-                modifier = Modifier.drawerLayer(drawerState),
-            )
+            DrawerLayer(drawer, drawerState, listState, search, actions, theme.fullList) { activeLetter }
         }
         // Buscando, el alfabeto sobra: se oculta para dejar la pantalla limpia.
         if (!search.active) {
@@ -123,6 +119,29 @@ fun LauncherScreen(
             }
         }
     }
+}
+
+/** La lista encima del inicio; [activeLetter] se lee al dibujar, no al componer. */
+@Composable
+private fun DrawerLayer(
+    drawer: DrawerUiState,
+    drawerState: DrawerState,
+    listState: LazyListState,
+    search: DrawerSearchState,
+    actions: AppActions,
+    fullList: Boolean,
+    activeLetter: () -> Int,
+) {
+    AppListScreen(
+        uiState = drawer,
+        listState = listState,
+        search = search,
+        actions = actions,
+        nestedScrollConnection = drawerState.nestedScroll,
+        fullList = fullList,
+        activeSection = { drawer.list.letters.getOrNull(activeLetter()) },
+        modifier = Modifier.drawerLayer(drawerState),
+    )
 }
 
 /** Al soltar se queda la última letra elegida; en la lista completa, además, salta a ella. */

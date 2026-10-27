@@ -56,6 +56,15 @@ class DrawerState(private val scope: CoroutineScope) {
         animateTo(target, velocity)
     }
 
+    /**
+     * Atrás predictivo: mientras el gesto avanza la lista baja un poco y se aclara, para que se
+     * vea qué va a pasar; [fraction] es el avance del gesto (0..1).
+     */
+    fun peekBack(fraction: Float) {
+        settleJob?.cancel()
+        progress = 1f - fraction.coerceIn(0f, 1f) * BACK_PEEK
+    }
+
     fun open() = animateTo(1f)
 
     fun close() = animateTo(0f)
@@ -110,6 +119,9 @@ class DrawerState(private val scope: CoroutineScope) {
 
         /** Al soltar despacio: pasada la mitad, abre. */
         const val HALF_OPEN = 0.5f
+
+        /** Cuánto se cierra la lista siguiendo el gesto de atrás antes de soltar. */
+        const val BACK_PEEK = 0.35f
     }
 }
 

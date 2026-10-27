@@ -108,6 +108,7 @@ fun SettingsScreen(
         item(key = "presets-title") { SectionTitle(R.string.settings_themes) }
         item(key = "presets") { ThemePresetPicker(selected = theme.preset, onSelect = actions::onPreset) }
         backgroundSection(theme, features)
+        shareSection(features)
         themeSection(theme, actions)
         layoutSection(theme, actions)
         favoritesSection(lists.favorites, actions)
@@ -296,11 +297,16 @@ private object PreviewSettingsActions : SettingsActions {
 private object PreviewFeatureActions : FeatureActions {
     override fun onPickPhoto() = Unit
     override fun onRemovePhoto() = Unit
+    override fun onExportTheme() = Unit
+    override fun onImportTheme() = Unit
     override fun onSystemWallpaper() = Unit
     override fun onNotifications(enabled: Boolean) = Unit
     override fun onNotificationAccess() = Unit
     override fun onDoubleTapLock(enabled: Boolean) = Unit
     override fun onLockAccess() = Unit
+    override fun onUsageTime(enabled: Boolean) = Unit
+    override fun onUsageAccess() = Unit
+    override fun onContactsSearch(enabled: Boolean) = Unit
 }
 
 @Preview(name = "Claro", heightDp = 1200)

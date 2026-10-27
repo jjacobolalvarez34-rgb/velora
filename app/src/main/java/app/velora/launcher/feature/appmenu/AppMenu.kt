@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Delete
@@ -24,6 +27,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -34,9 +38,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import app.velora.launcher.R
 import app.velora.launcher.core.data.apps.ShortcutsRepository
+import app.velora.launcher.core.data.notifications.NotificationActions
+import app.velora.launcher.core.data.usage.UsageRepository
 import app.velora.launcher.core.designsystem.theme.Sizes
 import app.velora.launcher.core.designsystem.theme.Spacing
 import app.velora.launcher.core.model.AppEntry
+import app.velora.launcher.core.model.AppNotification
 import app.velora.launcher.core.model.AppShortcut
 import app.velora.launcher.feature.apps.AppActions
 import app.velora.launcher.feature.apps.AppIcon
@@ -56,25 +63,21 @@ fun AppMenuSheet(
     actions: AppActions,
     onOpenSettings: () -> Unit,
     onDismiss: () -> Unit,
+    extras: AppMenuExtras = AppMenuExtras(),
 ) {
     val shortcuts by rememberShortcuts(app)
+    val usage by produceState<Long?>(null, app.key, extras.usage) { value = extras.usage?.todayMs(app.key.packageName) }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState()) {
-        Column(Modifier.padding(bottom = Spacing.l)) {
-            Header(app)
+        // Con notificaciones y atajos puede ser largo: se desplaza.
+        Column(Modifier.verticalScroll(rememberScrollState()).padding(bottom = Spacing.l)) {
+            Header(app, usage)
+            extras.notificationActions?.let { AppNotificationsList(extras.notifications, it, onDismiss) }
+            if (extras.notifications.isNotEmpty()) HorizontalDivider(Modifier.padding(vertical = Spacing.s))
             shortcuts.forEach { shortcut ->
                 MenuItem(Icons.Outlined.PlayArrow, shortcut.label, onDismiss) { actions.openShortcut(shortcut, null) }
             }
             if (shortcuts.isNotEmpty()) HorizontalDivider(Modifier.padding(vertical = Spacing.s))
-            FavoriteItem(app, isFavorite, actions, onDismiss)
-            MenuItem(Icons.Outlined.Info, stringResource(R.string.app_menu_info), onDismiss) {
-                actions.openInfo(app, null)
-            }
-            MenuItem(Icons.Outlined.Clear, stringResource(R.string.app_menu_hide), onDismiss) { actions.hide(app) }
-            if (app.canUninstall) {
-                MenuItem(Icons.Outlined.Delete, stringResource(R.string.app_menu_uninstall), onDismiss) {
-                    actions.uninstall(app)
-                }
-            }
+            AppItems(app, isFavorite, actions, extras.onAddToFolder, onDismiss)
             HorizontalDivider(Modifier.padding(vertical = Spacing.s))
             MenuItem(
                 Icons.Outlined.Settings,
@@ -82,6 +85,35 @@ fun AppMenuSheet(
                 onDismiss,
                 onOpenSettings,
             )
+        }
+    }
+}
+
+/** Lo que Velora hace con la app: favorito, carpeta, información, ocultar, desinstalar. */
+@Composable
+private fun AppItems(
+    app: AppEntry,
+    isFavorite: Boolean,
+    actions: AppActions,
+    onAddToFolder: (() -> Unit)?,
+    onDismiss: () -> Unit,
+) {
+    FavoriteItem(app, isFavorite, actions, onDismiss)
+    onAddToFolder?.let { addToFolder ->
+        MenuItem(
+            Icons.AutoMirrored.Outlined.List,
+            stringResource(R.string.app_menu_add_to_folder),
+            onDismiss,
+            addToFolder,
+        )
+    }
+    MenuItem(Icons.Outlined.Info, stringResource(R.string.app_menu_info), onDismiss) {
+        actions.openInfo(app, null)
+    }
+    MenuItem(Icons.Outlined.Clear, stringResource(R.string.app_menu_hide), onDismiss) { actions.hide(app) }
+    if (app.canUninstall) {
+        MenuItem(Icons.Outlined.Delete, stringResource(R.string.app_menu_uninstall), onDismiss) {
+            actions.uninstall(app)
         }
     }
 }
@@ -99,17 +131,53 @@ private fun FavoriteItem(app: AppEntry, isFavorite: Boolean, actions: AppActions
     }
 }
 
+/**
+ * Lo opcional del panel: notificaciones de la app (ADR-023), tiempo de uso de hoy (ADR-024) y
+ * "Añadir a carpeta". Vacío en previews y con las funciones apagadas.
+ */
+@Immutable
+data class AppMenuExtras(
+    val notifications: List<AppNotification> = emptyList(),
+    val notificationActions: NotificationActions? = null,
+    val usage: UsageRepository? = null,
+    val onAddToFolder: (() -> Unit)? = null,
+)
+
 @Composable
-private fun Header(app: AppEntry) {
+private fun Header(app: AppEntry, usageMs: Long?) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(horizontal = Spacing.l, vertical = Spacing.m),
     ) {
         AppIcon(key = app.key, size = Sizes.favoriteIcon)
         Spacer(Modifier.width(Spacing.m))
-        Text(app.label, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurface)
+        Column {
+            Text(app.label, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurface)
+            usageMs?.let {
+                Text(
+                    stringResource(R.string.app_menu_usage_today, formatUsage(it)),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }
+
+/** "1 h 20 min", "35 min" o "menos de 1 min". */
+@Composable
+private fun formatUsage(ms: Long): String {
+    val minutes = ms / MS_PER_MINUTE
+    val hours = minutes / MINUTES_PER_HOUR
+    return when {
+        minutes < 1 -> stringResource(R.string.usage_under_minute)
+        hours == 0L -> stringResource(R.string.usage_minutes, minutes)
+        else -> stringResource(R.string.usage_hours_minutes, hours, minutes % MINUTES_PER_HOUR)
+    }
+}
+
+private const val MS_PER_MINUTE = 60_000L
+private const val MINUTES_PER_HOUR = 60L
 
 /** Fila de un menú en panel: ícono a la izquierda y texto; tocarla cierra el panel y hace la acción. */
 @Composable

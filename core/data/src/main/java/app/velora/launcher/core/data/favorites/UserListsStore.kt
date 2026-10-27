@@ -16,6 +16,8 @@ class UserListsStore(context: Context) {
 
     fun widgets() = WidgetsRepository(database.widgets())
 
+    fun folders(visible: StateFlow<List<AppEntry>>) = FoldersRepository(database.folders(), visible)
+
     /** [visible] = apps instaladas sin las ocultas. */
     fun favorites(visible: StateFlow<List<AppEntry>>) = FavoritesRepository(database.favorites(), visible)
 }

@@ -5,6 +5,14 @@
     <!-- Abrir el diálogo de desinstalar del sistema (SEGURIDAD §2). -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
 
+    <!-- Contactos en el buscador: opt-in, se pide tras un aviso (ADR-025). -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
+    <!-- Tiempo de uso de hoy: acceso especial que el usuario concede en Ajustes (ADR-024). -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
     <!-- Visibilidad de paquetes: solo apps abribles. Nunca QUERY_ALL_PACKAGES (SEGURIDAD §2). -->
     <queries>
         <intent>

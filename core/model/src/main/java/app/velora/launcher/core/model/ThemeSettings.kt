@@ -64,6 +64,30 @@ enum class ThemePreset {
 
     /** Ceniza: fantasía oscura, hoguera y brasas, letras talladas. */
     Ash,
+
+    /** Atardecer: cielo de durazno a rosa, un sol bajo y el horizonte. */
+    Sunset,
+
+    /** Océano: azul petróleo profundo con dos olas finas. */
+    Ocean,
+
+    /** Nieve: blanco casi puro, tinta gris carbón. El más minimalista. */
+    Snow,
+
+    /** Café: marrón tostado con crema, cálido y tranquilo. */
+    Coffee,
+
+    /** Galaxia: nebulosas, un brazo de estrellas y un planeta con anillo. */
+    Galaxy,
+
+    /** Neón: sol rayado y cuadrícula en perspectiva, texto que brilla. */
+    Neon,
+
+    /** Matcha: crema verdosa con un cuenco y una hoja; claro. */
+    Matcha,
+
+    /** Lavanda: lila con manchas de acuarela; claro. */
+    Lavender,
     ;
 
     /** Fuente, reloj e íconos que mejor le quedan. */
@@ -77,6 +101,14 @@ enum class ThemePreset {
             Aurora -> look(FontChoice.Nunito, ClockStyle.Centered, IconStyle.Minimal)
             PixelNight -> look(FontChoice.Pixel, ClockStyle.Classic, IconStyle.Circle)
             Ash -> look(FontChoice.Cinzel, ClockStyle.Day, IconStyle.Minimal)
+            Sunset -> look(FontChoice.Fraunces, ClockStyle.Centered, IconStyle.Minimal)
+            Ocean -> look(FontChoice.Figtree, ClockStyle.Classic, IconStyle.Minimal)
+            Snow -> look(FontChoice.PlusJakartaSans, ClockStyle.Classic, IconStyle.Minimal)
+            Coffee -> look(FontChoice.Fraunces, ClockStyle.Day, IconStyle.Minimal)
+            Galaxy -> look(FontChoice.Figtree, ClockStyle.Centered, IconStyle.Minimal)
+            Neon -> look(FontChoice.PlusJakartaSans, ClockStyle.Centered, IconStyle.Minimal)
+            Matcha -> look(FontChoice.Quicksand, ClockStyle.Classic, IconStyle.Minimal)
+            Lavender -> look(FontChoice.Nunito, ClockStyle.Day, IconStyle.Minimal)
         }.copy(preset = this)
 
     private fun look(font: FontChoice, clock: ClockStyle, icons: IconStyle) =
@@ -91,6 +123,8 @@ enum class ThemePreset {
  * @property photoBackground ruta de la foto propia que reemplaza el fondo del tema (ADR-022), o null.
  * @property notifications mostrar notificaciones en el inicio (opt-in, ADR-023).
  * @property doubleTapLock doble toque en el inicio para bloquear (opt-in, accesibilidad, ADR-009).
+ * @property usageTime mostrar el tiempo de uso de hoy en el panel de cada app (opt-in, ADR-024).
+ * @property contactsSearch buscar contactos en el buscador (opt-in, `READ_CONTACTS`, ADR-025).
  */
 @Immutable
 data class ThemeSettings(
@@ -104,4 +138,6 @@ data class ThemeSettings(
     val photoBackground: String? = null,
     val notifications: Boolean = false,
     val doubleTapLock: Boolean = false,
+    val usageTime: Boolean = false,
+    val contactsSearch: Boolean = false,
 )

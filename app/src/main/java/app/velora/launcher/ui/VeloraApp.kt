@@ -1,9 +1,11 @@
 package app.velora.launcher.ui
 
 import android.content.ActivityNotFoundException
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -43,7 +45,6 @@ import app.velora.launcher.core.model.AppShortcut
 import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.ThemeSettings
 import app.velora.launcher.di.AppContainer
-import app.velora.launcher.feature.appmenu.AppMenuSheet
 import app.velora.launcher.feature.appmenu.LocalShortcutsRepository
 import app.velora.launcher.feature.apps.AppActions
 import app.velora.launcher.feature.apps.LocalIconRepository
@@ -58,8 +59,7 @@ import app.velora.launcher.feature.home.HomeUiState
 import app.velora.launcher.feature.home.HomeViewModel
 import app.velora.launcher.feature.welcome.OnboardingScreen
 import app.velora.launcher.feature.welcome.WelcomeScreen
-import app.velora.launcher.feature.widgets.HomeMenuSheet
-import app.velora.launcher.feature.widgets.WidgetPickerSheet
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -130,6 +130,8 @@ private fun LauncherRoute(
     val sheets = rememberLauncherSheets()
     val actions = rememberAppActions(container, homeViewModel, sheets)
     val lock = rememberDoubleTapLock()
+    val folders by container.foldersRepository.folders.collectAsStateWithLifecycle(emptyList())
+    val folderActions = rememberFolderActions(container, sheets)
     DrawerEffects(drawerState, search, homePresses, drawerViewModel::onQueryChange)
     NotificationsProvider(container.notificationsRepository, enabled = theme.notifications) {
         LauncherScreen(
@@ -145,22 +147,13 @@ private fun LauncherRoute(
             widgets = { HomeWidgetsSlot(container, showMusic = theme.notifications) },
             photo = rememberPhoto(theme.photoBackground),
             onDoubleTap = lock.takeIf { theme.doubleTapLock },
+            folders = folders,
+            onOpenFolder = folderActions::open,
         )
     }
-    LauncherSheets(sheets, container, drawer, actions, onOpenSettings)
+    LauncherSheets(sheets, container, drawer, actions, onOpenSettings, theme, folders, folderActions)
     IconPrefetch(container, home, drawer, theme.icons)
 }
-
-/** Qué panel está abierto sobre el inicio. */
-@Stable
-private class LauncherSheetsState {
-    var appMenu by mutableStateOf<AppEntry?>(null)
-    var homeMenu by mutableStateOf(false)
-    var widgetPicker by mutableStateOf(false)
-}
-
-@Composable
-private fun rememberLauncherSheets() = remember { LauncherSheetsState() }
 
 @Composable
 private fun rememberAppActions(
@@ -183,37 +176,8 @@ private fun rememberAppActions(
             }
             override fun webSearch(query: String) = opener.webSearch(query)
             override fun copy(text: String) = opener.copy(text)
+            override fun openContact(uri: Uri) = opener.openContact(uri)
         }
-    }
-}
-
-/** Paneles desde abajo: menú de una app, menú del inicio y selector de widgets. */
-@Composable
-private fun LauncherSheets(
-    sheets: LauncherSheetsState,
-    container: AppContainer,
-    drawer: DrawerUiState,
-    actions: AppActions,
-    onOpenSettings: () -> Unit,
-) {
-    sheets.appMenu?.let { app ->
-        AppMenuSheet(
-            app = app,
-            isFavorite = app.key.stableId in drawer.favoriteIds,
-            actions = actions,
-            onOpenSettings = onOpenSettings,
-            onDismiss = { sheets.appMenu = null },
-        )
-    }
-    if (sheets.homeMenu) {
-        HomeMenuSheet(
-            onAddWidget = { sheets.widgetPicker = true },
-            onOpenSettings = onOpenSettings,
-            onDismiss = { sheets.homeMenu = false },
-        )
-    }
-    if (sheets.widgetPicker) {
-        WidgetPickerSheet(container.widgetHost, onDismiss = { sheets.widgetPicker = false })
     }
 }
 
@@ -281,11 +245,18 @@ private fun DrawerEffects(
     }
     // Al irse a otra app el inicio queda listo, sin animación al volver (ESTILO §5.3).
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { drawerState.snapClosed() }
-    BackHandler(enabled = drawerState.isOpen) {
-        when {
-            search.text.text.isNotEmpty() -> search.clear()
-            search.focused -> focusManager.clearFocus()
-            else -> drawerState.close()
+    val searching = search.text.text.isNotEmpty() || search.focused
+    // Primero se limpia el buscador o se guarda el teclado; con eso hecho, atrás cierra la lista.
+    BackHandler(enabled = drawerState.isOpen && searching) {
+        if (search.text.text.isNotEmpty()) search.clear() else focusManager.clearFocus()
+    }
+    PredictiveBackHandler(enabled = drawerState.isOpen && !searching) { events ->
+        try {
+            events.collect { event -> drawerState.peekBack(event.progress) }
+            drawerState.close()
+        } catch (e: CancellationException) {
+            drawerState.open()
+            throw e
         }
     }
 }

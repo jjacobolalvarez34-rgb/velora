@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,6 +36,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
@@ -60,6 +62,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import app.velora.launcher.R
+import app.velora.launcher.core.data.contacts.ContactResult
 import app.velora.launcher.core.designsystem.motion.VeloraMotion
 import app.velora.launcher.core.designsystem.theme.Sizes
 import app.velora.launcher.core.designsystem.theme.Spacing
@@ -194,48 +197,11 @@ private fun LazyListScope.searchResults(results: List<AppEntry>, uiState: Drawer
     items(results, key = { it.key.stableId }, contentType = { "app" }) {
         ListApp(it, actions, animatedItem())
     }
+    items(uiState.contacts, key = { "contact-${it.id}" }, contentType = { "contact" }) { contact ->
+        ContactRow(contact, onClick = { actions.openContact(contact.uri) }, modifier = animatedItem())
+    }
     item(key = "web") {
         WebSearchRow(uiState.query, onClick = { actions.webSearch(uiState.query) }, modifier = animatedItem())
-    }
-}
-
-@Composable
-private fun CalculatorRow(result: String, onCopy: () -> Unit, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onCopy)
-            .padding(vertical = Spacing.s),
-    ) {
-        Text(
-            "= $result",
-            style = VeloraTheme.typography.clock.copy(fontSize = 40.sp, lineHeight = 46.sp),
-            color = VeloraTheme.onWallpaper.content,
-        )
-        Text(
-            stringResource(R.string.calculator_copy),
-            style = VeloraTheme.typography.caption,
-            color = VeloraTheme.onWallpaper.contentVariant,
-        )
-    }
-}
-
-@Composable
-private fun WebSearchRow(query: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(min = Sizes.appRowHeight)
-            .clickable(onClick = onClick),
-    ) {
-        Icon(Icons.Outlined.Search, contentDescription = null, tint = VeloraTheme.onWallpaper.contentVariant)
-        Spacer(Modifier.width(Spacing.m))
-        Text(
-            text = stringResource(R.string.web_search, query),
-            style = VeloraTheme.typography.appRow,
-            color = VeloraTheme.onWallpaper.contentVariant,
-        )
     }
 }
 

@@ -40,6 +40,10 @@ interface PrefsRepository {
 
     suspend fun setDoubleTapLock(enabled: Boolean)
 
+    suspend fun setUsageTime(enabled: Boolean)
+
+    suspend fun setContactsSearch(enabled: Boolean)
+
     /** Aplica un tema completo: su fondo y colores, y su fuente, reloj e íconos recomendados. */
     suspend fun applyPreset(preset: ThemePreset)
 
@@ -68,6 +72,8 @@ class DataStorePrefsRepository(context: Context) : PrefsRepository {
                 photoBackground = prefs[PHOTO],
                 notifications = prefs[NOTIFICATIONS],
                 doubleTapLock = prefs[DOUBLE_TAP_LOCK],
+                usageTime = prefs[USAGE_TIME],
+                contactsSearch = prefs[CONTACTS_SEARCH],
             ).decode()
         }
         .distinctUntilChanged()
@@ -93,6 +99,10 @@ class DataStorePrefsRepository(context: Context) : PrefsRepository {
     override suspend fun setNotifications(enabled: Boolean) = put(NOTIFICATIONS, enabled)
 
     override suspend fun setDoubleTapLock(enabled: Boolean) = put(DOUBLE_TAP_LOCK, enabled)
+
+    override suspend fun setUsageTime(enabled: Boolean) = put(USAGE_TIME, enabled)
+
+    override suspend fun setContactsSearch(enabled: Boolean) = put(CONTACTS_SEARCH, enabled)
 
     override suspend fun applyPreset(preset: ThemePreset) {
         val theme = preset.recommended
@@ -121,6 +131,8 @@ class DataStorePrefsRepository(context: Context) : PrefsRepository {
         val PHOTO = stringPreferencesKey("theme_photo_background")
         val NOTIFICATIONS = booleanPreferencesKey("feature_notifications")
         val DOUBLE_TAP_LOCK = booleanPreferencesKey("feature_double_tap_lock")
+        val USAGE_TIME = booleanPreferencesKey("feature_usage_time")
+        val CONTACTS_SEARCH = booleanPreferencesKey("feature_contacts_search")
         val ONBOARDING_DONE = booleanPreferencesKey("onboarding_done")
     }
 }
@@ -140,6 +152,8 @@ internal data class StoredTheme(
     val photoBackground: String? = null,
     val notifications: Boolean? = null,
     val doubleTapLock: Boolean? = null,
+    val usageTime: Boolean? = null,
+    val contactsSearch: Boolean? = null,
 ) {
     fun decode(): ThemeSettings {
         val defaults = ThemeSettings()
@@ -154,6 +168,8 @@ internal data class StoredTheme(
             photoBackground = photoBackground,
             notifications = notifications ?: defaults.notifications,
             doubleTapLock = doubleTapLock ?: defaults.doubleTapLock,
+            usageTime = usageTime ?: defaults.usageTime,
+            contactsSearch = contactsSearch ?: defaults.contactsSearch,
         )
     }
 }

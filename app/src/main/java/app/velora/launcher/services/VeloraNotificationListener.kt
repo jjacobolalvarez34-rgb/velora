@@ -39,6 +39,9 @@ class VeloraNotificationListener : NotificationListenerService() {
     private var publishJob: Job? = null
     private var media: MediaWatcher? = null
 
+    /** Las que se muestran, por clave: para abrirlas o responderlas. Solo en memoria. */
+    private var active: Map<String, StatusBarNotification> = emptyMap()
+
     override fun onListenerConnected() {
         current = WeakReference(this)
         scope.launch {
@@ -46,6 +49,11 @@ class VeloraNotificationListener : NotificationListenerService() {
                 requestUnbind()
                 return@launch
             }
+            repository.notificationActions = NotificationOpener(
+                context = this@VeloraNotificationListener,
+                find = { active[it] },
+                cancel = { key -> runCatching { cancelNotification(key) } },
+            )
             publishAll()
             media = MediaWatcher(this@VeloraNotificationListener, repository).also { it.start() }
         }
@@ -54,6 +62,7 @@ class VeloraNotificationListener : NotificationListenerService() {
     override fun onListenerDisconnected() {
         media?.stop()
         media = null
+        active = emptyMap()
         repository.clear()
     }
 
@@ -79,8 +88,9 @@ class VeloraNotificationListener : NotificationListenerService() {
 
     private fun publishAll() {
         val users = getSystemService(UserManager::class.java)
-        val active = runCatching { activeNotifications }.getOrNull().orEmpty()
-        repository.publish(active.filter(::isShown).map { it.toModel(users) })
+        val shown = runCatching { activeNotifications }.getOrNull().orEmpty().filter(::isShown)
+        active = shown.associateBy { it.key }
+        repository.publish(shown.map { it.toModel(users) })
     }
 
     private fun isShown(sbn: StatusBarNotification): Boolean {
@@ -99,6 +109,8 @@ class VeloraNotificationListener : NotificationListenerService() {
             title = if (secret) null else extras.getCharSequence(Notification.EXTRA_TITLE)?.toString(),
             text = if (secret) null else extras.getCharSequence(Notification.EXTRA_TEXT)?.toString(),
             postedAtMs = postTime,
+            key = key,
+            canReply = !secret && NotificationOpener.replyAction(this) != null,
         )
     }
 

@@ -14,6 +14,17 @@ interface MediaControls {
     fun previous()
 }
 
+/** Abrir, responder o descartar una notificación; lo implementa el servicio (las `PendingIntent` no salen de ahí). */
+interface NotificationActions {
+    /** true si se abrió. */
+    fun open(key: String): Boolean
+
+    /** true si la app recibió la respuesta. */
+    fun reply(key: String, text: String): Boolean
+
+    fun dismiss(key: String)
+}
+
 /**
  * Notificaciones y música para el inicio (ADR-023). Todo en memoria: el servicio de
  * notificaciones publica aquí y la UI solo lee. Al desactivar la función se vacía.
@@ -25,6 +36,14 @@ class NotificationsRepository {
     /** Una entrada por app y perfil ([keyOf]): cuántas hay y la más reciente. */
     val byApp: StateFlow<Map<String, AppNotification>> = _byApp.asStateFlow()
 
+    private val _byAppList = MutableStateFlow<Map<String, List<AppNotification>>>(emptyMap())
+
+    /** Todas las de cada app, de la más nueva a la más vieja: para leerlas en su panel. */
+    val byAppList: StateFlow<Map<String, List<AppNotification>>> = _byAppList.asStateFlow()
+
+    @Volatile
+    var notificationActions: NotificationActions? = null
+
     private val _nowPlaying = MutableStateFlow<NowPlaying?>(null)
     val nowPlaying: StateFlow<NowPlaying?> = _nowPlaying.asStateFlow()
 
@@ -33,6 +52,8 @@ class NotificationsRepository {
 
     fun publish(notifications: List<AppNotification>) {
         _byApp.value = group(notifications)
+        _byAppList.value =
+            notifications.sortedByDescending { it.postedAtMs }.groupBy { keyOf(it.packageName, it.userSerial) }
     }
 
     fun setNowPlaying(value: NowPlaying?) {
@@ -41,8 +62,10 @@ class NotificationsRepository {
 
     fun clear() {
         _byApp.value = emptyMap()
+        _byAppList.value = emptyMap()
         _nowPlaying.value = null
         mediaControls = null
+        notificationActions = null
     }
 
     companion object {
