@@ -128,24 +128,29 @@ El elemento firma. Especificación:
 | Tema | Fondo | Texto | Fuente / reloj / íconos recomendados |
 |---|---|---|---|
 | Tu fondo | wallpaper del usuario + velo suave y sombra en el texto | blanco neutro (nunca el azul del sistema) | Nunito / Clásico / Círculo |
-| Noche | negro puro con un brillo tenue | claro | Nunito / Clásico / Minimalista |
-| Papel | crema con renglones muy tenues | tinta oscura | Fraunces / Día / Minimalista |
-| Sakura | cielo rosa, una luna, siete pétalos | oscuro (barras del sistema oscuras) | Nunito / Clásico / Círculo |
-| Bosque | verde profundo con una sola curva fina | claro | Quicksand / Clásico / Minimalista |
-| Aurora | azul noche con tres luces suaves | claro | Nunito / Centrado / Minimalista |
+| Noche | casi negro con un brillo frío tenue, bruma y grano | claro | Nunito / Clásico / Minimalista |
+| Papel | papel de algodón crema con fibra fina y grano | tinta oscura | Fraunces / Día / Minimalista |
+| Sakura | cielo rosa en malla (durazno, rosa, lila), una luna con halo, siete pétalos | oscuro (barras del sistema oscuras) | Nunito / Clásico / Círculo |
+| Bosque | cuatro filas de colinas con pinos y niebla en los valles | claro | Quicksand / Clásico / Minimalista |
+| Aurora | azul noche con dos cortinas de luz onduladas, rayos finos y pocas estrellas | claro | Nunito / Centrado / Minimalista |
 | Noche pixel | cielo en tres tonos, nebulosa tramada, estrellas en cruz, luna con cráteres y montañas, todo en la misma rejilla | casi blanco con sombra dura de píxel; acento amarillo luna | Silkscreen / Clásico / Círculo |
-| Atardecer | durazno a rosa, sol bajo y horizonte | tinta ciruela | Fraunces / Centrado / Minimalista |
-| Océano | azul petróleo con dos olas finas | espuma | Figtree / Clásico / Minimalista |
-| Nieve | blanco casi puro | carbón | Plus Jakarta Sans / Clásico / Minimalista |
-| Café | marrón tostado con un brillo cálido | crema | Fraunces / Día / Minimalista |
-| Galaxia | nebulosas magenta y turquesa, brazo de estrellas, planeta con anillo | blanco con sombra profunda | Figtree / Centrado / Minimalista |
-| Neón | sol rayado y cuadrícula en perspectiva | blanco con brillo magenta | Plus Jakarta Sans / Centrado / Minimalista |
-| Matcha | crema verdosa con un cuenco y una hoja | verde bosque | Quicksand / Clásico / Minimalista |
-| Lavanda | lila con manchas de acuarela | violeta profundo | Nunito / Día / Minimalista |
+| Atardecer | lofi: durazno a rosa, sol difuso, nubes en hilos y ciudad con ventanas | tinta ciruela | Fraunces / Centrado / Minimalista |
+| Océano | vista aérea: turquesa profundo a aguamarina con frentes de espuma | espuma | Figtree / Clásico / Minimalista |
+| Nieve | blanco casi puro con tres lomas de nieve muy suaves | carbón | Plus Jakarta Sans / Clásico / Minimalista |
+| Café | marrón tostado, luz cálida de ventana y crema que gira tenue | crema | Fraunces / Día / Minimalista |
+| Galaxia | franja de nebulosa de humo (magenta a turquesa) con polvo oscuro, estrellas, planeta con anillo | blanco con sombra profunda | Figtree / Centrado / Minimalista |
+| Neón | cielo violeta con bruma, sol rayado y cuadrícula en perspectiva | blanco con brillo magenta | Plus Jakarta Sans / Centrado / Minimalista |
+| Matcha | degradado de malla: crema verdosa, té y pistacho | verde bosque | Quicksand / Clásico / Minimalista |
+| Lavanda | degradado de malla: lila, violeta, rosa y pervinca | violeta profundo | Nunito / Día / Minimalista |
 | Ceniza | cenizas cálidas, una hoguera abajo, brasas que flotan, viñeta | hueso/pergamino, acento brasa | Cinzel / Día / Minimalista |
+| Mármol | mármol blanco con vetas grises que serpentean | grafito cálido | Fraunces / Apilado / Minimalista |
+| Mármol negro | casi negro con humo gris y vetas doradas finas | hueso, acento dorado | Cinzel / Apilado / Minimalista |
+| Grafito | gris carbón, una luz suave arriba y grano fino; el más sobrio | blanco | Figtree / Banner / Minimalista |
 
 - **Ceniza** es un tema de fantasía oscura propio (sin nombres, logos ni arte de ningún juego): fuente romana grabada (Cinzel, OFL), círculos de íconos de hierro y glifos color hueso.
 - **Foto propia** (ADR-022): cualquier tema puede llevar una foto del usuario de fondo (recortada a pantalla, con el velo del tema); los colores del texto siguen siendo los del tema.
+
+- **Arte procedural** (`components/ProceduralArt.kt`, `ArtCache.kt`): los fondos se calculan píxel a píxel con ruido fbm y *domain warping* (semilla fija), a la mitad de resolución y fuera del hilo principal; se escalan con filtrado y se guardan en memoria y en `cacheDir/art/` (PNG; subir `ART_VERSION` al cambiar un dibujo). Mientras se generan se ve el degradado del tema y luego entran con `effectDefault`. Encima: detalles vectoriales nítidos y un grano de película fino (mosaico de 128 px repetido). Noche pixel no lleva filtrado ni grano. Zonas tranquilas detrás del reloj (10–30 % de la altura) y de los favoritos (abajo a la izquierda).
 
 Regla: **sencillo y estético**. Pocas formas, mucho aire: el protagonista es el texto.
 

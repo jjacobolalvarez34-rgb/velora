@@ -46,7 +46,9 @@ internal class ThemeSharing(
         val theme = current() ?: return
         activity.lifecycleScope.launch {
             val photo = theme.photoBackground?.let { BackgroundPhotos.read(it) }
-            val text = ThemeFile.encode(SharedTheme(theme.preset, theme.font, theme.clock, theme.icons, photo))
+            val text = ThemeFile.encode(
+                SharedTheme(theme.preset, theme.font, theme.clock, theme.icons, photo, theme.custom),
+            )
             val ok = withContext(Dispatchers.IO) {
                 runCatching {
                     activity.contentResolver.openOutputStream(uri)?.use { it.write(text.toByteArray()) } != null

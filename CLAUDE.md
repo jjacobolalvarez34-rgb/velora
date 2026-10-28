@@ -62,7 +62,7 @@ Para probar como launcher: instalar, pulsar Inicio y elegir Velora → "Siempre"
 3. **Cero permisos nuevos sin ADR** en `docs/DECISIONES.md` y entrada en `docs/SEGURIDAD.md`.
 4. **Toda animación usa los tokens de movimiento** de `core/designsystem/motion` y respeta "Quitar animaciones" del sistema.
 5. **Toda lista lazy usa `key` estable** y modelos `@Immutable`.
-6. **No copiar nada de Niagara**: nombre, íconos, textos, recursos, ni código descompilado.
+6. **Paridad de funciones con Niagara sí; sus recursos y código no** (ADR-028): nada de su nombre, íconos, fondos, textos ni código descompilado.
 7. **Ningún dato sale del teléfono.** Sin analítica de terceros ni SDKs de anuncios.
 8. **Si cambias comportamiento, actualizas el doc correspondiente en el mismo cambio.**
 9. **Cada bug corregido se registra en `docs/BUGS.md`** con causa raíz y prueba que lo cubre.

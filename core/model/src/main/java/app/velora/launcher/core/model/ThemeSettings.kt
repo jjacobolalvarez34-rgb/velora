@@ -15,6 +15,15 @@ enum class ClockStyle {
 
     /** El día en mayúsculas espaciadas arriba, la hora y la fecha debajo. */
     Day,
+
+    /** Horas y minutos apilados, enormes y finos. */
+    Stacked,
+
+    /** El día en letras gigantes de lado a lado, la hora y la fecha pequeñas a los costados. */
+    Banner,
+
+    /** Horas del color del texto y minutos del acento, gruesos. */
+    Duo,
 }
 
 /** Forma de los íconos de las apps. */
@@ -25,8 +34,11 @@ enum class IconStyle {
     /** La forma que usa el sistema del teléfono. */
     System,
 
-    /** Logo en línea (ícono temático de Android 13+) sobre un círculo translúcido. */
+    /** Íconos de Velora: glifos propios con el estilo de [IconOptions] (ADR-021, ADR-028). */
     Minimal,
+
+    /** Un pack de íconos instalado desde la Play Store ([IconOptions.thirdPartyPack]). */
+    Pack,
 
     /** Solo texto: lo más minimalista y lo más rápido. */
     None,
@@ -88,6 +100,15 @@ enum class ThemePreset {
 
     /** Lavanda: lila con manchas de acuarela; claro. */
     Lavender,
+
+    /** Mármol blanco con vetas grises: claro y elegante. */
+    Marble,
+
+    /** Mármol negro con vetas doradas. */
+    BlackMarble,
+
+    /** Grafito: gris carbón con una luz suave y grano fino, el más sobrio. */
+    Graphite,
     ;
 
     /** Fuente, reloj e íconos que mejor le quedan. */
@@ -105,14 +126,22 @@ enum class ThemePreset {
             Ocean -> look(FontChoice.Figtree, ClockStyle.Classic, IconStyle.Minimal)
             Snow -> look(FontChoice.PlusJakartaSans, ClockStyle.Classic, IconStyle.Minimal)
             Coffee -> look(FontChoice.Fraunces, ClockStyle.Day, IconStyle.Minimal)
-            Galaxy -> look(FontChoice.Figtree, ClockStyle.Centered, IconStyle.Minimal)
-            Neon -> look(FontChoice.PlusJakartaSans, ClockStyle.Centered, IconStyle.Minimal)
+            Galaxy -> look(FontChoice.Figtree, ClockStyle.Centered, IconStyle.Minimal, IconPack.Stellar)
+            Neon -> look(FontChoice.PlusJakartaSans, ClockStyle.Duo, IconStyle.Minimal)
             Matcha -> look(FontChoice.Quicksand, ClockStyle.Classic, IconStyle.Minimal)
             Lavender -> look(FontChoice.Nunito, ClockStyle.Day, IconStyle.Minimal)
+            Marble -> look(FontChoice.Fraunces, ClockStyle.Stacked, IconStyle.Minimal, IconPack.Marble)
+            BlackMarble -> look(FontChoice.Cinzel, ClockStyle.Stacked, IconStyle.Minimal)
+            Graphite -> look(FontChoice.Figtree, ClockStyle.Banner, IconStyle.Minimal)
         }.copy(preset = this)
 
-    private fun look(font: FontChoice, clock: ClockStyle, icons: IconStyle) =
-        ThemeSettings(font = font, clock = clock, icons = icons)
+    private fun look(font: FontChoice, clock: ClockStyle, icons: IconStyle, pack: IconPack = IconPack.Line) =
+        ThemeSettings(
+            font = font,
+            clock = clock,
+            icons = icons,
+            custom = Customization(icons = IconOptions(pack = pack)),
+        )
 }
 
 /**
@@ -125,6 +154,7 @@ enum class ThemePreset {
  * @property doubleTapLock doble toque en el inicio para bloquear (opt-in, accesibilidad, ADR-009).
  * @property usageTime mostrar el tiempo de uso de hoy en el panel de cada app (opt-in, ADR-024).
  * @property contactsSearch buscar contactos en el buscador (opt-in, `READ_CONTACTS`, ADR-025).
+ * @property custom íconos, color del tema, elementos visibles, consejos y freno de uso (ADR-028).
  */
 @Immutable
 data class ThemeSettings(
@@ -140,4 +170,5 @@ data class ThemeSettings(
     val doubleTapLock: Boolean = false,
     val usageTime: Boolean = false,
     val contactsSearch: Boolean = false,
+    val custom: Customization = Customization(),
 )

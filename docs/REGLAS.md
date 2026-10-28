@@ -68,3 +68,7 @@
 - No borrar pruebas que fallan para que pase el build.
 - Si una tarea toca más de ~5 archivos o un área de `BUGS.md`, presentar plan antes de editar.
 - Al terminar, decir exactamente cómo probarlo en el teléfono (pasos).
+
+## Niagara (actualizado 2026-10-28, ADR-028)
+- **Paridad de funciones sí**: Velora puede hacer todo lo que hace Niagara (y más).
+- **Recursos y código no**: nada de íconos Anycons, fondos, textos, nombres, capturas ni código de Niagara. Cada recurso de Velora es propio o tiene licencia libre registrada en `THIRD_PARTY_NOTICES.md`.

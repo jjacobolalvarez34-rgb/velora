@@ -80,7 +80,7 @@ fun OnboardingScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxSize()
-            .background(BrandColors.background)
+            .landingBackground()
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .padding(horizontal = Spacing.l, vertical = Spacing.m),
     ) {

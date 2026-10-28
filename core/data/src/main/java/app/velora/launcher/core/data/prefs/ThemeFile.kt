@@ -1,6 +1,7 @@
 package app.velora.launcher.core.data.prefs
 
 import app.velora.launcher.core.model.ClockStyle
+import app.velora.launcher.core.model.Customization
 import app.velora.launcher.core.model.FontChoice
 import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.ThemePreset
@@ -14,13 +15,15 @@ data class SharedTheme(
     val icons: IconStyle?,
     /** JPEG del fondo propio, si el tema lo trae. */
     val photo: ByteArray?,
+    /** Íconos, color y elementos visibles (sin consejos ni frenos de uso: esos son personales). */
+    val custom: Customization? = null,
 ) {
     override fun equals(other: Any?): Boolean = other is SharedTheme &&
         preset == other.preset && font == other.font && clock == other.clock && icons == other.icons &&
-        photo.contentEqualsOrNull(other.photo)
+        custom == other.custom && photo.contentEqualsOrNull(other.photo)
 
     override fun hashCode(): Int =
-        listOf(preset, font, clock, icons).hashCode() * HASH + (photo?.contentHashCode() ?: 0)
+        listOf(preset, font, clock, icons, custom).hashCode() * HASH + (photo?.contentHashCode() ?: 0)
 
     private fun ByteArray?.contentEqualsOrNull(other: ByteArray?) =
         if (this == null) other == null else other != null && contentEquals(other)
@@ -51,6 +54,9 @@ object ThemeFile {
         theme.font?.let { appendLine("font=${it.name}") }
         theme.clock?.let { appendLine("clock=${it.name}") }
         theme.icons?.let { appendLine("icons=${it.name}") }
+        theme.custom?.let { custom ->
+            append(CustomizationCodec.encode(custom.copy(dismissedTips = emptySet(), usageLimits = emptyMap())))
+        }
         theme.photo?.let { appendLine("photo=${Base64.getEncoder().encodeToString(it)}") }
     }
 
@@ -71,6 +77,11 @@ object ThemeFile {
                 clock = values["clock"]?.let { name -> ClockStyle.entries.firstOrNull { it.name == name } },
                 icons = values["icons"]?.let { name -> IconStyle.entries.firstOrNull { it.name == name } },
                 photo = values["photo"]?.let { runCatching { Base64.getDecoder().decode(it) }.getOrNull() },
+                custom = if (values.keys.any { k -> k.startsWith("icons.") || k.startsWith("visible.") }) {
+                    CustomizationCodec.fromValues(values.filterKeys { !it.startsWith("tips.") && it != "limits" })
+                } else {
+                    null
+                },
             )
         }
     }

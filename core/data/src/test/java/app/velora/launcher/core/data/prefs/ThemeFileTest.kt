@@ -1,7 +1,10 @@
 package app.velora.launcher.core.data.prefs
 
 import app.velora.launcher.core.model.ClockStyle
+import app.velora.launcher.core.model.Customization
 import app.velora.launcher.core.model.FontChoice
+import app.velora.launcher.core.model.IconOptions
+import app.velora.launcher.core.model.IconPack
 import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.ThemePreset
 import org.junit.Assert.assertEquals
@@ -13,7 +16,14 @@ class ThemeFileTest {
     @Test
     fun `un tema se exporta y se vuelve a leer igual`() {
         val theme =
-            SharedTheme(ThemePreset.Galaxy, FontChoice.Cinzel, ClockStyle.Day, IconStyle.Minimal, byteArrayOf(1, 2, 3))
+            SharedTheme(
+                ThemePreset.Galaxy,
+                FontChoice.Cinzel,
+                ClockStyle.Day,
+                IconStyle.Minimal,
+                byteArrayOf(1, 2, 3),
+                Customization(icons = IconOptions(pack = IconPack.Stellar), accentColor = 0xFF7FF0E0),
+            )
 
         assertEquals(theme, ThemeFile.decode(ThemeFile.encode(theme)))
     }

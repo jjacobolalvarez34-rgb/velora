@@ -68,6 +68,7 @@ class HomeViewModel(
             favorites = favorites,
             showWelcome = welcome,
             clockStyle = theme.clock,
+            visible = theme.custom.visible,
             battery = battery,
         )
     }.stateIn(

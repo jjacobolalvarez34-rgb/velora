@@ -1,29 +1,25 @@
 package app.velora.launcher.core.designsystem.components
 
 import androidx.compose.ui.draw.CacheDrawScope
-import androidx.compose.ui.draw.DrawResult
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
 import app.velora.launcher.core.designsystem.theme.ArtColors
 import kotlin.random.Random
 
-// Temas nocturnos con más detalle: estrellas, brasas, galaxias y neón.
+// Temas nocturnos con más detalle dibujados en vector: brasas (Ceniza) y la rejilla de Neón.
 
 /**
- * Neón: noche violeta, un sol rayado en el horizonte y un piso de cuadrícula en perspectiva, con
- * una línea turquesa que brilla donde se juntan.
+ * Neón (encima de [neonArt]): un sol rayado en el horizonte y un piso de cuadrícula en
+ * perspectiva, con una línea turquesa que brilla donde se juntan.
  */
-internal fun CacheDrawScope.neon(): DrawResult {
+internal fun CacheDrawScope.neonOverlay(): DrawScope.() -> Unit {
     val w = size.width
     val h = size.height
-    val horizon = h * 0.68f
-    val sky = Brush.verticalGradient(listOf(ArtColors.neonTop, ArtColors.neonBottom), endY = horizon)
+    val horizon = h * NEON_HORIZON
     val sunRadius = w * 0.3f
     val sunCenter = Offset(w / 2f, horizon)
     val sun = Brush.verticalGradient(
@@ -42,9 +38,7 @@ internal fun CacheDrawScope.neon(): DrawResult {
         horizon - 24.dp.toPx(),
         horizon + 24.dp.toPx(),
     )
-    return onDrawBehind {
-        drawRect(ArtColors.neonFloor)
-        drawRect(sky, size = Size(w, horizon))
+    return {
         drawArc(sun, 180f, 180f, true, sunCenter - Offset(sunRadius, sunRadius), Size(sunRadius * 2, sunRadius * 2))
         stripes.forEach { y -> drawRect(ArtColors.neonTop.copy(alpha = 0.9f), Offset(0f, y), Size(w, stripe)) }
         vertical.forEach { drawLine(ArtColors.neonGrid, vanishing, it, line) }
@@ -58,7 +52,7 @@ internal fun CacheDrawScope.neon(): DrawResult {
  * Ceniza: negro cálido, el resplandor de una hoguera desde abajo, brasas que suben y bordes
  * oscurecidos. Fantasía oscura, sin nada de ningún juego.
  */
-internal fun CacheDrawScope.ash(): DrawResult {
+internal fun CacheDrawScope.ash(): DrawScope.() -> Unit {
     val w = size.width
     val h = size.height
     val sky = Brush.verticalGradient(listOf(ArtColors.ashTop, ArtColors.ashBottom))
@@ -82,7 +76,7 @@ internal fun CacheDrawScope.ash(): DrawResult {
             (0.8f + random.nextFloat() * 1.6f).dp.toPx(),
         )
     }
-    return onDrawBehind {
+    return {
         drawRect(sky)
         drawRect(glow)
         embers.forEach { (at, alpha, radius) -> drawCircle(ArtColors.ashEmber.copy(alpha = alpha), radius, at) }

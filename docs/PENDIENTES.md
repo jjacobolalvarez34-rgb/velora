@@ -90,18 +90,32 @@
 - [~] **Deslizar sobre una app** hacia el centro abre su panel con atajos y sus notificaciones (0.7.0).
 - [~] **Carpetas** (0.7.0, ADR-026): "Añadir a carpeta", arriba de los favoritos, renombrar y eliminar.
 - [~] **Doble toque para bloquear** (accesibilidad opt-in, adelantado a 0.6.0).
-- [~] **Tiempo de uso** de hoy en el panel de cada app (0.7.0, ADR-024). Falta: freno de uso (avisar al pasar un límite).
+- [~] **Tiempo de uso** de hoy en el panel de cada app (0.7.0) y **freno de uso** (0.8.0, ADR-024).
 - [~] Búsqueda de **contactos** (0.7.0, ADR-025).
 - [~] Favoritos en el alfabeto: la estrella arriba de la primera letra (0.6.0). Falta: acceso a ajustes al final.
 - [~] Widgets: reordenar, redimensionar arrastrando y quitar desde el inicio (0.7.0).
 - [~] **Quitar widgets desde el inicio** (hecho en 0.7.0: mantener presionado → "Quitar widget" en rojo; pedido 2026-10-26): hoy solo se puede en Ajustes → Widgets → "Quitar". Idea: mantener presionado un widget → panel desde abajo con "Quitar", "Más alto/Más bajo" y "Mover". Al quitar, liberar el `appWidgetId` (B-019). Hay que ver que mantener presionado no choque con los widgets que usan su propio toque largo.
+
+## 7d. Pedidos del 2026-10-28 — 0.8.0
+
+- [~] Personalizar rediseñado: vista previa en vivo y pestañas Tema · Fondo · Reloj · Letra · Íconos · Color · Elementos (ADR-028).
+- [~] Íconos de Velora con 8 diseños, 4 formas, 3 fuentes de color, grosor y relleno suave; packs de terceros (ADR-030).
+- [~] Fondos procedurales con diseño (texturas, grano fino) y temas Mármol, Mármol negro y Grafito.
+- [~] Relojes Apilado, Banda y Dúo; color del tema; elementos visibles (reloj, fecha, barra de estado, consejos).
+- [~] Consejos de inicio deslizables (como notificaciones de los primeros días).
+- [~] El buscador solo aparece con las recientes (no estorba en la lista por letra ni bajando por la lista completa).
+- [~] Entrada de los íconos al volver de una app y al desbloquear (ADR-029).
+- [~] Logo vectorial animado y landing con luces (ADR-029).
+- [~] Freno de uso: límite diario por app desde su panel; al pasarlo, se pregunta antes de abrir.
+- [ ] Acceso a Ajustes al final del alfabeto (hoy: mantener presionado el inicio).
+- [ ] Baseline Profile y Macrobenchmark de los flujos nuevos: necesitan un teléfono conectado.
 
 ## 7c. Pedidos del 2026-10-27 — 0.7.0
 
 - [~] Noche pixel con más definición: cielo en tres tonos, nebulosa tramada, estrellas en cruz, luna escalonada con cráteres, montañas de píxeles y letras con sombra dura (sin desenfoque).
 - [~] Temas nuevos: Galaxia, Neón (texto que brilla), Matcha y Lavanda; antes Atardecer, Océano, Nieve y Café.
 - [~] Compartir temas de Velora: guardar en `.velora-theme` y abrir uno compartido (ADR-027).
-- [ ] **Packs de íconos de terceros** (los de la Play Store que usan muchos launchers): siguiente paso para acercarse a los setups de la comunidad sin copiar nada de Niagara.
+- [~] **Packs de íconos de terceros** (0.8.0, ADR-030).
 - Aclaración: no se importan temas de Niagara (ADR-027): su formato es propio y los recursos tienen dueño.
 
 ## 7b. Pedidos del 2026-10-26 (tarde) — 0.6.0

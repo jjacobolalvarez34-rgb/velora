@@ -17,6 +17,7 @@ import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.AppKey
 import app.velora.launcher.core.model.ClockState
 import app.velora.launcher.core.model.ClockStyle
+import app.velora.launcher.core.model.Customization
 import app.velora.launcher.core.model.FontChoice
 import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.TextSize
@@ -131,6 +132,9 @@ class HomeViewModelTest {
         }
         override suspend fun setContactsSearch(enabled: Boolean) {
             theme.value = theme.value.copy(contactsSearch = enabled)
+        }
+        override suspend fun updateCustom(change: (Customization) -> Customization) {
+            theme.value = theme.value.copy(custom = change(theme.value.custom))
         }
         override val onboardingDone = MutableStateFlow(true)
         override suspend fun setOnboardingDone() {

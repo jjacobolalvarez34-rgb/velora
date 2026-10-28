@@ -27,7 +27,7 @@ import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.TextSize
 import app.velora.launcher.core.model.ThemeSettings
 
-/** Diseño: modo zurdo y tamaño de texto. */
+/** Diseño: modo zurdo y lista completa (el tamaño del texto está en Personalizar → Letra). */
 internal fun LazyListScope.layoutSection(theme: ThemeSettings, actions: SettingsActions) {
     item(key = "layout") { SectionTitle(R.string.settings_layout) }
     item(key = "left-handed") {
@@ -47,11 +47,6 @@ internal fun LazyListScope.layoutSection(theme: ThemeSettings, actions: Settings
             onChange = actions::onFullList,
             icon = Icons.Outlined.Menu,
         )
-    }
-    item(key = "text-size") { SectionTitle(R.string.settings_text_size) }
-    items(TextSize.entries.size, key = { "text-${TextSize.entries[it]}" }) { index ->
-        val size = TextSize.entries[index]
-        RadioOption(stringResource(textSizeLabel(size)), theme.textSize == size, { actions.onTextSize(size) })
     }
 }
 
@@ -176,7 +171,7 @@ private fun PlainRow(text: String) {
     )
 }
 
-private fun textSizeLabel(size: TextSize): Int = when (size) {
+internal fun textSizeLabel(size: TextSize): Int = when (size) {
     TextSize.Small -> R.string.text_size_small
     TextSize.Normal -> R.string.text_size_normal
     TextSize.Large -> R.string.text_size_large

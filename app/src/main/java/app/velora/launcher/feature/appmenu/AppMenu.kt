@@ -71,6 +71,7 @@ fun AppMenuSheet(
         // Con notificaciones y atajos puede ser largo: se desplaza.
         Column(Modifier.verticalScroll(rememberScrollState()).padding(bottom = Spacing.l)) {
             Header(app, usage)
+            extras.onSetLimit?.let { LimitChooser(extras.usageLimit, it) }
             extras.notificationActions?.let { AppNotificationsList(extras.notifications, it, onDismiss) }
             if (extras.notifications.isNotEmpty()) HorizontalDivider(Modifier.padding(vertical = Spacing.s))
             shortcuts.forEach { shortcut ->
@@ -141,6 +142,9 @@ data class AppMenuExtras(
     val notificationActions: NotificationActions? = null,
     val usage: UsageRepository? = null,
     val onAddToFolder: (() -> Unit)? = null,
+    /** Freno de uso de esta app en minutos por día (ADR-024); [onSetLimit] null = función apagada. */
+    val usageLimit: Int? = null,
+    val onSetLimit: ((Int?) -> Unit)? = null,
 )
 
 @Composable

@@ -1,10 +1,19 @@
 package app.velora.launcher.feature.settings
 
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,8 +27,13 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +42,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,12 +61,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.velora.launcher.R
 import app.velora.launcher.core.designsystem.components.ThemeBackground
+import app.velora.launcher.core.designsystem.motion.VeloraMotion
 import app.velora.launcher.core.designsystem.theme.Shapes
 import app.velora.launcher.core.designsystem.theme.Spacing
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
 import app.velora.launcher.core.designsystem.theme.fontFamilyOf
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.ClockStyle
+import app.velora.launcher.core.model.Customization
 import app.velora.launcher.core.model.FontChoice
 import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.TextSize
@@ -72,6 +92,9 @@ interface SettingsActions {
     fun onWidgetHeight(appWidgetId: Int, heightDp: Int)
     fun onRemoveWidget(appWidgetId: Int)
     fun onMoveWidget(appWidgetId: Int, offset: Int)
+
+    /** Íconos, color del tema, elementos visibles (ADR-028). */
+    fun onCustom(change: (Customization) -> Customization)
 }
 
 /** Listas de apps que se editan en Ajustes. */
@@ -86,6 +109,13 @@ data class SettingsLists(
 @Immutable
 data class WidgetSetting(val appWidgetId: Int, val label: String, val heightDp: Int)
 
+/** Páginas de Ajustes: un menú corto y cada tema en su propia pantalla, siempre igual. */
+enum class SettingsPage { Main, Personalize, Layout, Lists, Features }
+
+/**
+ * Ajustes (ADR-028): arriba "Personalizar" con una vista previa en vivo; debajo, pocas
+ * categorías. Cada página entra deslizándose y "atrás" vuelve al menú.
+ */
 @Composable
 fun SettingsScreen(
     theme: ThemeSettings,
@@ -96,67 +126,143 @@ fun SettingsScreen(
     features: FeatureActions = PreviewFeatureActions,
     status: FeatureStatus = FeatureStatus(),
     photo: ImageBitmap? = null,
+    iconPacks: List<InstalledIconPack> = emptyList(),
 ) {
-    LazyColumn(
-        contentPadding = WindowInsets.safeDrawing.asPaddingValues(),
+    var page by rememberSaveable { mutableStateOf(SettingsPage.Main) }
+    BackHandler(enabled = page != SettingsPage.Main) { page = SettingsPage.Main }
+    val motion = VeloraTheme.motion
+    AnimatedContent(
+        targetState = page,
+        transitionSpec = { pageTransition(initialState, targetState, motion) },
+        label = "settings-page",
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
-    ) {
-        item(key = "title") { Title(stringResource(R.string.settings_title)) }
-        item(key = "preview") { ThemePreview(theme, preview, photo) }
-        item(key = "presets-title") { SectionTitle(R.string.settings_themes) }
-        item(key = "presets") { ThemePresetPicker(selected = theme.preset, onSelect = actions::onPreset) }
-        backgroundSection(theme, features)
-        shareSection(features)
-        themeSection(theme, actions)
-        layoutSection(theme, actions)
-        favoritesSection(lists.favorites, actions)
-        widgetsSection(lists.widgets, actions)
-        hiddenSection(lists.hidden, actions)
-        featuresSection(theme, status, features)
-        item(key = "general") { SectionTitle(R.string.settings_general) }
-        item(key = "home-app") {
-            Option(
-                title = stringResource(R.string.settings_home_app_title),
-                subtitle = stringResource(R.string.settings_home_app_summary),
-                onClick = actions::onChooseHomeApp,
-                icon = Icons.Outlined.Home,
-            )
+    ) { current ->
+        val back = { page = SettingsPage.Main }
+        when (current) {
+            SettingsPage.Main -> MainPage(theme, preview, photo, lists, actions, features, onOpen = { page = it })
+
+            SettingsPage.Personalize ->
+                PersonalizeScreen(theme, preview, photo, lists.favorites, actions, features, iconPacks, back)
+
+            SettingsPage.Layout -> SettingsListPage(R.string.settings_page_layout, back) {
+                layoutSection(theme, actions)
+            }
+
+            SettingsPage.Lists -> SettingsListPage(R.string.settings_page_lists, back) {
+                favoritesSection(lists.favorites, actions)
+                widgetsSection(lists.widgets, actions)
+                hiddenSection(lists.hidden, actions)
+            }
+
+            SettingsPage.Features -> SettingsListPage(R.string.settings_page_features, back) {
+                featuresSection(theme, status, features)
+            }
         }
     }
 }
 
-private fun LazyListScope.themeSection(theme: ThemeSettings, actions: SettingsActions) {
-    item(key = "font") { SectionTitle(R.string.settings_font) }
-    items(FontChoice.entries.size, key = { "font-${FontChoice.entries[it]}" }) { index ->
-        val font = FontChoice.entries[index]
-        RadioOption(
-            title = fontName(font),
-            selected = theme.font == font,
-            onClick = { actions.onFont(font) },
-            titleStyle = MaterialTheme.typography.titleMedium.copy(fontFamily = fontFamilyOf(font)),
-        )
-    }
-    item(key = "clock") { SectionTitle(R.string.settings_clock) }
-    items(ClockStyle.entries.size, key = { "clock-${ClockStyle.entries[it]}" }) { index ->
-        val style = ClockStyle.entries[index]
-        val (title, subtitle) = clockLabels(style)
-        RadioOption(stringResource(title), theme.clock == style, {
-            actions.onClockStyle(style)
-        }, stringResource(subtitle))
-    }
-    item(key = "icons") { SectionTitle(R.string.settings_icons) }
-    items(IconStyle.entries.size, key = { "icons-${IconStyle.entries[it]}" }) { index ->
-        val style = IconStyle.entries[index]
-        val (title, subtitle) = iconLabels(style)
-        RadioOption(stringResource(title), theme.icons == style, {
-            actions.onIconStyle(style)
-        }, stringResource(subtitle))
+/** Hacia una página: entra desde la derecha; de vuelta al menú, al revés. */
+private fun pageTransition(from: SettingsPage, to: SettingsPage, motion: VeloraMotion): ContentTransform {
+    val forward = to != SettingsPage.Main
+    val sign = if (forward) 1 else -1
+    return (
+        slideInHorizontally(motion.spatialDefault()) {
+            sign * it / PAGE_SLIDE
+        } + fadeIn(motion.effectDefault())
+        ) togetherWith
+        (slideOutHorizontally(motion.spatialDefault()) { -sign * it / PAGE_SLIDE } + fadeOut(motion.effectFast()))
+}
+
+private const val PAGE_SLIDE = 3
+
+@Composable
+private fun MainPage(
+    theme: ThemeSettings,
+    preview: ClockPreview,
+    photo: ImageBitmap?,
+    lists: SettingsLists,
+    actions: SettingsActions,
+    features: FeatureActions,
+    onOpen: (SettingsPage) -> Unit,
+) {
+    LazyColumn(contentPadding = WindowInsets.safeDrawing.asPaddingValues(), modifier = Modifier.fillMaxSize()) {
+        item(key = "title") { Title(stringResource(R.string.settings_title)) }
+        item(key = "personalize") {
+            PersonalizeHero(theme, preview, photo, lists.favorites, onClick = { onOpen(SettingsPage.Personalize) })
+        }
+        item(key = "categories") { SectionTitle(R.string.settings_more) }
+        item(key = "layout") {
+            Option(
+                title = stringResource(R.string.settings_page_layout),
+                subtitle = stringResource(R.string.settings_page_layout_summary),
+                onClick = { onOpen(SettingsPage.Layout) },
+                icon = Icons.Outlined.Menu,
+            )
+        }
+        item(key = "lists") {
+            Option(
+                title = stringResource(R.string.settings_page_lists),
+                subtitle = stringResource(R.string.settings_page_lists_summary),
+                onClick = { onOpen(SettingsPage.Lists) },
+                icon = Icons.Outlined.Star,
+            )
+        }
+        item(key = "features") {
+            Option(
+                title = stringResource(R.string.settings_page_features),
+                subtitle = stringResource(R.string.settings_page_features_summary),
+                onClick = { onOpen(SettingsPage.Features) },
+                icon = Icons.Outlined.Notifications,
+            )
+        }
+        shareSection(features)
+        generalSection(actions)
     }
 }
 
-private fun LazyListScope.hiddenSection(hidden: List<AppEntry>, actions: SettingsActions) {
+private fun LazyListScope.generalSection(actions: SettingsActions) {
+    item(key = "general") { SectionTitle(R.string.settings_general) }
+    item(key = "home-app") {
+        Option(
+            title = stringResource(R.string.settings_home_app_title),
+            subtitle = stringResource(R.string.settings_home_app_summary),
+            onClick = actions::onChooseHomeApp,
+            icon = Icons.Outlined.Home,
+        )
+    }
+}
+
+/** Una página de Ajustes con su título, botón atrás y su lista. */
+@Composable
+internal fun SettingsListPage(title: Int, onBack: () -> Unit, content: LazyListScope.() -> Unit) {
+    LazyColumn(contentPadding = WindowInsets.safeDrawing.asPaddingValues(), modifier = Modifier.fillMaxSize()) {
+        item(key = "page-title") { PageTitle(stringResource(title), onBack) }
+        content()
+    }
+}
+
+/** Título con flecha atrás, igual en todas las páginas. */
+@Composable
+internal fun PageTitle(text: String, onBack: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(start = Spacing.xs, end = Spacing.m, top = Spacing.m, bottom = Spacing.s),
+    ) {
+        IconButton(onClick = onBack) {
+            Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.settings_back))
+        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.semantics { heading() },
+        )
+    }
+}
+
+internal fun LazyListScope.hiddenSection(hidden: List<AppEntry>, actions: SettingsActions) {
     item(key = "hidden") { SectionTitle(R.string.settings_hidden) }
     if (hidden.isEmpty()) {
         item(key = "hidden-empty") {
@@ -177,30 +283,6 @@ private fun LazyListScope.hiddenSection(hidden: List<AppEntry>, actions: Setting
             colors = cardColors(),
             modifier = Modifier.settingsCard(),
         )
-    }
-}
-
-/** El reloj tal como se verá en el inicio, sobre un degradado del color del tema. */
-@Composable
-private fun ThemePreview(theme: ThemeSettings, preview: ClockPreview, photo: ImageBitmap?) {
-    val scheme = MaterialTheme.colorScheme
-    Box(
-        modifier = Modifier
-            .padding(horizontal = Spacing.m, vertical = Spacing.s)
-            .fillMaxWidth()
-            .clip(Shapes.sheet)
-            .background(Brush.verticalGradient(listOf(scheme.primary, scheme.tertiary))),
-    ) {
-        // Mismo fondo y colores que el inicio con el tema elegido.
-        VeloraTheme(font = theme.font, preset = theme.preset, reducedMotion = true) {
-            ThemeBackground(theme.preset, Modifier.matchParentSize(), photo)
-            ClockHeader(
-                clock = preview.clock,
-                style = theme.clock,
-                battery = preview.battery,
-                modifier = Modifier.padding(Spacing.l),
-            )
-        }
     }
 }
 
@@ -292,6 +374,7 @@ private object PreviewSettingsActions : SettingsActions {
     override fun onWidgetHeight(appWidgetId: Int, heightDp: Int) = Unit
     override fun onRemoveWidget(appWidgetId: Int) = Unit
     override fun onMoveWidget(appWidgetId: Int, offset: Int) = Unit
+    override fun onCustom(change: (Customization) -> Customization) = Unit
 }
 
 private object PreviewFeatureActions : FeatureActions {

@@ -185,7 +185,7 @@ internal object PresetColors {
         surface = Color(0x1FE6F4F3),
         accent = Color(0xFFB8E3DE),
         onAccent = Color(0xFF062227),
-        textShadow = Color(0x40000000),
+        textShadow = Color(0x73000000),
         iconCircle = Color(0xFFB8E3DE),
         iconGlyph = Color(0xFF062227),
     )
@@ -308,6 +308,51 @@ internal object PresetColors {
         iconCircle = Color(0xFF6D55A8),
         iconGlyph = Color(0xFFFFFFFF),
     )
+
+    /** Mármol blanco: tinta grafito cálida sobre piedra clara. */
+    val marble = OnWallpaperColors(
+        content = Color(0xFF262421),
+        contentVariant = Color(0xB3262421),
+        scrimTop = Color.Transparent,
+        scrimBottom = Color.Transparent,
+        drawerScrim = Color(0xF2F4F2ED),
+        surface = Color(0x14262421),
+        accent = Color(0xFF3A3632),
+        onAccent = Color(0xFFF4F2ED),
+        isLight = true,
+        iconCircle = Color(0xFF262421),
+        iconGlyph = Color(0xFFF4F2ED),
+    )
+
+    /** Mármol negro: hueso sobre piedra oscura, acento dorado como las vetas. */
+    val blackMarble = OnWallpaperColors(
+        content = Color(0xFFEDE3CF),
+        contentVariant = Color(0xB3EDE3CF),
+        scrimTop = Color.Transparent,
+        scrimBottom = Color.Transparent,
+        drawerScrim = Color(0xF20A0A09),
+        surface = Color(0x1FEDE3CF),
+        accent = Color(0xFFD9B872),
+        onAccent = Color(0xFF0F0E0C),
+        textShadow = Color(0xB3000000),
+        iconCircle = Color(0xFF221F1B),
+        iconGlyph = Color(0xFFD9B872),
+    )
+
+    /** Grafito: blanco sobre carbón; el más sobrio. */
+    val graphite = OnWallpaperColors(
+        content = Color(0xFFFFFFFF),
+        contentVariant = Color(0xB8FFFFFF),
+        scrimTop = Color.Transparent,
+        scrimBottom = Color.Transparent,
+        drawerScrim = Color(0xF20E0F10),
+        surface = Color(0x1FFFFFFF),
+        accent = Color(0xFFF2F2F2),
+        onAccent = Color(0xFF161718),
+        textShadow = Color(0x59000000),
+        iconCircle = Color(0xFFE9E9EC),
+        iconGlyph = Color(0xFF161718),
+    )
 }
 
 /** Colores de las ilustraciones de fondo: pocas formas, mucho aire. */
@@ -315,46 +360,80 @@ internal object ArtColors {
     /** Velo sobre una foto propia en los temas de texto oscuro. */
     val lightVeil = Color(0x8CFFFFFF)
 
+    // Noche
     val nightBase = Color(0xFF050507)
-    val nightGlow = Color(0x14FFFFFF)
+    val nightHaze = Color(0xFF0C0D13)
+    val nightGlow = Color(0xFF1B1F2C)
 
+    // Papel
     val paperBase = Color(0xFFF3EEE5)
-    val paperShade = Color(0x0F2B2620)
-    val paperLine = Color(0x0D2B2620)
+    val paperWarm = Color(0xFFEDE4D3)
+    val paperFiber = Color(0xFFD9CDB7)
+    val paperFiberLight = Color(0xFFFCFAF4)
+    val paperEdge = Color(0xFFE5DAC7)
 
-    val sakuraSkyTop = Color(0xFFFFF6F8)
-    val sakuraSkyBottom = Color(0xFFF7DCE6)
+    // Sakura
+    val sakuraSkyTop = Color(0xFFFFF5F7)
+    val sakuraSkyBottom = Color(0xFFF6D6E2)
+    val sakuraPeach = Color(0xFFFFE3D8)
+    val sakuraRose = Color(0xFFF4C6D7)
+    val sakuraLilac = Color(0xFFECDAF2)
     val sakuraMoon = Color(0xB3FFFFFF)
+    val sakuraMoonHalo = Color(0x40FFFFFF)
     val sakuraPetal = Color(0x8CF0A3B8)
 
-    val sunsetTop = Color(0xFFFFD9B8)
-    val sunsetBottom = Color(0xFFF4A7B4)
-    val sunsetSun = Color(0xB3FFF1E0)
-    val sunsetHorizon = Color(0x593A1F2B)
-    val oceanTop = Color(0xFF0B3A40)
-    val oceanBottom = Color(0xFF062227)
-    val oceanWave = Color(0x2EB8E3DE)
+    // Atardecer lofi
+    val sunsetTop = Color(0xFFFCE5D0)
+    val sunsetMid = Color(0xFFF9C3A7)
+    val sunsetLow = Color(0xFFF2A3AD)
+    val sunsetSun = Color(0xFFFFF4E2)
+    val sunsetCloud = Color(0xFFFDD8C9)
+    val sunsetCityFar = Color(0xFFE99CAB)
+    val sunsetCityNear = Color(0xFFD6849D)
+    val sunsetWindow = Color(0xFFFFE3B0)
+
+    // Océano visto desde arriba
+    val oceanDeep = Color(0xFF04303C)
+    val oceanMid = Color(0xFF0A6B76)
+    val oceanShallow = Color(0xFF2FB1AD)
+    val oceanGlow = Color(0xFF79DCD2)
+    val oceanFoam = Color(0xFFF1FBF8)
+
+    // Nieve
     val snowBase = Color(0xFFFAFAFA)
-    val snowShade = Color(0x0D202124)
+    val snowSky = Color(0xFFEEF2F7)
+    val snowShade = Color(0xFFE3E9EF)
+
+    // Café
     val coffeeTop = Color(0xFF3B2A1E)
-    val coffeeBottom = Color(0xFF1E140E)
-    val coffeeGlow = Color(0x26E2BE91)
-    val forestTop = Color(0xFF0E2321)
-    val forestBottom = Color(0xFF173A33)
-    val forestCurve = Color(0x33D7E8B0)
+    val coffeeBottom = Color(0xFF1A110C)
+    val coffeeGlow = Color(0xFFE2BE91)
+    val coffeeCrema = Color(0xFF5A3F2C)
 
-    val auroraTop = Color(0xFF070B1F)
-    val auroraBottom = Color(0xFF0E1838)
-    val auroraTeal = Color(0x592DD4BF)
-    val auroraViolet = Color(0x4D8B5CF6)
-    val auroraBlue = Color(0x403B82F6)
+    // Bosque con niebla
+    val forestTop = Color(0xFF0B1E1C)
+    val forestMist = Color(0xFF52766C)
+    val forestRidge1 = Color(0xFF35564D)
+    val forestRidge2 = Color(0xFF26443D)
+    val forestRidge3 = Color(0xFF18302A)
+    val forestRidge4 = Color(0xFF0C1D19)
 
+    // Aurora
+    val auroraTop = Color(0xFF040816)
+    val auroraBottom = Color(0xFF0C1A35)
+    val auroraGreen = Color(0xFF3BF0A6)
+    val auroraTeal = Color(0xFF2DD4BF)
+    val auroraViolet = Color(0xFF8B5CF6)
+    val auroraStar = Color(0xFFEAF2FF)
+
+    // Ceniza
     val ashTop = Color(0xFF0B0907)
     val ashBottom = Color(0xFF1A130E)
     val ashGlow = Color(0x8CE0893C)
     val ashEmber = Color(0xFFF2A65A)
     val ashVignette = Color(0xCC000000)
 
+    // Noche pixel
     val pixelTop = Color(0xFF0B0620)
     val pixelMid = Color(0xFF1E0F45)
     val pixelBottom = Color(0xFF3A1A5E)
@@ -366,30 +445,60 @@ internal object ArtColors {
     val pixelCrater = Color(0xFFE5C77A)
     val pixelHillFar = Color(0xFF2A1450)
     val pixelHillNear = Color(0xFF160A30)
-    val galaxyBase = Color(0xFF05060F)
-    val galaxyMagenta = Color(0x66B23CFF)
-    val galaxyTeal = Color(0x5527C4C9)
+
+    // Galaxia
+    val galaxyBase = Color(0xFF04050D)
+    val galaxyDeep = Color(0xFF0A0D22)
+    val galaxyMagenta = Color(0xFFB23CFF)
+    val galaxyTeal = Color(0xFF27C4C9)
+    val galaxyCore = Color(0xFFFFD9F0)
     val galaxyStar = Color(0xFFF4F7FF)
     val galaxyHalo = Color(0x80A9C8FF)
     val galaxyPlanetLight = Color(0xFFF2B07A)
     val galaxyPlanetDark = Color(0xFF5A2B5E)
     val galaxyRing = Color(0xB3FFE2C4)
+
+    // Neón
     val neonTop = Color(0xFF0A0614)
     val neonBottom = Color(0xFF3B0D4F)
-    val neonFloor = Color(0xFF0A0614)
+    val neonHaze = Color(0xFFFF2BD6)
     val neonSunTop = Color(0xFFFFD25A)
     val neonSunBottom = Color(0xFFFF2BD6)
     val neonGrid = Color(0xB3FF2BD6)
     val neonGlow = Color(0x553CF2FF)
     val neonHorizon = Color(0xFF3CF2FF)
-    val matchaTop = Color(0xFFF1F3E4)
-    val matchaBottom = Color(0xFFDCE5C3)
-    val matchaSoft = Color(0x1F4F6B3A)
-    val matchaLine = Color(0x664F6B3A)
-    val lavenderTop = Color(0xFFF1ECF9)
-    val lavenderBottom = Color(0xFFDCCFEF)
-    val lavenderBlobA = Color(0x55B79CF0)
-    val lavenderBlobB = Color(0x44F0A8D8)
+
+    // Matcha (degradado de malla)
+    val matchaBase = Color(0xFFEEF1E0)
+    val matchaTea = Color(0xFFDCE7BD)
+    val matchaLeaf = Color(0xFFC8DAA2)
+    val matchaMilk = Color(0xFFF5F2DE)
+
+    // Lavanda (degradado de malla)
+    val lavenderBase = Color(0xFFEEE8F8)
+    val lavenderViolet = Color(0xFFCEB9F5)
+    val lavenderPink = Color(0xFFF5C8E1)
+    val lavenderBlue = Color(0xFFC0CBF6)
+    val lavenderMist = Color(0xFFF8EEF8)
+
+    // Mármol blanco
+    val marbleBase = Color(0xFFF4F2ED)
+    val marbleCloud = Color(0xFFE2DED7)
+    val marbleVein = Color(0xFF8E8983)
+    val marbleFine = Color(0xFFB8B2AA)
+
+    // Mármol negro
+    val blackMarbleBase = Color(0xFF0A0A09)
+    val blackMarbleCloud = Color(0xFF1C1A17)
+    val blackMarbleSmoke = Color(0xFF2A2723)
+    val blackMarbleGold = Color(0xFFC9A35A)
+    val blackMarbleGlint = Color(0xFFF0D48F)
+    val blackMarbleHair = Color(0xFF6E685E)
+
+    // Grafito
+    val graphiteTop = Color(0xFF232427)
+    val graphiteBottom = Color(0xFF0E0F10)
+    val graphiteLight = Color(0xFF4A4D52)
 }
 
 /** Colores de marca (landing), tomados del logo: cinta plateada sobre negro. */
@@ -397,4 +506,14 @@ object BrandColors {
     val background = Color(0xFF000000)
     val silver = Color(0xFFE8EAED)
     val silverMuted = Color(0xA6E8EAED)
+
+    /** Segundo tono de la marca: la cinta pasa de plata a lila. */
+    val lilac = Color(0xFFB9A8FF)
+
+    /** Halo detrás del logo y luces del landing. */
+    val glow = Color(0x40A99BFF)
+
+    /** Luces de fondo del landing, muy tenues sobre negro. */
+    val auroraA = Color(0x337C6CFF)
+    val auroraB = Color(0x2639C6D6)
 }

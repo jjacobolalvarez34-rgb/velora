@@ -22,3 +22,4 @@ Thumbs.db
 
 # Capturas de referencia de otras apps: se miran, no se versionan (SEGURIDAD §5)
 docs/*.zip
+build-report.txt

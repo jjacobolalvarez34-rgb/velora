@@ -146,6 +146,20 @@ _`compileSdk` actualizado a 37 por ADR-013; `minSdk` y `targetSdk` siguen vigent
 **Por qué:** la comunidad puede compartir temas sin riesgo legal ni de seguridad: el archivo no puede ejecutar nada.
 **Consecuencias:** pruebas en `ThemeFileTest`. Un tema importado incluye la foto de quien lo compartió: es responsabilidad de esa persona tener derecho a compartirla.
 
+## ADR-028 · Paridad de funciones con Niagara, con diseño propio; Personalizar — Aceptada (2026-10-28)
+**Contexto:** el autor pidió anular "no copiar Niagara" para primero hacer todo lo que Niagara ya hace y después mejorarlo.
+**Decisión:** la regla cambia a **paridad de funciones sí, recursos y código no** (REGLAS §6): Velora tiene temas listos, packs de íconos con formas/grosor/color, color del tema, elementos visibles, relojes y consejos de inicio, igual que Niagara; pero los íconos (Anycons), fondos, textos, nombres y código de Niagara son obra protegida y no se copian. Todo se diseña de nuevo. Personalizar es una pantalla con una vista previa en vivo (el inicio real achicado) y pestañas iguales en todas partes: Tema · Fondo · Reloj · Letra · Íconos · Color · Elementos. La personalización fina se guarda en `Customization` (una clave de DataStore con formato `clave=valor`, `CustomizationCodec`), así crece sin migraciones; también viaja en los temas compartidos (sin consejos ni frenos, que son personales).
+**Por qué:** las funciones no tienen dueño; los recursos sí. Así competimos sin riesgo legal ni de Play Store.
+**Consecuencias:** nuevos relojes (Apilado, Banda, Dúo), packs de Velora (Línea, Relleno, Puntos, Pegatina, Vivo, Vidrio, Estelar, Mármol), formas (círculo, squircle, redondeado, gota), color del ícono (tema, app, blanco y negro), grosor y relleno suave, packs de terceros (ADR-030), consejos deslizables y freno de uso (ADR-024).
+
+## ADR-029 · Marca vectorial animada y entrada del inicio — Aceptada (2026-10-28)
+**Decisión:** el logo del landing es una "V" vectorial (dos cintas plata→lila que se dibujan al entrar, estrella de cuatro puntas, halo que respira) sobre un fondo negro con dos luces que se mueven despacio. Al volver al inicio (ON_START después de un ON_STOP) y al desbloquear (`ACTION_USER_PRESENT`, sin permisos) el reloj y los favoritos vuelven a entrar escalonados desde abajo (28 dp) con `LocalEntranceGeneration`. Con "Quitar animaciones" todo aparece quieto.
+**Consecuencias:** el ícono de la app sigue siendo el de `docs/marca/`; si se cambia, regenerar el adaptativo.
+
+## ADR-030 · Packs de íconos de terceros — Aceptada (2026-10-28)
+**Decisión:** se leen los packs instalados que siguen el formato común de launchers (acciones `org.adw.launcher.THEMES`, `com.novalauncher.THEME`, etc., declaradas en `<queries>`; nunca `QUERY_ALL_PACKAGES`). Se parsea su `appfilter.xml` de forma defensiva; las apps que el pack no cubre usan `iconback`/`iconmask`/`iconupon`/`scale` si el pack los trae, o el ícono original con la forma elegida.
+**Consecuencias:** son recursos del autor de cada pack, instalados por el usuario: Velora solo los muestra, no los copia ni redistribuye.
+
 ---
 
 ## Plantilla

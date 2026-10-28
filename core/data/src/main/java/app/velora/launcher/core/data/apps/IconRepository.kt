@@ -26,7 +26,11 @@ class IconRepository(
     private val scope: CoroutineScope,
     private val infoFor: suspend (AppKey) -> LauncherActivityInfo?,
 ) {
-    private val renderer = IconRenderer(context, context.resources.displayMetrics.densityDpi)
+    private val densityDpi = context.resources.displayMetrics.densityDpi
+    private val renderer = IconRenderer(context, densityDpi)
+
+    /** Packs de íconos de terceros (`IconStyle.Pack`); el selector de Ajustes usa el mismo. */
+    val packs = IconPackRepository(context)
     private val disk = IconDiskCache(File(context.cacheDir, "icons"))
 
     private val memory: LruCache<String, ImageBitmap> = run {
@@ -57,9 +61,12 @@ class IconRepository(
         runCatching { disk.read(request.fileName)?.asImageBitmap() }.getOrNull()
     }?.also { memory.put(request.fileName, it) }
 
+    /** Los packs de terceros se leen en IO; el dibujo, en Default. */
     private suspend fun render(request: IconRequest, info: LauncherActivityInfo): ImageBitmap? {
+        val pack = request.options.thirdPartyPack?.takeIf { request.style == IconStyle.Pack }
+        val packIcon = pack?.let { packs.iconFor(it, info.componentName, densityDpi) }
         val bitmap = withContext(Dispatchers.Default) {
-            runCatching { renderer.render(info, request.sizePx, request.style, request.tint, request.backdrop) }
+            runCatching { renderer.render(info, request, packIcon) }
                 .onFailure { Logger.w(TAG, it) { "No se pudo dibujar el ícono de ${request.key.packageName}" } }
                 .getOrNull()
         } ?: return null
@@ -72,6 +79,7 @@ class IconRepository(
 
     /** Un paquete se actualizó: su ícono puede haber cambiado. Se puede llamar desde el main thread. */
     fun evictPackage(packageName: String) {
+        packs.invalidate(packageName)
         evictFromMemory(packageName)
         scope.launch(Dispatchers.IO) { disk.deletePackage(packageName) }
     }
@@ -99,20 +107,5 @@ class IconRepository(
         const val TAG = "IconRepository"
         const val BYTES_PER_MB = 1024 * 1024
         const val CACHE_FRACTION = 8
-    }
-}
-
-/**
- * Qué ícono pedir: la app, el tamaño final en píxeles, el estilo, y para los minimalistas el
- * color del logo en línea y el del círculo de fondo (ARGB).
- */
-data class IconRequest(val key: AppKey, val sizePx: Int, val style: IconStyle, val tint: Int, val backdrop: Int) {
-    /** Nombre en disco y clave en memoria: empieza por el paquete para poder borrarlo junto. */
-    val fileName: String = IconDiskCache.packagePrefix(key.packageName) +
-        "${key.className.hashCode().toUInt().toString(HEX)}_${key.userSerial}_${style.name}_" +
-        "${tint.toUInt().toString(HEX)}_${backdrop.toUInt().toString(HEX)}@$sizePx.png"
-
-    private companion object {
-        const val HEX = 16
     }
 }

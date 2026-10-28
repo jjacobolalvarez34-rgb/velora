@@ -13,6 +13,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import app.velora.launcher.core.designsystem.motion.VeloraMotion
@@ -37,6 +38,8 @@ fun VeloraTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
     reducedMotion: Boolean = rememberReducedMotion(),
+    /** Color del tema elegido por el usuario (ADR-028); null = el del tema. */
+    accent: Color? = null,
     content: @Composable () -> Unit,
 ) {
     val dynamic = dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
@@ -48,7 +51,7 @@ fun VeloraTheme(
         else -> VeloraLightColors
     }
     // Sobre el wallpaper siempre hay velo oscuro: el acento es el tono claro, en ambos modos.
-    val onWallpaper = onWallpaperColorsFor(preset)
+    val onWallpaper = remember(preset, accent) { withAccent(onWallpaperColorsFor(preset), accent) }
     val family = fontFamilyOf(font)
     val typography = remember(family, onWallpaper) { veloraTypography(family, textShadowOf(onWallpaper)) }
     val material = remember(family) { materialTypography(family) }
@@ -81,10 +84,25 @@ private fun onWallpaperColorsFor(preset: ThemePreset): OnWallpaperColors = when 
     ThemePreset.PixelNight -> PresetColors.pixelNight
     ThemePreset.Ash -> PresetColors.ash
     ThemePreset.Aurora -> PresetColors.aurora
+    ThemePreset.Marble -> PresetColors.marble
+    ThemePreset.BlackMarble -> PresetColors.blackMarble
+    ThemePreset.Graphite -> PresetColors.graphite
 }
 
 private const val SHADOW_BLUR = 8f
 private const val SHADOW_DROP = 1.5f
+
+/**
+ * El color elegido reemplaza el acento (burbuja del alfabeto, puntos, reloj Dúo) y el círculo de
+ * los íconos de Velora; el texto sobre él se vuelve blanco o negro según cuánto brilla.
+ */
+private fun withAccent(base: OnWallpaperColors, accent: Color?): OnWallpaperColors {
+    if (accent == null) return base
+    val on = if (accent.luminance() > HALF_LUMINANCE) Color(0xFF15141A) else Color.White
+    return base.copy(accent = accent, onAccent = on, iconCircle = accent, iconGlyph = on)
+}
+
+private const val HALF_LUMINANCE = 0.5f
 
 /** Brillo de neón, sombra dura (pixel) o la sombra suave de siempre. */
 private fun textShadowOf(colors: OnWallpaperColors): Shadow? = when {

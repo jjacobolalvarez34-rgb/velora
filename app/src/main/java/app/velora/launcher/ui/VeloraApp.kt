@@ -30,6 +30,8 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -38,15 +40,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import app.velora.launcher.R
 import app.velora.launcher.core.data.apps.IconRequest
 import app.velora.launcher.core.data.log.Logger
+import app.velora.launcher.core.designsystem.motion.LocalEntranceGeneration
 import app.velora.launcher.core.designsystem.theme.Sizes
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
 import app.velora.launcher.core.model.AppEntry
+import app.velora.launcher.core.model.AppKey
 import app.velora.launcher.core.model.AppShortcut
+import app.velora.launcher.core.model.IconOptions
 import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.ThemeSettings
 import app.velora.launcher.di.AppContainer
 import app.velora.launcher.feature.appmenu.LocalShortcutsRepository
 import app.velora.launcher.feature.apps.AppActions
+import app.velora.launcher.feature.apps.LocalIconOptions
 import app.velora.launcher.feature.apps.LocalIconRepository
 import app.velora.launcher.feature.apps.LocalIconStyle
 import app.velora.launcher.feature.apps.rememberAppOpener
@@ -57,6 +63,7 @@ import app.velora.launcher.feature.drawer.rememberDrawerSearchState
 import app.velora.launcher.feature.home.HomeEvent
 import app.velora.launcher.feature.home.HomeUiState
 import app.velora.launcher.feature.home.HomeViewModel
+import app.velora.launcher.feature.settings.userAccent
 import app.velora.launcher.feature.welcome.OnboardingScreen
 import app.velora.launcher.feature.welcome.WelcomeScreen
 import kotlin.coroutines.cancellation.CancellationException
@@ -77,12 +84,13 @@ fun VeloraApp(container: AppContainer, homePresses: Flow<Boolean>, onOpenSetting
     val theme = homeViewModel.theme.collectAsStateWithLifecycle().value ?: return
     val onboardingDone = homeViewModel.onboardingDone.collectAsStateWithLifecycle().value ?: return
     val density = LocalDensity.current
-    VeloraTheme(font = theme.font, preset = theme.preset) {
+    VeloraTheme(font = theme.font, preset = theme.preset, accent = theme.userAccent()) {
         CompositionLocalProvider(
             // Tamaño de texto de Velora encima del tamaño de fuente del sistema.
             LocalDensity provides Density(density.density, density.fontScale * theme.textSize.scale),
             LocalIconRepository provides container.iconRepository,
             LocalIconStyle provides theme.icons,
+            LocalIconOptions provides theme.custom.icons,
             LocalShortcutsRepository provides container.shortcutsRepository,
         ) {
             val home by homeViewModel.uiState.collectAsStateWithLifecycle()
@@ -90,7 +98,10 @@ fun VeloraApp(container: AppContainer, homePresses: Flow<Boolean>, onOpenSetting
             HomeEventMessages(homeViewModel)
 
             val onWelcome = !onboardingDone || home.showWelcome
-            SystemBarsAppearance(lightBackground = VeloraTheme.onWallpaper.isLight && !onWelcome)
+            SystemBarsAppearance(
+                lightBackground = VeloraTheme.onWallpaper.isLight && !onWelcome,
+                showStatusBar = theme.custom.visible.statusBar || onWelcome,
+            )
             if (!onboardingDone) {
                 WelcomeRoute(homeViewModel, intro = true)
             } else if (home.showWelcome) {
@@ -128,57 +139,34 @@ private fun LauncherRoute(
     val listState = rememberLazyListState()
     val search = rememberDrawerSearchState()
     val sheets = rememberLauncherSheets()
-    val actions = rememberAppActions(container, homeViewModel, sheets)
+    val actions = rememberAppActions(container, homeViewModel, sheets, theme)
     val lock = rememberDoubleTapLock()
     val folders by container.foldersRepository.folders.collectAsStateWithLifecycle(emptyList())
     val folderActions = rememberFolderActions(container, sheets)
     DrawerEffects(drawerState, search, homePresses, drawerViewModel::onQueryChange)
     NotificationsProvider(container.notificationsRepository, enabled = theme.notifications) {
-        LauncherScreen(
-            home = home,
-            drawer = drawer,
-            drawerState = drawerState,
-            listState = listState,
-            search = search,
-            actions = actions,
-            onOpenSettings = onOpenSettings,
-            theme = theme,
-            onHomeMenu = { sheets.homeMenu = true },
-            widgets = { HomeWidgetsSlot(container, showMusic = theme.notifications) },
-            photo = rememberPhoto(theme.photoBackground),
-            onDoubleTap = lock.takeIf { theme.doubleTapLock },
-            folders = folders,
-            onOpenFolder = folderActions::open,
-        )
-    }
-    LauncherSheets(sheets, container, drawer, actions, onOpenSettings, theme, folders, folderActions)
-    IconPrefetch(container, home, drawer, theme.icons)
-}
-
-@Composable
-private fun rememberAppActions(
-    container: AppContainer,
-    homeViewModel: HomeViewModel,
-    sheets: LauncherSheetsState,
-): AppActions {
-    val opener = rememberAppOpener(container.appLauncher)
-    return remember(opener, homeViewModel, sheets) {
-        object : AppActions {
-            override fun open(app: AppEntry, bounds: Rect?) = opener.open(app, bounds)
-            override fun openInfo(app: AppEntry, bounds: Rect?) = opener.openInfo(app, bounds)
-            override fun uninstall(app: AppEntry) = opener.uninstall(app)
-            override fun addFavorite(app: AppEntry) = homeViewModel.onAddFavorite(app.key)
-            override fun removeFavorite(app: AppEntry) = homeViewModel.onRemoveFavorite(app.key)
-            override fun hide(app: AppEntry) = homeViewModel.onHide(app)
-            override fun openShortcut(shortcut: AppShortcut, bounds: Rect?) = opener.openShortcut(shortcut, bounds)
-            override fun showMenu(app: AppEntry) {
-                sheets.appMenu = app
-            }
-            override fun webSearch(query: String) = opener.webSearch(query)
-            override fun copy(text: String) = opener.copy(text)
-            override fun openContact(uri: Uri) = opener.openContact(uri)
+        CompositionLocalProvider(LocalEntranceGeneration provides rememberEntranceGeneration()) {
+            LauncherScreen(
+                home = home,
+                drawer = drawer,
+                drawerState = drawerState,
+                listState = listState,
+                search = search,
+                actions = actions,
+                onOpenSettings = onOpenSettings,
+                theme = theme,
+                onHomeMenu = { sheets.homeMenu = true },
+                widgets = { HomeWidgetsSlot(container, showMusic = theme.notifications) },
+                photo = rememberPhoto(theme.photoBackground),
+                onDoubleTap = lock.takeIf { theme.doubleTapLock },
+                folders = folders,
+                onOpenFolder = folderActions::open,
+                tips = { HomeTipsSlot(container, theme, home, homeViewModel, drawerState, sheets, onOpenSettings) },
+            )
         }
     }
+    LauncherSheets(sheets, container, drawer, actions, onOpenSettings, theme, folders, folderActions)
+    IconPrefetch(container, home, drawer, theme.icons, theme.custom.icons)
 }
 
 /**
@@ -186,32 +174,50 @@ private fun rememberAppActions(
  * al abrir la lista ya están dibujados (y en disco para el próximo arranque).
  */
 @Composable
-private fun IconPrefetch(container: AppContainer, home: HomeUiState, drawer: DrawerUiState, style: IconStyle) {
+private fun IconPrefetch(
+    container: AppContainer,
+    home: HomeUiState,
+    drawer: DrawerUiState,
+    style: IconStyle,
+    options: IconOptions,
+) {
     if (style == IconStyle.None) return
-    val tint = VeloraTheme.onWallpaper.iconGlyph.toArgb()
-    val backdrop = VeloraTheme.onWallpaper.iconCircle.toArgb()
+    val colors = VeloraTheme.onWallpaper
+    val tint = colors.iconGlyph.toArgb()
+    val backdrop = colors.iconCircle.toArgb()
+    val accent = colors.accent.toArgb()
     val density = LocalDensity.current
     val favoritePx = with(density) { Sizes.favoriteIcon.roundToPx() }
     val listPx = with(density) { Sizes.listIcon.roundToPx() }
-    LaunchedEffect(home.favorites, drawer.list, style, tint, backdrop, favoritePx, listPx) {
-        val favorites = home.favorites.map { IconRequest(it.key, favoritePx, style, tint, backdrop) }
-        val everything = drawer.list.byLetter.values.flatten().map {
-            IconRequest(it.key, listPx, style, tint, backdrop)
-        }
+    LaunchedEffect(home.favorites, drawer.list, style, options, tint, backdrop, accent, favoritePx, listPx) {
+        fun request(key: AppKey, sizePx: Int) = IconRequest(key, sizePx, style, tint, backdrop, options, accent)
+        val favorites = home.favorites.map { request(it.key, favoritePx) }
+        val everything = drawer.list.byLetter.values.flatten().map { request(it.key, listPx) }
         container.iconRepository.prefetch(favorites + everything)
     }
 }
 
-/** Íconos oscuros en las barras del sistema cuando el fondo del tema es claro (Sakura). */
+/**
+ * Íconos oscuros en las barras del sistema cuando el fondo del tema es claro (Sakura), y la barra
+ * de estado oculta si así se eligió (elementos visibles, ADR-028; se asoma deslizando).
+ */
 @Composable
-private fun SystemBarsAppearance(lightBackground: Boolean) {
+private fun SystemBarsAppearance(lightBackground: Boolean, showStatusBar: Boolean) {
     val view = LocalView.current
     val activity = LocalActivity.current
-    LaunchedEffect(lightBackground) {
+    LaunchedEffect(lightBackground, showStatusBar) {
         val window = activity?.window ?: return@LaunchedEffect
         WindowCompat.getInsetsController(window, view).apply {
             isAppearanceLightStatusBars = lightBackground
             isAppearanceLightNavigationBars = lightBackground
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            if (showStatusBar) {
+                show(
+                    WindowInsetsCompat.Type.statusBars(),
+                )
+            } else {
+                hide(WindowInsetsCompat.Type.statusBars())
+            }
         }
     }
 }

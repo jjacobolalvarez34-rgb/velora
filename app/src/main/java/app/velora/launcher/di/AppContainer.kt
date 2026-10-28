@@ -3,6 +3,7 @@ package app.velora.launcher.di
 import android.content.Context
 import app.velora.launcher.core.data.apps.AppLauncher
 import app.velora.launcher.core.data.apps.AppsRepository
+import app.velora.launcher.core.data.apps.IconPackRepository
 import app.velora.launcher.core.data.apps.IconRepository
 import app.velora.launcher.core.data.apps.RoomAppsCache
 import app.velora.launcher.core.data.apps.ShortcutsRepository
@@ -57,6 +58,8 @@ class AppContainer(context: Context) {
     val iconRepository: IconRepository by lazy {
         IconRepository(appContext, applicationScope, infoFor = { systemApps.infoFor(it) })
     }
+
+    val iconPackRepository: IconPackRepository by lazy { iconRepository.packs }
 
     val appLauncher: AppLauncher by lazy { AppLauncher(appContext, userFor = { systemApps.userFor(it) }) }
 

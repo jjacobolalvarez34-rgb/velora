@@ -70,11 +70,8 @@ class SettingsViewModel(
 
     fun onMoveFavorite(app: AppEntry, offset: Int) = save { favorites.move(app.key, offset) }
 
-    fun onTextSize(size: TextSize) = save { prefs.setTextSize(size) }
-
-    fun onLeftHanded(enabled: Boolean) = save { prefs.setLeftHanded(enabled) }
-
-    fun onFullList(enabled: Boolean) = save { prefs.setFullList(enabled) }
+    /** Cambios de una sola preferencia: `onPrefs { setFont(font) }`. */
+    fun onPrefs(change: suspend PrefsRepository.() -> Unit) = save { prefs.change() }
 
     fun onPreset(preset: ThemePreset) = save { prefs.applyPreset(preset) }
 
@@ -111,13 +108,12 @@ class SettingsViewModel(
         theme.clock?.let { prefs.setClockStyle(it) }
         theme.icons?.let { prefs.setIconStyle(it) }
         prefs.setPhotoBackground(photoPath)
+        theme.custom?.let { shared ->
+            prefs.updateCustom { mine ->
+                shared.copy(dismissedTips = mine.dismissedTips, usageLimits = mine.usageLimits)
+            }
+        }
     }
-
-    fun onFont(font: FontChoice) = save { prefs.setFont(font) }
-
-    fun onClockStyle(style: ClockStyle) = save { prefs.setClockStyle(style) }
-
-    fun onIconStyle(style: IconStyle) = save { prefs.setIconStyle(style) }
 
     private fun save(block: suspend () -> Unit) {
         viewModelScope.launch { block() }

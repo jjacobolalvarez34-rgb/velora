@@ -13,6 +13,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -27,10 +28,14 @@ import app.velora.launcher.core.data.log.Logger
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.ClockStyle
+import app.velora.launcher.core.model.Customization
 import app.velora.launcher.core.model.FontChoice
 import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.TextSize
 import app.velora.launcher.core.model.ThemePreset
+import app.velora.launcher.feature.apps.LocalIconOptions
+import app.velora.launcher.feature.apps.LocalIconRepository
+import app.velora.launcher.feature.apps.LocalIconStyle
 import app.velora.launcher.services.LockAccessibilityService
 import app.velora.launcher.services.VeloraNotificationListener
 import app.velora.launcher.ui.BackgroundPhotos
@@ -48,6 +53,9 @@ class SettingsActivity : ComponentActivity() {
     private val container get() = (application as VeloraApplication).container
 
     private val widgetHost get() = container.widgetHost
+
+    /** Packs de íconos instalados (formato común de launchers), para elegir uno en Personalizar. */
+    private var iconPacks by mutableStateOf<List<InstalledIconPack>>(emptyList())
 
     private var status by mutableStateOf(FeatureStatus(lockSupported = LockAccessibilityService.isSupported))
 
@@ -72,15 +80,16 @@ class SettingsActivity : ComponentActivity() {
     )
 
     private val actions = object : SettingsActions {
-        override fun onFont(font: FontChoice) = viewModel.onFont(font)
-        override fun onClockStyle(style: ClockStyle) = viewModel.onClockStyle(style)
-        override fun onIconStyle(style: IconStyle) = viewModel.onIconStyle(style)
+        override fun onFont(font: FontChoice) = viewModel.onPrefs { setFont(font) }
+        override fun onClockStyle(style: ClockStyle) = viewModel.onPrefs { setClockStyle(style) }
+        override fun onIconStyle(style: IconStyle) = viewModel.onPrefs { setIconStyle(style) }
+        override fun onCustom(change: (Customization) -> Customization) = viewModel.onPrefs { updateCustom(change) }
         override fun onChooseHomeApp() = openHomeAppSettings()
         override fun onUnhide(app: AppEntry) = viewModel.onUnhide(app)
         override fun onMoveFavorite(app: AppEntry, offset: Int) = viewModel.onMoveFavorite(app, offset)
-        override fun onTextSize(size: TextSize) = viewModel.onTextSize(size)
-        override fun onLeftHanded(enabled: Boolean) = viewModel.onLeftHanded(enabled)
-        override fun onFullList(enabled: Boolean) = viewModel.onFullList(enabled)
+        override fun onTextSize(size: TextSize) = viewModel.onPrefs { setTextSize(size) }
+        override fun onLeftHanded(enabled: Boolean) = viewModel.onPrefs { setLeftHanded(enabled) }
+        override fun onFullList(enabled: Boolean) = viewModel.onPrefs { setFullList(enabled) }
         override fun onPreset(preset: ThemePreset) = viewModel.onPreset(preset)
         override fun onWidgetHeight(appWidgetId: Int, heightDp: Int) =
             widgetHost.update { setHeight(appWidgetId, heightDp) }
@@ -169,17 +178,25 @@ class SettingsActivity : ComponentActivity() {
             val photo by produceState<ImageBitmap?>(null, theme.photoBackground) {
                 value = theme.photoBackground?.let { BackgroundPhotos.load(it) }
             }
-            // La pantalla usa la fuente elegida: se ve el cambio al instante.
-            VeloraTheme(font = theme.font, preset = theme.preset) {
-                SettingsScreen(
-                    theme = theme,
-                    preview = preview,
-                    lists = SettingsLists(favorites = favorites, hidden = hidden, widgets = widgets),
-                    actions = actions,
-                    features = features,
-                    status = status,
-                    photo = photo,
-                )
+            // La pantalla usa la fuente elegida: se ve el cambio al instante. Los íconos de la vista
+            // previa salen del mismo repositorio que el inicio.
+            VeloraTheme(font = theme.font, preset = theme.preset, accent = theme.userAccent()) {
+                CompositionLocalProvider(
+                    LocalIconRepository provides container.iconRepository,
+                    LocalIconStyle provides theme.icons,
+                    LocalIconOptions provides theme.custom.icons,
+                ) {
+                    SettingsScreen(
+                        theme = theme,
+                        preview = preview,
+                        lists = SettingsLists(favorites = favorites, hidden = hidden, widgets = widgets),
+                        actions = actions,
+                        features = features,
+                        status = status,
+                        photo = photo,
+                        iconPacks = iconPacks,
+                    )
+                }
             }
         }
     }
@@ -187,6 +204,11 @@ class SettingsActivity : ComponentActivity() {
     /** Al volver de la pantalla del sistema se mira si el usuario dio (o quitó) el acceso. */
     override fun onResume() {
         super.onResume()
+        // Al volver de la Play Store puede haber un pack nuevo.
+        lifecycleScope.launch {
+            iconPacks =
+                container.iconPackRepository.installedPacks().map { InstalledIconPack(it.packageName, it.label) }
+        }
         lifecycleScope.launch {
             status = withContext(Dispatchers.IO) {
                 FeatureStatus(

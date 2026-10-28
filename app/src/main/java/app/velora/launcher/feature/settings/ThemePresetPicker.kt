@@ -66,7 +66,7 @@ fun ThemePresetPicker(selected: ThemePreset, onSelect: (ThemePreset) -> Unit, mo
 }
 
 @Composable
-private fun PresetCard(preset: ThemePreset, selected: Boolean, onClick: () -> Unit) {
+internal fun PresetCard(preset: ThemePreset, selected: Boolean, onClick: () -> Unit) {
     val border = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent
     val scheme = MaterialTheme.colorScheme
     Box(
@@ -118,6 +118,9 @@ internal fun presetName(preset: ThemePreset): Int = when (preset) {
     ThemePreset.Neon -> R.string.theme_neon
     ThemePreset.Matcha -> R.string.theme_matcha
     ThemePreset.Lavender -> R.string.theme_lavender
+    ThemePreset.Marble -> R.string.theme_marble
+    ThemePreset.BlackMarble -> R.string.theme_black_marble
+    ThemePreset.Graphite -> R.string.theme_graphite
     ThemePreset.PixelNight -> R.string.theme_pixel_night
     ThemePreset.Ash -> R.string.theme_ash
     ThemePreset.Aurora -> R.string.theme_aurora

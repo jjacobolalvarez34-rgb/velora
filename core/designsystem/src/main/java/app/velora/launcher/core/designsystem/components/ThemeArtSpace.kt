@@ -1,7 +1,6 @@
 package app.velora.launcher.core.designsystem.components
 
 import androidx.compose.ui.draw.CacheDrawScope
-import androidx.compose.ui.draw.DrawResult
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -11,13 +10,11 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.dp
 import app.velora.launcher.core.designsystem.theme.ArtColors
-import kotlin.math.PI
 import kotlin.math.abs
-import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
 
-// Temas espaciales: Noche pixel (todo en una rejilla de píxeles) y Galaxia.
+// Temas espaciales en vector: Noche pixel (todo en una rejilla de píxeles) y lo nítido de Galaxia.
 
 /** Una rejilla de bloques de [px]: lo que cabe en la pantalla. */
 private class PixelGrid(val px: Float, width: Float, height: Float) {
@@ -35,7 +32,7 @@ private class PixelGrid(val px: Float, width: Float, height: Float) {
  * tres tamaños (las grandes en cruz), una luna escalonada con cráteres y montañas de píxeles.
  * Todo sobre la misma rejilla, así nada se ve borroso.
  */
-internal fun CacheDrawScope.pixelNight(): DrawResult {
+internal fun CacheDrawScope.pixelNight(): DrawScope.() -> Unit {
     val w = size.width
     val h = size.height
     val grid = PixelGrid(4.dp.toPx(), w, h)
@@ -51,7 +48,7 @@ internal fun CacheDrawScope.pixelNight(): DrawResult {
     val moon = pixelDisc(grid, moonCenter, MOON_BLOCKS)
     val far = List(grid.cols) { col -> (grid.rows * (0.86f - 0.05f * sin(col / 7f) - 0.03f * sin(col / 3f))).toInt() }
     val near = List(grid.cols) { col -> (grid.rows * (0.92f - 0.04f * sin(col / 5f + 1f))).toInt() }
-    return onDrawBehind {
+    return {
         drawRect(sky)
         nebula.forEach { drawRect(ArtColors.pixelNebula, it, grid.block) }
         small.forEachIndexed { i, at ->
@@ -111,17 +108,13 @@ private fun DrawScope.drawHills(tops: List<Int>, color: Color, grid: PixelGrid) 
 private data class Star(val at: Offset, val radius: Float, val alpha: Float)
 
 /**
- * Galaxia: negro azulado profundo, dos nebulosas (magenta y turquesa) que se cruzan, un brazo de
- * estrellas en espiral, estrellas brillantes con halo y un planeta con anillo abajo.
+ * Galaxia (encima de [galaxyArt]): un brazo de estrellas siguiendo la nebulosa, estrellas
+ * sueltas, algunas brillantes con halo y un planeta con anillo abajo.
  */
-internal fun CacheDrawScope.galaxy(): DrawResult {
+internal fun CacheDrawScope.galaxyOverlay(): DrawScope.() -> Unit {
     val w = size.width
     val h = size.height
     val random = Random(SEED + 1)
-    val nebulas = listOf(
-        Brush.radialGradient(listOf(ArtColors.galaxyMagenta, Color.Transparent), Offset(w * 0.2f, h * 0.3f), w * 0.8f),
-        Brush.radialGradient(listOf(ArtColors.galaxyTeal, Color.Transparent), Offset(w * 0.85f, h * 0.55f), w * 0.7f),
-    )
     val stars = galaxyArm(random) + List(STARS * 3) {
         Star(
             Offset(random.nextFloat() * w, random.nextFloat() * h),
@@ -134,9 +127,7 @@ internal fun CacheDrawScope.galaxy(): DrawResult {
     val halos = bright.map { Brush.radialGradient(listOf(ArtColors.galaxyHalo, Color.Transparent), it, halo) }
     val brightRadius = 1.6.dp.toPx()
     val planet = ringedPlanet()
-    return onDrawBehind {
-        drawRect(ArtColors.galaxyBase)
-        nebulas.forEach { drawRect(it) }
+    return {
         stars.forEach { drawCircle(ArtColors.galaxyStar.copy(alpha = it.alpha), it.radius, it.at) }
         bright.forEachIndexed { i, at ->
             drawCircle(halos[i], halo, at)
@@ -146,16 +137,15 @@ internal fun CacheDrawScope.galaxy(): DrawResult {
     }
 }
 
-/** El brazo de la galaxia: puntos alrededor de una elipse inclinada, con dispersión. */
+/** El brazo de la galaxia: estrellas que siguen la franja de la nebulosa, más juntas en su centro. */
 private fun CacheDrawScope.galaxyArm(random: Random): List<Star> {
     val w = size.width
     val h = size.height
     return List(GALAXY_ARM) {
-        val t = random.nextFloat() * 2f * PI.toFloat()
-        val spread = (random.nextFloat() - 0.5f) * w * 0.12f
-        val x = w * 0.5f + cos(t) * w * 0.55f + spread
-        val y = h * 0.38f + sin(t) * h * 0.12f + cos(t) * h * 0.1f + spread
-        Star(Offset(x, y), (0.4f + random.nextFloat() * 0.9f).dp.toPx(), 0.25f + random.nextFloat() * 0.6f)
+        val x = random.nextFloat()
+        val spread = (random.nextFloat() + random.nextFloat() - 1f) * 0.08f
+        val y = h * (0.64f - 0.26f * x + spread)
+        Star(Offset(x * w, y), (0.4f + random.nextFloat() * 0.9f).dp.toPx(), 0.25f + random.nextFloat() * 0.6f)
     }
 }
 

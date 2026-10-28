@@ -3,6 +3,7 @@ package app.velora.launcher.feature.home
 import androidx.compose.runtime.Immutable
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.ClockStyle
+import app.velora.launcher.core.model.VisibleElements
 
 @Immutable
 data class HomeUiState(
@@ -13,6 +14,8 @@ data class HomeUiState(
     val clockStyle: ClockStyle = ClockStyle.Classic,
     /** Batería en %, o null si no se sabe (los estilos que la muestran la ocultan). */
     val battery: Int? = null,
+    /** Qué se ve en el inicio (ADR-028). */
+    val visible: VisibleElements = VisibleElements(),
 )
 
 /** Hora y fecha ya formateadas según el idioma y la preferencia 12/24 h del sistema. */

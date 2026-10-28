@@ -18,6 +18,7 @@ import app.velora.launcher.core.data.apps.IconRequest
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
 import app.velora.launcher.core.model.AppKey
 import app.velora.launcher.core.model.AppNotification
+import app.velora.launcher.core.model.IconOptions
 import app.velora.launcher.core.model.IconStyle
 
 /** Caché de íconos para las filas; la provee `VeloraApp`. null en previews: se dibuja el hueco. */
@@ -28,6 +29,9 @@ val LocalNotifications = staticCompositionLocalOf<Map<String, AppNotification>> 
 
 /** Estilo de íconos elegido en Ajustes → Tema. */
 val LocalIconStyle = staticCompositionLocalOf { IconStyle.Circle }
+
+/** Opciones finas de los íconos (estilo de Velora, forma, color, grosor, pack de terceros). */
+val LocalIconOptions = staticCompositionLocalOf { IconOptions() }
 
 /**
  * Ícono de una app. Lee primero la caché (sin parpadeo) y, si no está, lo renderiza fuera del
@@ -41,7 +45,11 @@ fun AppIcon(key: AppKey, size: Dp, modifier: Modifier = Modifier) {
     val colors = VeloraTheme.onWallpaper
     val tint = colors.iconGlyph.toArgb()
     val backdrop = colors.iconCircle.toArgb()
-    val request = remember(key, sizePx, style, tint, backdrop) { IconRequest(key, sizePx, style, tint, backdrop) }
+    val accent = colors.accent.toArgb()
+    val options = LocalIconOptions.current
+    val request = remember(key, sizePx, style, tint, backdrop, options, accent) {
+        IconRequest(key, sizePx, style, tint, backdrop, options, accent)
+    }
     val bitmap: ImageBitmap? by produceState(icons?.cached(request), icons, request) {
         if (value == null && icons != null) value = icons.load(request)
     }

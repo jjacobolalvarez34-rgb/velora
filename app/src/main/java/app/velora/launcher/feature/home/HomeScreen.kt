@@ -58,6 +58,7 @@ fun HomeScreen(
     widgets: @Composable () -> Unit = {},
     folders: List<AppFolder> = emptyList(),
     onOpenFolder: (AppFolder) -> Unit = {},
+    tips: @Composable () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -65,11 +66,19 @@ fun HomeScreen(
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .padding(homePadding()),
     ) {
-        StaggeredEntrance(index = 0) {
-            ClockHeader(clock = uiState.clock, style = uiState.clockStyle, battery = uiState.battery)
+        if (uiState.visible.clock) {
+            StaggeredEntrance(index = 0) {
+                ClockHeader(
+                    clock = uiState.clock,
+                    style = uiState.clockStyle,
+                    battery = uiState.battery,
+                    showDate = uiState.visible.date,
+                )
+            }
         }
         widgets()
         Spacer(Modifier.weight(1f))
+        tips()
         FavoritesColumn(uiState, actions, folders, onOpenFolder)
     }
 }

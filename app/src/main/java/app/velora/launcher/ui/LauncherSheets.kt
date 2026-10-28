@@ -14,6 +14,7 @@ import app.velora.launcher.core.model.ThemeSettings
 import app.velora.launcher.di.AppContainer
 import app.velora.launcher.feature.appmenu.AppMenuExtras
 import app.velora.launcher.feature.appmenu.AppMenuSheet
+import app.velora.launcher.feature.appmenu.LimitDialog
 import app.velora.launcher.feature.apps.AppActions
 import app.velora.launcher.feature.drawer.DrawerUiState
 import app.velora.launcher.feature.folders.AddToFolderSheet
@@ -23,6 +24,8 @@ import app.velora.launcher.feature.widgets.HomeMenuSheet
 import app.velora.launcher.feature.widgets.WidgetPickerSheet
 import kotlinx.coroutines.launch
 
+private const val MS_PER_MINUTE = 60_000L
+
 /** Qué panel está abierto sobre el inicio. */
 @Stable
 internal class LauncherSheetsState {
@@ -31,6 +34,7 @@ internal class LauncherSheetsState {
     var widgetPicker by mutableStateOf(false)
     var openFolder by mutableStateOf<Long?>(null)
     var addToFolder by mutableStateOf<AppEntry?>(null)
+    var limitHit by mutableStateOf<LimitHit?>(null)
 }
 
 @Composable
@@ -76,6 +80,15 @@ internal fun LauncherSheets(
     sheets.addToFolder?.let { app ->
         AddToFolderSheet(app, folders, folderActions, onDismiss = { sheets.addToFolder = null })
     }
+    sheets.limitHit?.let { hit ->
+        LimitDialog(
+            appLabel = hit.app.label,
+            usedMinutes = hit.usedMs / MS_PER_MINUTE,
+            limitMinutes = hit.limitMinutes,
+            onOpen = { actions.openAnyway(hit.app, hit.bounds) },
+            onDismiss = { sheets.limitHit = null },
+        )
+    }
 }
 
 /** Notificaciones y tiempo de uso solo si el usuario los activó. */
@@ -89,11 +102,28 @@ private fun rememberMenuExtras(
     val repository = container.notificationsRepository
     val all by repository.byAppList.collectAsStateWithLifecycle()
     val notifications = if (theme.notifications) all[NotificationsRepository.keyOf(app.key)].orEmpty() else emptyList()
+    val pkg = app.key.packageName
     return AppMenuExtras(
         notifications = notifications,
         notificationActions = repository.notificationActions.takeIf { theme.notifications },
         usage = container.usageRepository.takeIf { theme.usageTime },
         onAddToFolder = onAddToFolder,
+        usageLimit = theme.custom.usageLimits[pkg],
+        onSetLimit = { minutes: Int? ->
+            container.applicationScope.launch {
+                container.prefsRepository.updateCustom { custom ->
+                    val limits = if (minutes ==
+                        null
+                    ) {
+                        custom.usageLimits - pkg
+                    } else {
+                        custom.usageLimits + (pkg to minutes)
+                    }
+                    custom.copy(usageLimits = limits)
+                }
+            }
+            Unit
+        }.takeIf { theme.usageTime },
     )
 }
 

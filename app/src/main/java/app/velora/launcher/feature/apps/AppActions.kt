@@ -14,6 +14,9 @@ import app.velora.launcher.core.model.AppShortcut
 interface AppActions {
     /** @param bounds rectángulo de la fila en coordenadas de la raíz, para animar desde ahí. */
     fun open(app: AppEntry, bounds: Rect?)
+
+    /** Abrir sin mirar el freno de uso (el usuario eligió "Abrir igual"). */
+    fun openAnyway(app: AppEntry, bounds: Rect?) = open(app, bounds)
     fun openInfo(app: AppEntry, bounds: Rect?)
     fun uninstall(app: AppEntry)
     fun addFavorite(app: AppEntry)

@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import app.velora.launcher.core.model.ClockStyle
+import app.velora.launcher.core.model.Customization
 import app.velora.launcher.core.model.FontChoice
 import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.TextSize
@@ -47,6 +48,9 @@ interface PrefsRepository {
     /** Aplica un tema completo: su fondo y colores, y su fuente, reloj e íconos recomendados. */
     suspend fun applyPreset(preset: ThemePreset)
 
+    /** Cambia la personalización fina (íconos, color, elementos visibles, consejos, frenos). */
+    suspend fun updateCustom(change: (Customization) -> Customization)
+
     /** true cuando el usuario ya vio la introducción. */
     val onboardingDone: Flow<Boolean>
 
@@ -74,6 +78,7 @@ class DataStorePrefsRepository(context: Context) : PrefsRepository {
                 doubleTapLock = prefs[DOUBLE_TAP_LOCK],
                 usageTime = prefs[USAGE_TIME],
                 contactsSearch = prefs[CONTACTS_SEARCH],
+                custom = prefs[CUSTOM],
             ).decode()
         }
         .distinctUntilChanged()
@@ -111,7 +116,16 @@ class DataStorePrefsRepository(context: Context) : PrefsRepository {
             it[FONT] = theme.font.name
             it[CLOCK] = theme.clock.name
             it[ICONS] = theme.icons.name
+            // El tema propone un estilo de íconos; la forma, el color y el grosor del usuario se quedan.
+            val custom = CustomizationCodec.decode(it[CUSTOM])
+            it[CUSTOM] = CustomizationCodec.encode(
+                custom.copy(icons = custom.icons.copy(pack = theme.custom.icons.pack), accentColor = null),
+            )
         }
+    }
+
+    override suspend fun updateCustom(change: (Customization) -> Customization) {
+        store.edit { it[CUSTOM] = CustomizationCodec.encode(change(CustomizationCodec.decode(it[CUSTOM]))) }
     }
 
     override suspend fun setOnboardingDone() = put(ONBOARDING_DONE, true)
@@ -134,6 +148,7 @@ class DataStorePrefsRepository(context: Context) : PrefsRepository {
         val USAGE_TIME = booleanPreferencesKey("feature_usage_time")
         val CONTACTS_SEARCH = booleanPreferencesKey("feature_contacts_search")
         val ONBOARDING_DONE = booleanPreferencesKey("onboarding_done")
+        val CUSTOM = stringPreferencesKey("theme_customization")
     }
 }
 
@@ -154,6 +169,7 @@ internal data class StoredTheme(
     val doubleTapLock: Boolean? = null,
     val usageTime: Boolean? = null,
     val contactsSearch: Boolean? = null,
+    val custom: String? = null,
 ) {
     fun decode(): ThemeSettings {
         val defaults = ThemeSettings()
@@ -170,6 +186,7 @@ internal data class StoredTheme(
             doubleTapLock = doubleTapLock ?: defaults.doubleTapLock,
             usageTime = usageTime ?: defaults.usageTime,
             contactsSearch = contactsSearch ?: defaults.contactsSearch,
+            custom = CustomizationCodec.decode(custom),
         )
     }
 }

@@ -95,6 +95,7 @@ fun AppListScreen(
     val motion = VeloraTheme.motion
     val barState = rememberSearchBarVisibility(listState)
     val mode = drawerMode(search, fullList)
+    val atTop by remember(listState) { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
     Box(modifier = modifier.fillMaxSize()) {
         val padding = listPadding()
         val scroll = Modifier.listScroll(nestedScrollConnection, barState.observer)
@@ -113,7 +114,10 @@ fun AppListScreen(
         }
         AnimatedSearchBar(
             state = search,
-            visible = search.active || mode != DrawerMode.Full || barState.visible,
+            // El buscador solo va donde están las recientes (abrir deslizando, o arriba de la lista
+            // completa); viendo una letra o bajando por la lista estorbaría.
+            visible =
+                search.active || mode == DrawerMode.Explore || (mode == DrawerMode.Full && atTop && barState.visible),
             onGo = { uiState.results?.firstOrNull()?.let { actions.open(it, null) } },
             modifier = Modifier.align(Alignment.BottomCenter),
         )

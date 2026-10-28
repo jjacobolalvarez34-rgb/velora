@@ -3,7 +3,9 @@ package app.velora.launcher.feature.welcome
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,7 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -47,7 +52,7 @@ fun WelcomeScreen(onSetDefault: () -> Unit, onNotNow: () -> Unit, modifier: Modi
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxSize()
-            .background(BrandColors.background)
+            .landingBackground()
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .padding(horizontal = Spacing.l, vertical = Spacing.xl),
     ) {
@@ -84,21 +89,31 @@ private fun WelcomeIntro() {
     }
 }
 
+/** Lo que hace distinto a Velora, en tres pastillas tranquilas. */
 @Composable
 private fun WelcomePoints() {
-    Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.s), horizontalAlignment = Alignment.CenterHorizontally) {
         listOf(R.string.welcome_point_list, R.string.welcome_point_alphabet, R.string.welcome_point_privacy)
             .forEach { point ->
-                Text(
-                    text = stringResource(point),
-                    style = VeloraTheme.typography.caption,
-                    color = BrandColors.silverMuted,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .background(BrandColors.silver.copy(alpha = PILL_ALPHA), Shapes.sheet)
+                        .padding(horizontal = Spacing.m, vertical = Spacing.s),
+                ) {
+                    Box(Modifier.size(6.dp).background(BrandColors.lilac, CircleShape))
+                    Spacer(Modifier.width(Spacing.s))
+                    Text(
+                        text = stringResource(point),
+                        style = VeloraTheme.typography.caption,
+                        color = BrandColors.silver,
+                    )
+                }
             }
     }
 }
+
+private const val PILL_ALPHA = 0.08f
 
 /** Abajo, al alcance del pulgar. */
 @Composable

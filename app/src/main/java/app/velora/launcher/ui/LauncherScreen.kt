@@ -86,6 +86,7 @@ fun LauncherScreen(
     onDoubleTap: (() -> Unit)? = null,
     folders: List<AppFolder> = emptyList(),
     onOpenFolder: (AppFolder) -> Unit = {},
+    tips: @Composable () -> Unit = {},
 ) {
     drawerState.spec = VeloraTheme.motion.let { if (it.reduced) null else it.spatialDefault() }
     val drawerVisible by remember(drawerState) { derivedStateOf { drawerState.isOpen } }
@@ -107,6 +108,7 @@ fun LauncherScreen(
             widgets = widgets,
             folders = folders,
             onOpenFolder = onOpenFolder,
+            tips = tips,
         )
         if (drawerVisible) {
             DrawerLayer(drawer, drawerState, listState, search, actions, theme.fullList) { activeLetter }
