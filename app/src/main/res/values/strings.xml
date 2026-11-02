@@ -150,8 +150,6 @@
     <string name="settings_photo_remove">Quitar la foto</string>
     <string name="settings_photo_remove_summary">Vuelve el fondo del tema.</string>
     <string name="settings_photo_error">No se pudo usar esa foto.</string>
-    <string name="settings_system_wallpaper">Cambiar el fondo del teléfono</string>
-    <string name="settings_system_wallpaper_summary">Abre el selector de fondos del sistema (se ve con el tema «Tu fondo»).</string>
     <string name="settings_features">Funciones</string>
     <string name="settings_notifications">Notificaciones en el inicio</string>
     <string name="settings_notifications_summary">Un punto junto a cada app con avisos, lo último bajo los favoritos y la música que suena.</string>

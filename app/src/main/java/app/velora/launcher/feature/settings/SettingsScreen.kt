@@ -1,7 +1,8 @@
 package app.velora.launcher.feature.settings
 
 import android.content.res.Configuration
-import androidx.activity.compose.BackHandler
+import androidx.activity.BackEventCompat
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.fadeIn
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Home
@@ -30,14 +32,19 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import app.velora.launcher.R
 import app.velora.launcher.core.designsystem.motion.VeloraMotion
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
@@ -114,7 +121,7 @@ fun SettingsScreen(
     backupActions: BackupActions = NoBackupActions,
 ) {
     var page by rememberSaveable { mutableStateOf(SettingsPage.Main) }
-    BackHandler(enabled = page != SettingsPage.Main) { page = SettingsPage.Main }
+    val backProgress = predictiveBackToMenu(enabled = page != SettingsPage.Main) { page = SettingsPage.Main }
     // Al volver al menú se suelta el borrador de Personalizar: lo que no se guardó, no queda.
     LaunchedEffect(page) { if (page == SettingsPage.Main) personalizeActions.onDiscard() }
     val motion = VeloraTheme.motion
@@ -124,7 +131,8 @@ fun SettingsScreen(
         label = "settings-page",
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.background)
+            .backPeek(backProgress),
     ) { current ->
         val back = { page = SettingsPage.Main }
         when (current) {
@@ -152,6 +160,43 @@ fun SettingsScreen(
         }
     }
 }
+
+/**
+ * Atrás predictivo (Android 13+, ADR-036): deslizar desde el borde va achicando y corriendo la
+ * página con el dedo; al soltar vuelve al menú y, si se cancela, la página regresa a su sitio.
+ * Devuelve el avance del gesto (0..1) y de qué lado viene (+1 izquierda, −1 derecha).
+ */
+@Composable
+private fun predictiveBackToMenu(enabled: Boolean, onBack: () -> Unit): State<Offset> {
+    val progress = remember { mutableStateOf(Offset.Zero) }
+    PredictiveBackHandler(enabled = enabled) { events ->
+        try {
+            events.collect { event ->
+                val side = if (event.swipeEdge == BackEventCompat.EDGE_LEFT) 1f else -1f
+                progress.value = Offset(event.progress, side)
+            }
+            onBack()
+        } finally {
+            progress.value = Offset.Zero
+        }
+    }
+    return progress
+}
+
+/** La página sigue al dedo: se achica hasta un 10 % y se corre hacia el lado del gesto. */
+private fun Modifier.backPeek(progress: State<Offset>) = graphicsLayer {
+    val (p, side) = progress.value
+    val scale = 1f - p * BACK_SCALE
+    scaleX = scale
+    scaleY = scale
+    translationX = side * p * BACK_SHIFT.toPx()
+    clip = p > 0f
+    shape = RoundedCornerShape(BACK_CORNER * p)
+}
+
+private const val BACK_SCALE = 0.1f
+private val BACK_SHIFT = 32.dp
+private val BACK_CORNER = 32.dp
 
 /** Hacia una página: entra desde la derecha; de vuelta al menú, al revés. */
 private fun pageTransition(to: SettingsPage, motion: VeloraMotion): ContentTransform {
@@ -281,7 +326,6 @@ private object PreviewFeatureActions : FeatureActions {
     override fun onRemovePhoto() = Unit
     override fun onExportTheme() = Unit
     override fun onImportTheme() = Unit
-    override fun onSystemWallpaper() = Unit
     override fun onNotifications(enabled: Boolean) = Unit
     override fun onNotificationAccess() = Unit
     override fun onDoubleTapLock(enabled: Boolean) = Unit

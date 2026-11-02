@@ -30,7 +30,6 @@
     <!-- Background -->
     <string name="personalize_bg_theme">Theme\'s</string>
     <string name="personalize_bg_pick">Pick photo</string>
-    <string name="personalize_bg_system">Phone\'s</string>
     <string name="personalize_bg_photo">Previous background %1$d</string>
     <string name="personalize_bg_delete">Delete this photo</string>
     <string name="personalize_bg_in_use">In use</string>

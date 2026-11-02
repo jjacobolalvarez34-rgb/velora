@@ -102,6 +102,8 @@ class PrivateSpaceRepository(private val context: Context, scope: CoroutineScope
      * muestra su pantalla de credencial y devuelve false aunque luego se desbloquee.
      */
     suspend fun setLocked(locked: Boolean): Boolean = withContext(Dispatchers.IO) {
+        // El espacio privado existe desde Android 15; antes no hay nada que bloquear.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return@withContext false
         val user = PrivateProfiles.find(launcherApps) ?: return@withContext false
         runCatching { userManager.requestQuietModeEnabled(locked, user) }
             .onFailure { Logger.w(TAG, it) { "No se pudo cambiar el espacio privado" } }

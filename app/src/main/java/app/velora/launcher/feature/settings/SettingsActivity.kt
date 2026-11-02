@@ -124,23 +124,6 @@ class SettingsActivity : ComponentActivity() {
             viewModel.onPhotoBackground(null)
         }
 
-        override fun onSystemWallpaper() {
-            val chooser = Intent.createChooser(
-                Intent(Intent.ACTION_SET_WALLPAPER),
-                getString(R.string.settings_system_wallpaper),
-            )
-            if (!tryStart(
-                    chooser,
-                )
-            ) {
-                Toast.makeText(
-                    this@SettingsActivity,
-                    R.string.error_open_system_settings,
-                    Toast.LENGTH_SHORT,
-                ).show()
-            }
-        }
-
         override fun onNotifications(enabled: Boolean) {
             viewModel.onNotifications(enabled) {
                 when {
@@ -202,8 +185,6 @@ class SettingsActivity : ComponentActivity() {
                 refreshPhotoHistory()
             }
         }
-
-        override fun onSystemWallpaper() = features.onSystemWallpaper()
 
         override fun onSave() = viewModel.onSaveDraft()
 

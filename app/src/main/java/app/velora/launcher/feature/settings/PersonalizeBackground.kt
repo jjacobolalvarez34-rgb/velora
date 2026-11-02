@@ -36,12 +36,12 @@ import app.velora.launcher.core.designsystem.theme.VeloraTheme
 import app.velora.launcher.ui.BackgroundPhotos
 
 /** Qué se puede elegir como fondo: el del tema, una foto nueva o el fondo del teléfono. */
-private enum class BackgroundChoice { Theme, Pick, System }
+private enum class BackgroundChoice { Theme, Pick }
 
 /**
- * Sección Fondo: el fondo del tema (quitar la foto), elegir una foto nueva o cambiar el fondo del
- * teléfono; debajo, los fondos anteriores para volver a uno con un toque o borrarlo. La foto
- * elegida va al borrador y se aplica al guardar.
+ * Sección Fondo: el fondo del tema (quitar la foto) o elegir una foto nueva; debajo, los fondos
+ * anteriores para volver a uno con un toque o borrarlo. La foto elegida va al borrador y se aplica
+ * al guardar. Velora nunca cambia el fondo del teléfono (ADR-037).
  */
 @Composable
 internal fun BackgroundTab(state: PersonalizeState, actions: PersonalizeActions) {
@@ -64,9 +64,6 @@ internal fun BackgroundTab(state: PersonalizeState, actions: PersonalizeActions)
 
                 BackgroundChoice.Pick ->
                     ActionTile(R.string.personalize_bg_pick, Icons.Outlined.Add, actions::onPickPhoto)
-
-                BackgroundChoice.System ->
-                    ActionTile(R.string.personalize_bg_system, Icons.Outlined.Home, actions::onSystemWallpaper)
             }
         }
         if (state.history.isNotEmpty()) {

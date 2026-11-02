@@ -31,7 +31,6 @@
     <!-- Fondo -->
     <string name="personalize_bg_theme">Del tema</string>
     <string name="personalize_bg_pick">Elegir foto</string>
-    <string name="personalize_bg_system">Del teléfono</string>
     <string name="personalize_bg_photo">Fondo anterior %1$d</string>
     <string name="personalize_bg_delete">Borrar esta foto</string>
     <string name="personalize_bg_in_use">En uso</string>

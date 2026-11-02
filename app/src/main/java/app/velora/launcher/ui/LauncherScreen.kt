@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -43,6 +44,7 @@ import app.velora.launcher.core.designsystem.theme.Sizes
 import app.velora.launcher.core.designsystem.theme.Spacing
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
 import app.velora.launcher.core.model.AppFolder
+import app.velora.launcher.core.model.ThemePreset
 import app.velora.launcher.core.model.ThemeSettings
 import app.velora.launcher.feature.apps.AppActions
 import app.velora.launcher.feature.drawer.AppListScreen
@@ -91,6 +93,8 @@ fun LauncherScreen(
     tips: @Composable () -> Unit = {},
     onHiddenApps: () -> Unit = {},
 ) {
+    // Wallpaper Engine y fondos en vivo: solo con "Tu fondo" y sin foto propia (ADR-037).
+    val wallpaperTap = rememberLiveWallpaperTap(enabled = theme.preset == ThemePreset.Wallpaper && photo == null)
     drawerState.spec = VeloraTheme.motion.let { if (it.reduced) null else it.spatialDefault() }
     val drawerVisible by remember(drawerState) { derivedStateOf { drawerState.isOpen } }
     var activeLetter by remember { mutableIntStateOf(-1) }
@@ -108,7 +112,7 @@ fun LauncherScreen(
             modifier = Modifier
                 .homeLayer(drawerState)
                 .hiddenAppsGesture(onHiddenApps)
-                .homeGestures(drawerState, onHomeMenu, onOpenSettings, onDoubleTap),
+                .homeGestures(drawerState, onHomeMenu, onOpenSettings, onDoubleTap, wallpaperTap),
             widgets = widgets,
             folders = folders,
             onOpenFolder = onOpenFolder,
@@ -217,6 +221,7 @@ private fun Modifier.homeGestures(
     onHomeMenu: () -> Unit,
     onOpenSettings: () -> Unit,
     onDoubleTap: (() -> Unit)?,
+    onWallpaperTap: ((Offset) -> Unit)? = null,
 ): Modifier {
     val haptics = LocalHapticFeedback.current
     val openSettings = stringResource(R.string.home_open_settings)
@@ -228,8 +233,9 @@ private fun Modifier.homeGestures(
             orientation = Orientation.Vertical,
             onDragStopped = { velocity -> drawerState.settle(velocity) },
         )
-        .pointerInput(onHomeMenu, onDoubleTap) {
+        .pointerInput(onHomeMenu, onDoubleTap, onWallpaperTap) {
             detectTapGestures(
+                onTap = onWallpaperTap,
                 onDoubleTap = onDoubleTap?.let { lock -> { lock() } },
                 onLongPress = {
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)

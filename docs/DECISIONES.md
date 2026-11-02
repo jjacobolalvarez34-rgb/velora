@@ -190,6 +190,17 @@ _`compileSdk` actualizado a 37 por ADR-013; `minSdk` y `targetSdk` siguen vigent
 **Por qué:** el respaldo de Android no siempre funciona entre marcas ni sirve para mover a mano; un archivo propio y legible no puede ejecutar nada.
 **Consecuencias:** sin cambio de esquema (solo consultas `DELETE` nuevas en los DAO). Pruebas en `BackupFileTest` y en las de repositorios. El archivo revela qué apps tiene el usuario: queda donde él lo guarde.
 
+## ADR-036 · Atrás predictivo en todas partes — Aceptada (2026-11-02)
+**Contexto:** el autor pidió los gestos nuevos de Android (deslizar desde el borde para volver).
+**Decisión:** `enableOnBackInvokedCallback="true"` (ya estaba). La lista de apps se cierra siguiendo el dedo (`DrawerState.peekBack`); las páginas de Ajustes se achican y se corren hacia el lado del gesto con `PredictiveBackHandler` y, al soltar, vuelven al menú; los paneles (`ModalBottomSheet`) usan el atrás predictivo de Material 3. En el inicio "atrás" no hace nada (B-101) y el sistema muestra su propia animación.
+**Consecuencias:** cualquier pantalla nueva con varias páginas usa `PredictiveBackHandler`, no `BackHandler`, salvo diálogos.
+
+## ADR-037 · Velora solo cambia Velora; fondos en vivo (Wallpaper Engine) — Aceptada (2026-11-02)
+**Contexto:** en un Xiaomi, el autor teme que instalar y quitar Velora le dañe los temas del sistema; además pidió compatibilidad con Wallpaper Engine.
+**Decisión:** Velora **nunca escribe** en el fondo del sistema, los íconos, los temas ni los ajustes del teléfono: todo (temas, fotos, íconos, colores) vive en los datos de Velora y desaparece al desinstalarla. Se quitó el botón "Cambiar el fondo del teléfono" (abría el selector del sistema). `SystemUntouchedTest` falla si el código usa `WallpaperManager.setBitmap/setStream/setResource/clear`, `ACTION_SET_WALLPAPER`, `SET_WALLPAPER` o `Settings.*.put`. Fondos en vivo: con el tema "Tu fondo" (y sin foto propia) la ventana deja ver el fondo del sistema (`windowShowWallpaper`) y Velora le envía `COMMAND_TAP` en los toques sobre espacios vacíos y lo centra con `setWallpaperOffsets`, como cualquier launcher; no cambia qué fondo hay.
+**Por qué:** el teléfono debe quedar exactamente como estaba. Si en Xiaomi los íconos del tema de MIUI no se ven, es porque MIUI aplica sus temas solo en su propio launcher: al volver a él (Ajustes → Apps → Apps predeterminadas → Pantalla de inicio) se ven de nuevo.
+**Consecuencias:** para usar Wallpaper Engine: elegir el fondo en Wallpaper Engine y en Velora el tema "Tu fondo".
+
 ---
 
 ## Plantilla

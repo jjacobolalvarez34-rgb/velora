@@ -96,6 +96,14 @@
 - [~] Widgets: reordenar, redimensionar arrastrando y quitar desde el inicio (0.7.0).
 - [~] **Quitar widgets desde el inicio** (hecho en 0.7.0: mantener presionado → "Quitar widget" en rojo; pedido 2026-10-26): hoy solo se puede en Ajustes → Widgets → "Quitar". Idea: mantener presionado un widget → panel desde abajo con "Quitar", "Más alto/Más bajo" y "Mover". Al quitar, liberar el `appWidgetId` (B-019). Hay que ver que mantener presionado no choque con los widgets que usan su propio toque largo.
 
+## 7f. Pedidos del 2026-11-02
+
+- [~] Atrás predictivo también en las páginas de Ajustes (ADR-036).
+- [~] Velora no toca nada del sistema; se quitó el botón del fondo del teléfono y hay una prueba que lo vigila (ADR-037).
+- [~] Wallpaper Engine y fondos en vivo con el tema "Tu fondo": reciben los toques (ADR-037).
+- [ ] Instalación nueva bloqueada en teléfonos nuevos (solo deja como actualización): muy probablemente Play Protect, por la accesibilidad y el lector de notificaciones. Falta el mensaje exacto del teléfono. Solución de fondo: clave de release propia + Play Store (prueba interna). Mientras: "Instalar de todos modos" o pausar el análisis de Play Protect.
+- [ ] Fondos de internet (Unsplash): pendiente para después, a pedido del autor.
+
 ## 7e. Pedidos del 2026-11-01 — 0.9.0
 
 - [~] B-101: "atrás" en el inicio ya no repite la animación.

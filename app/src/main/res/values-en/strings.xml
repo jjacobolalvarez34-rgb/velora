@@ -138,8 +138,6 @@
     <string name="settings_photo_remove">Remove photo</string>
     <string name="settings_photo_remove_summary">Brings back the theme background.</string>
     <string name="settings_photo_error">Couldn\'t use that photo.</string>
-    <string name="settings_system_wallpaper">Change phone wallpaper</string>
-    <string name="settings_system_wallpaper_summary">Opens the system wallpaper picker (shown with the “Your wallpaper” theme).</string>
     <string name="settings_features">Features</string>
     <string name="settings_notifications">Notifications on home</string>
     <string name="settings_notifications_summary">A dot next to apps with alerts, the latest one under favorites and what\'s playing.</string>

@@ -32,7 +32,6 @@ interface FeatureActions {
     fun onRemovePhoto()
     fun onExportTheme()
     fun onImportTheme()
-    fun onSystemWallpaper()
     fun onNotifications(enabled: Boolean)
     fun onNotificationAccess()
     fun onDoubleTapLock(enabled: Boolean)
@@ -78,14 +77,6 @@ internal fun LazyListScope.backgroundSection(theme: ThemeSettings, actions: Feat
                 icon = Icons.Outlined.Delete,
             )
         }
-    }
-    item(key = "background-system") {
-        Option(
-            title = stringResource(R.string.settings_system_wallpaper),
-            subtitle = stringResource(R.string.settings_system_wallpaper_summary),
-            onClick = actions::onSystemWallpaper,
-            icon = Icons.Outlined.Settings,
-        )
     }
 }
 

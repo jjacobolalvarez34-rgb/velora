@@ -121,7 +121,6 @@ interface PersonalizeActions {
     fun onEdit(change: (ThemeSettings) -> ThemeSettings)
     fun onPickPhoto()
     fun onDeletePhoto(path: String)
-    fun onSystemWallpaper()
     fun onSave()
     fun onDiscard()
 }
@@ -330,7 +329,6 @@ internal object PreviewPersonalizeActions : PersonalizeActions {
     override fun onEdit(change: (ThemeSettings) -> ThemeSettings) = Unit
     override fun onPickPhoto() = Unit
     override fun onDeletePhoto(path: String) = Unit
-    override fun onSystemWallpaper() = Unit
     override fun onSave() = Unit
     override fun onDiscard() = Unit
 }

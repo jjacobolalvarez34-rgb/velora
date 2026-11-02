@@ -9,6 +9,7 @@
 3. **Local primero**: ningún dato sale del dispositivo. No hay servidores, ni analítica, ni SDKs de terceros con red. El manifiesto **no declara `INTERNET`** en el MVP.
 4. **Degradación elegante**: sin permisos especiales la app funciona completa en lo esencial.
 5. **Nada sensible persistido**: notificaciones solo en memoria.
+6. **Velora solo cambia Velora** (ADR-037): nunca el fondo, los íconos, los temas ni los ajustes del teléfono. Lo vigila `SystemUntouchedTest`.
 
 ## 2. Inventario de permisos
 
