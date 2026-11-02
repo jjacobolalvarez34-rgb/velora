@@ -3,7 +3,6 @@ package app.velora.launcher.core.data.apps
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.ApplicationInfo
 import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
@@ -13,6 +12,7 @@ import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
 import androidx.core.content.ContextCompat
+import app.velora.launcher.core.data.hidden.PrivateProfiles
 import app.velora.launcher.core.data.log.Logger
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.AppKey
@@ -87,7 +87,9 @@ class SystemAppsRepository(
                     systemLoaded.value = true
                     onSystemLoad(currentVersions())
                     if (fresh != persisted) {
-                        runCatching { cache.save(fresh) }.onFailure { Logger.w(TAG, it) { "No se guardó la caché" } }
+                        // El espacio privado nunca se guarda en disco: bloqueado no debe dejar rastro (B-016).
+                        runCatching { cache.save(fresh.filterNot { it.isPrivate }) }
+                            .onFailure { Logger.w(TAG, it) { "No se guardó la caché" } }
                         persisted = fresh
                     }
                 },
@@ -119,18 +121,26 @@ class SystemAppsRepository(
         val me = Process.myUserHandle()
         val loaded = launcherApps.profiles.flatMap { user ->
             val serial = userManager.getSerialNumberForUser(user)
+            val isPrivate = PrivateProfiles.isPrivate(launcherApps, user)
+            // Espacio privado bloqueado: sus apps no existen para Velora, ni en la búsqueda (B-016, ADR-033).
+            if (isPrivate && PrivateProfiles.isLocked(userManager, user)) return@flatMap emptyList()
             runCatching { launcherApps.getActivityList(null, user) }
                 .onFailure { Logger.w(TAG, it) { "No se pudo leer el perfil $serial" } }
                 .getOrDefault(emptyList())
                 .filter { it.componentName.packageName != context.packageName }
-                .map { info -> info.toEntry(serial, isWork = user != me, locale) to info }
+                .map { info -> info.toEntry(serial, isWork = user != me && !isPrivate, isPrivate, locale) to info }
         }
         infos.clear()
         loaded.forEach { (entry, info) -> infos[entry.key.stableId] = info }
         return AppSorting.sorted(loaded.map { it.first }, locale)
     }
 
-    private fun LauncherActivityInfo.toEntry(serial: Long, isWork: Boolean, locale: Locale): AppEntry {
+    private fun LauncherActivityInfo.toEntry(
+        serial: Long,
+        isWork: Boolean,
+        isPrivate: Boolean,
+        locale: Locale,
+    ): AppEntry {
         val label = label?.toString()?.trim().orEmpty().ifEmpty { componentName.packageName }
         val isSystem = applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
         return AppEntry(
@@ -141,6 +151,7 @@ class SystemAppsRepository(
             isWorkProfile = isWork,
             canUninstall = !isSystem,
             installedAtMs = firstInstallTime,
+            isPrivate = isPrivate,
         )
     }
 
@@ -171,7 +182,8 @@ class SystemAppsRepository(
         ContextCompat.registerReceiver(
             context,
             localeReceiver,
-            IntentFilter(Intent.ACTION_LOCALE_CHANGED),
+            // Idioma y perfiles que se bloquean o desbloquean (trabajo en pausa, espacio privado).
+            PrivateProfiles.changesFilter().apply { addAction(Intent.ACTION_LOCALE_CHANGED) },
             ContextCompat.RECEIVER_NOT_EXPORTED,
         )
         awaitClose {

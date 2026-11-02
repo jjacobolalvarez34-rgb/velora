@@ -17,6 +17,8 @@ data class AppKey(val packageName: String, val className: String, val userSerial
  * @property section letra de sección ("A", "Ñ", "#"…).
  * @property searchKey nombre en minúsculas y sin tildes, para buscar.
  * @property installedAtMs primera instalación (epoch ms), para "Recién instaladas".
+ * @property isPrivate del espacio privado de Android 15+ (ADR-033): solo aparece desbloqueado
+ *   y nunca se guarda en la caché de apps.
  */
 @Immutable
 data class AppEntry(
@@ -27,4 +29,5 @@ data class AppEntry(
     val isWorkProfile: Boolean,
     val canUninstall: Boolean,
     val installedAtMs: Long = 0L,
+    val isPrivate: Boolean = false,
 )

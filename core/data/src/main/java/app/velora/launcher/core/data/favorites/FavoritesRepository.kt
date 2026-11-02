@@ -50,6 +50,18 @@ class FavoritesRepository(private val dao: FavoritesDao, apps: StateFlow<List<Ap
         order.forEachIndexed { position, id -> dao.setPosition(id, position) }
     }
 
+    /** Favoritos en su orden, instalados o no, para el respaldo (ADR-035). */
+    suspend fun snapshot(): List<AppKey> =
+        dao.observe().first().map { AppKey(it.packageName, it.className, it.userSerial) }
+
+    /** Reemplaza los favoritos por [keys], en ese orden. Llamar dentro de una transacción. */
+    suspend fun restore(keys: List<AppKey>) {
+        dao.clear()
+        keys.distinctBy { it.stableId }.take(MAX_FAVORITES).forEachIndexed { position, key ->
+            dao.insert(FavoriteEntity(key.stableId, key.packageName, key.className, key.userSerial, position))
+        }
+    }
+
     companion object {
         const val MAX_FAVORITES = 12
     }

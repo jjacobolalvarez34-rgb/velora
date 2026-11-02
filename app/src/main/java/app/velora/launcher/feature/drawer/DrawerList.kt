@@ -50,6 +50,9 @@ data class DrawerList(
 /** Primera "letra" del alfabeto: los favoritos, a un toque desde la lista. */
 const val FAVORITES_SECTION = "★"
 
+/** Última "letra" del alfabeto: soltar el dedo ahí abre los ajustes de Velora. */
+const val SETTINGS_SECTION = "⚙"
+
 /**
  * Inserta las recientes arriba y un encabezado antes de cada letra nueva.
  * [apps] ya viene ordenada; [recents] de la más nueva a la más vieja. Si hay [favorites], el

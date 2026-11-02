@@ -87,7 +87,7 @@ internal class ThemeSharing(
 }
 
 /** `InputStream.readNBytes` llegó en API 33: se lee a mano hasta [limit] bytes. */
-private fun java.io.InputStream.readNBytesCompat(limit: Int): ByteArray {
+internal fun java.io.InputStream.readNBytesCompat(limit: Int): ByteArray {
     val out = java.io.ByteArrayOutputStream()
     val buffer = ByteArray(BUFFER)
     while (out.size() < limit) {

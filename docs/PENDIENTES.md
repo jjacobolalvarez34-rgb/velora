@@ -35,10 +35,10 @@
 - [~] Apps ocultas: "Ocultar" en el menú; se recuperan en Ajustes → Apps ocultas (Room v2, migración automática).
 - [~] Atajos de la app arriba del menú (`LauncherApps.getShortcuts`, B-018; solo si Velora es el inicio predeterminado).
 - [~] Ajustes → Diseño: modo zurdo (todo el inicio espejado) y tamaño de texto (pequeño/normal/grande); Ajustes → Favoritos: subir y bajar.
-- [ ] Onboarding: elegir favoritos la primera vez.
+- [~] Onboarding: elegir favoritos la primera vez (0.9.0).
 - [~] Atrás predictivo al cerrar la lista (0.7.0).
 - [ ] Baseline Profile de los flujos nuevos (abrir lista, arrastrar alfabeto, buscar) y medir los presupuestos de RENDIMIENTO §2.
-- [ ] Caché de íconos en disco.
+- [x] Caché de íconos en disco (B-100, 0.4.0).
 
 ## 4. Pedidos tras comparar con Niagara (2026-10-24)
 
@@ -47,7 +47,7 @@
 - [~] Ajustes → Tema con vista previa en vivo; relojes Clásico / Centrado / Día (con batería).
 - [~] "Recién instaladas" arriba de la lista y en el buscador vacío.
 - [~] Buscador que se esconde al bajar; modo búsqueda limpio (la lista se va con fundido); resultados animados.
-- [ ] **Widgets** (Fase 3, se puede adelantar). Plan:
+- [x] **Widgets** (ADR-020, 0.5.0–0.7.0). Plan original:
   1. Una zona de widgets en el inicio, debajo del reloj, con altura ajustable.
   2. Mantener presionado el inicio → "Agregar widget" → selector propio con las vistas previas (`AppWidgetManager.getInstalledProvidersForProfile`, todos los perfiles).
   3. `AppWidgetHost` propio: `allocateAppWidgetId` → `bindAppWidgetIdIfAllowed`. Si no se permite, el diálogo del sistema `ACTION_APPWIDGET_BIND` (solo la primera vez por proveedor) → la actividad de configuración del widget, si la tiene.
@@ -55,7 +55,7 @@
   5. Se redimensiona arrastrando un borde y se guarda en Room (id, proveedor, tamaño, orden).
   6. Quitar un widget o desinstalar su app libera el `appWidgetId` (B-019).
   7. Riesgos: widgets pesados de algunos fabricantes, y que los widgets son Views, no Compose. Hay que medir el scroll con Macrobenchmark antes de darlo por bueno.
-- [ ] Carpetas / agrupar apps (como "Tareas"): Fase 3.
+- [x] Carpetas (ADR-026, 0.7.0).
 
 ## 5. Pedidos del 2026-10-24 (noche)
 
@@ -96,6 +96,18 @@
 - [~] Widgets: reordenar, redimensionar arrastrando y quitar desde el inicio (0.7.0).
 - [~] **Quitar widgets desde el inicio** (hecho en 0.7.0: mantener presionado → "Quitar widget" en rojo; pedido 2026-10-26): hoy solo se puede en Ajustes → Widgets → "Quitar". Idea: mantener presionado un widget → panel desde abajo con "Quitar", "Más alto/Más bajo" y "Mover". Al quitar, liberar el `appWidgetId` (B-019). Hay que ver que mantener presionado no choque con los widgets que usan su propio toque largo.
 
+## 7e. Pedidos del 2026-11-01 — 0.9.0
+
+- [~] B-101: "atrás" en el inicio ya no repite la animación.
+- [~] Engranaje al final del alfabeto: soltar el dedo ahí abre Ajustes.
+- [~] Elegir favoritos la primera vez (panel que aparece una sola vez).
+- [~] 8 fuentes descargables más (ADR-031).
+- [~] Ayuda por fabricante (Xiaomi, Samsung, Huawei, OPPO, vivo, otros).
+- [~] Personalizar rediseñado otra vez, con "Guardar / Descartar" y fondos anteriores.
+- [~] Más relojes y más diseños de íconos.
+- [~] Apps ocultas con gesto de dos dedos y PIN opcional; espacio privado de Android 15+; respaldo completo.
+- [ ] Decidir: galería opcional de fondos de Unsplash (necesita `INTERNET`, ADR-032). Pinterest descartado.
+
 ## 7d. Pedidos del 2026-10-28 — 0.8.0
 
 - [~] Personalizar rediseñado: vista previa en vivo y pestañas Tema · Fondo · Reloj · Letra · Íconos · Color · Elementos (ADR-028).
@@ -107,7 +119,7 @@
 - [~] Entrada de los íconos al volver de una app y al desbloquear (ADR-029).
 - [~] Logo vectorial animado y landing con luces (ADR-029).
 - [~] Freno de uso: límite diario por app desde su panel; al pasarlo, se pregunta antes de abrir.
-- [ ] Acceso a Ajustes al final del alfabeto (hoy: mantener presionado el inicio).
+- [~] Acceso a Ajustes al final del alfabeto (0.9.0).
 - [ ] Baseline Profile y Macrobenchmark de los flujos nuevos: necesitan un teléfono conectado.
 
 ## 7c. Pedidos del 2026-10-27 — 0.7.0

@@ -82,6 +82,7 @@
 
 ### B-016 · Espacio privado visible o roto `[privacidad]` — Alto
 **Prevención:** contenedor separado; ocultar contenidos y resultados de búsqueda cuando está bloqueado; manejar que sus apps se detienen al bloquear (sin notificaciones).
+**Estado (0.9.0, ADR-033):** `AppsRepository` reconoce el perfil privado (`PrivateProfiles`, API 35+) y, bloqueado, no lee sus apps: no salen en la lista ni en la búsqueda, y nunca se guardan en la caché de apps (`cache.save` filtra `isPrivate`). La lista se relee con `ACTION_PROFILE_AVAILABLE/UNAVAILABLE`. Falta: excluir sus íconos de la caché en disco y sus notificaciones cuando está bloqueado. Sin prueba automática (necesita Android 15 con espacio privado): verificar a mano bloqueando y desbloqueando.
 
 ### B-017 · Abrir panel de notificaciones con gesto `[oem]` — Bajo
 **Síntoma:** `expandNotificationsPanel` es API oculta; puede fallar en algunos OEM/versiones.
@@ -126,3 +127,14 @@ Plantilla (copiar al final, numeración continúa desde B-100):
 **Prueba que lo cubre:** `core/data/.../IconDiskCacheTest.kt`.
 **Commit/PR:** feat: temas completos (0.4.0).
 **Lección:** todo lo que se ve en el primer frame necesita una versión en disco, no solo en memoria.
+
+### B-101 · "Atrás" en el inicio repite la animación de entrada una y otra vez `[inicio]` `[animación]` — Bajo — Resuelto (código; falta confirmar en teléfono)
+**Dispositivo / Android / capa:** teléfono del autor, 0.8.0.
+**Pasos para reproducir:** estar en el inicio con la lista cerrada y tocar "atrás" varias veces.
+**Esperado:** no pasa nada (un launcher no tiene a dónde volver).
+**Actual:** el reloj y los favoritos vuelven a entrar desde abajo con cada toque.
+**Causa raíz:** sin un manejador propio, "atrás" en la Activity raíz la manda al fondo (`moveTaskToBack`) y el sistema la vuelve a traer: ON_STOP → ON_START, que `rememberEntranceGeneration` (ADR-029) cuenta como "volver de otra app".
+**Solución:** `HomeActivity` registra un `OnBackPressedCallback` siempre activo que no hace nada; los `BackHandler` de Compose (lista, buscador) se registran después y tienen prioridad.
+**Prueba que lo cubre:** manual (VERIFICACIONES §5): atrás en el inicio no anima ni parpadea. No hay pruebas instrumentadas sin teléfono.
+**Commit/PR:** 0.9.0.
+**Lección:** en un launcher, todo lo que dependa de ON_START debe asumir que el sistema puede parar y arrancar la Activity sin que el usuario salga.

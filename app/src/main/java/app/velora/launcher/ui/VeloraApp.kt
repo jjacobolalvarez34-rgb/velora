@@ -102,22 +102,17 @@ fun VeloraApp(container: AppContainer, homePresses: Flow<Boolean>, onOpenSetting
                 lightBackground = VeloraTheme.onWallpaper.isLight && !onWelcome,
                 showStatusBar = theme.custom.visible.statusBar || onWelcome,
             )
-            if (!onboardingDone) {
-                WelcomeRoute(homeViewModel, intro = true)
-            } else if (home.showWelcome) {
-                WelcomeRoute(homeViewModel, intro = false)
-            } else {
+            when {
+                !onboardingDone -> WelcomeRoute(homeViewModel, intro = true)
+
+                home.showWelcome -> WelcomeRoute(homeViewModel, intro = false)
+
                 // Modo zurdo: todo el inicio se espeja (alfabeto, márgenes, íconos, zona de gestos).
-                val direction = if (theme.leftHanded) LayoutDirection.Rtl else LocalLayoutDirection.current
-                CompositionLocalProvider(LocalLayoutDirection provides direction) {
-                    LauncherRoute(
-                        container,
-                        homeViewModel,
-                        drawerViewModel,
-                        homePresses,
-                        onOpenSettings,
-                        theme,
-                    )
+                else -> CompositionLocalProvider(
+                    LocalLayoutDirection provides
+                        if (theme.leftHanded) LayoutDirection.Rtl else LocalLayoutDirection.current,
+                ) {
+                    LauncherRoute(container, homeViewModel, drawerViewModel, homePresses, onOpenSettings, theme)
                 }
             }
         }
@@ -162,10 +157,13 @@ private fun LauncherRoute(
                 folders = folders,
                 onOpenFolder = folderActions::open,
                 tips = { HomeTipsSlot(container, theme, home, homeViewModel, drawerState, sheets, onOpenSettings) },
+                onHiddenApps = { sheets.hiddenApps = true },
             )
         }
     }
     LauncherSheets(sheets, container, drawer, actions, onOpenSettings, theme, folders, folderActions)
+    FirstFavoritesPicker(container, theme, drawer, noFavorites = home.favorites.isEmpty())
+    HiddenAppsHost(container, sheets, actions)
     IconPrefetch(container, home, drawer, theme.icons, theme.custom.icons)
 }
 

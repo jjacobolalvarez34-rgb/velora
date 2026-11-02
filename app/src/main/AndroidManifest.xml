@@ -13,6 +13,9 @@
         android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
 
+    <!-- Ver el espacio privado de Android 15+ (normal; sin efecto antes de API 35). ADR-033. -->
+    <uses-permission android:name="android.permission.ACCESS_HIDDEN_PROFILES" />
+
     <!-- Visibilidad de paquetes: solo apps abribles. Nunca QUERY_ALL_PACKAGES (SEGURIDAD §2). -->
     <queries>
         <intent>

@@ -40,6 +40,9 @@ interface FeatureActions {
     fun onUsageTime(enabled: Boolean)
     fun onUsageAccess()
     fun onContactsSearch(enabled: Boolean)
+
+    /** Ayuda por fabricante: la lista de optimización de batería del sistema. */
+    fun onOpenBattery()
 }
 
 /** Si el sistema ya dio el acceso que cada función necesita. Se vuelve a leer al regresar a Ajustes. */

@@ -277,6 +277,7 @@ private fun AccessibleAlphabet(
             val description = when (letter) {
                 AppSorting.SYMBOLS_SECTION -> stringResource(R.string.alphabet_symbols)
                 FAVORITES_SECTION -> stringResource(R.string.alphabet_favorites)
+                SETTINGS_SECTION -> stringResource(R.string.settings_launcher_label)
                 else -> stringResource(R.string.alphabet_letter, letter)
             }
             Text(

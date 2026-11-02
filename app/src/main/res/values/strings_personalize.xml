@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Personalizar (ADR-028): guardar/descartar, secciones, fondos anteriores y relojes nuevos. -->
+<resources>
+    <!-- Guardar o descartar el borrador -->
+    <string name="personalize_save">Guardar</string>
+    <string name="personalize_discard">Descartar</string>
+    <string name="personalize_unsaved_title">¿Guardar los cambios?</string>
+    <string name="personalize_unsaved_text">Todavía no se ven en tu inicio.</string>
+    <string name="personalize_keep_editing">Seguir editando</string>
+
+    <!-- Una línea de ayuda por sección -->
+    <string name="personalize_hint_theme">Un toque cambia fondo, letra, reloj e íconos.</string>
+    <string name="personalize_hint_background">Una foto tuya encima del tema.</string>
+    <string name="personalize_hint_clock">Cómo se ve la hora arriba del inicio.</string>
+    <string name="personalize_hint_icons">Las muestras son tus apps.</string>
+    <string name="personalize_hint_color">Para el alfabeto, los avisos y algunos relojes.</string>
+    <string name="personalize_hint_font">La letra de todo Velora.</string>
+    <string name="personalize_hint_elements">Lo que se ve en el inicio.</string>
+
+    <!-- Títulos de grupo -->
+    <string name="personalize_group_presets">Temas</string>
+    <string name="personalize_group_background">Fondo</string>
+    <string name="personalize_group_history">Fondos anteriores</string>
+    <string name="personalize_group_clock">Estilo del reloj</string>
+    <string name="personalize_group_text_size">Tamaño del texto</string>
+    <string name="personalize_group_font">Letra</string>
+    <string name="personalize_group_auto_color">Automático</string>
+    <string name="personalize_group_colors">Colores</string>
+    <string name="personalize_group_elements">En el inicio</string>
+
+    <!-- Fondo -->
+    <string name="personalize_bg_theme">Del tema</string>
+    <string name="personalize_bg_pick">Elegir foto</string>
+    <string name="personalize_bg_system">Del teléfono</string>
+    <string name="personalize_bg_photo">Fondo anterior %1$d</string>
+    <string name="personalize_bg_delete">Borrar esta foto</string>
+    <string name="personalize_bg_in_use">En uso</string>
+
+    <!-- Color -->
+    <string name="personalize_color_theme_title">Color del tema</string>
+    <string name="personalize_color_theme_summary">Cada tema trae el suyo.</string>
+
+    <!-- Tarjeta de Ajustes -->
+    <string name="personalize_hero_short">Tema, fondo, reloj e íconos, con vista previa.</string>
+
+    <!-- Relojes nuevos -->
+    <string name="clock_vertical">Vertical</string>
+    <string name="clock_vertical_summary">Hora en columna y la fecha al lado.</string>
+    <string name="clock_outline">Contorno</string>
+    <string name="clock_outline_summary">Dígitos huecos con un trazo fino.</string>
+    <string name="clock_minimal">Minimal</string>
+    <string name="clock_minimal_summary">Solo la hora, pequeña y espaciada.</string>
+    <string name="clock_analog">Analógico</string>
+    <string name="clock_analog_summary">Esfera fina con agujas, sin números.</string>
+    <string name="clock_words">Palabras</string>
+    <string name="clock_words_summary">La hora escrita: «las siete y media».</string>
+
+    <!-- Reloj Palabras: la hora 0 es las doce. La frase lleva la hora en %1$s; de la 7 en adelante,
+         la hora que se pasa es la siguiente («veinte para las ocho»). -->
+    <string-array name="clock_words_hours">
+        <item>las doce</item>
+        <item>la una</item>
+        <item>las dos</item>
+        <item>las tres</item>
+        <item>las cuatro</item>
+        <item>las cinco</item>
+        <item>las seis</item>
+        <item>las siete</item>
+        <item>las ocho</item>
+        <item>las nueve</item>
+        <item>las diez</item>
+        <item>las once</item>
+    </string-array>
+    <string-array name="clock_words_patterns">
+        <item>%1$s en punto</item>
+        <item>%1$s y cinco</item>
+        <item>%1$s y diez</item>
+        <item>%1$s y cuarto</item>
+        <item>%1$s y veinte</item>
+        <item>%1$s y veinticinco</item>
+        <item>%1$s y media</item>
+        <item>veinticinco para %1$s</item>
+        <item>veinte para %1$s</item>
+        <item>cuarto para %1$s</item>
+        <item>diez para %1$s</item>
+        <item>cinco para %1$s</item>
+    </string-array>
+</resources>

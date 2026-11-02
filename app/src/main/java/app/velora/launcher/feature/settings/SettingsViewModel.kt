@@ -11,10 +11,6 @@ import app.velora.launcher.core.data.favorites.HiddenAppsRepository
 import app.velora.launcher.core.data.prefs.PrefsRepository
 import app.velora.launcher.core.data.prefs.SharedTheme
 import app.velora.launcher.core.model.AppEntry
-import app.velora.launcher.core.model.ClockStyle
-import app.velora.launcher.core.model.FontChoice
-import app.velora.launcher.core.model.IconStyle
-import app.velora.launcher.core.model.TextSize
 import app.velora.launcher.core.model.ThemePreset
 import app.velora.launcher.core.model.ThemeSettings
 import app.velora.launcher.di.AppContainer
@@ -23,13 +19,18 @@ import app.velora.launcher.feature.home.ClockText
 import app.velora.launcher.feature.home.LocalizedClockFormatter
 import app.velora.launcher.feature.widgets.WidgetHost
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** Funciones que se encienden con un interruptor y un acceso del sistema. */
 enum class Feature { DoubleTapLock, UsageTime, ContactsSearch }
@@ -74,6 +75,37 @@ class SettingsViewModel(
     fun onPrefs(change: suspend PrefsRepository.() -> Unit) = save { prefs.change() }
 
     fun onPreset(preset: ThemePreset) = save { prefs.applyPreset(preset) }
+
+    private val draftState = MutableStateFlow<ThemeDraft?>(null)
+
+    /**
+     * Borrador de Personalizar ([ThemeDraft]): null mientras no se cambió nada. La vista previa
+     * muestra `draft.edited`; el inicio sigue con [theme] hasta [onSaveDraft].
+     */
+    val draft: StateFlow<ThemeDraft?> = draftState.asStateFlow()
+
+    /** Cambia el borrador; el primer cambio lo crea a partir de lo guardado. */
+    fun onEditDraft(change: (ThemeSettings) -> ThemeSettings) {
+        val saved = theme.value ?: return
+        draftState.update { (it ?: ThemeDraft(saved)).edit(change) }
+    }
+
+    /** Olvida el borrador: la vista previa vuelve a lo guardado. */
+    fun onDiscardDraft() {
+        draftState.value = null
+    }
+
+    /**
+     * Escribe el borrador en las preferencias de una vez. El borrador se suelta cuando lo guardado
+     * ya llegó a [theme], así la vista previa no parpadea con el valor anterior.
+     */
+    fun onSaveDraft() = save {
+        val draft = draftState.value ?: return@save
+        if (draft.hasChanges) draft.saveTo(prefs)
+        withTimeoutOrNull(SAVE_SETTLE_MS) { theme.first { it != null && it.sameLook(draft.edited) } }
+        // Si se siguió editando mientras se guardaba, ese borrador nuevo se queda.
+        draftState.compareAndSet(draft, null)
+    }
 
     /**
      * Widgets del inicio con su nombre (leído de `PackageManager`, fuera del hilo principal).
@@ -121,6 +153,7 @@ class SettingsViewModel(
 
     companion object {
         private const val STOP_TIMEOUT_MS = 5_000L
+        private const val SAVE_SETTLE_MS = 1_000L
 
         fun factory(container: AppContainer) = viewModelFactory {
             initializer {

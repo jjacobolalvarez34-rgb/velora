@@ -297,4 +297,25 @@
     <string name="usage_limit_reached_body">You\'ve used it %1$d min today and your limit is %2$s. Open it anyway?</string>
     <string name="usage_limit_open_anyway">Open anyway</string>
     <string name="usage_limit_leave">Leave it</string>
+    <!-- 0.9.0 -->
+    <string name="pick_favorites_title">Pick your favorites</string>
+    <string name="pick_favorites_body">They go at the bottom of home, within thumb reach. Picked: %1$d of %2$d.</string>
+    <string name="pick_favorites_done">Done</string>
+    <string name="help_title">Help for your phone</string>
+    <string name="help_your_phone">Your phone</string>
+    <string name="help_other_brands">Other brands</string>
+    <string name="help_open_battery">Open battery settings</string>
+    <string name="help_open_battery_summary">Find Velora and choose “Unrestricted” or “Don\'t optimize”.</string>
+    <string name="help_family_xiaomi">Xiaomi, Redmi and POCO</string>
+    <string name="help_family_samsung">Samsung</string>
+    <string name="help_family_huawei">Huawei and Honor</string>
+    <string name="help_family_oppo">OPPO, realme and OnePlus</string>
+    <string name="help_family_vivo">vivo and iQOO</string>
+    <string name="help_family_other">Other phones</string>
+    <string name="help_steps_xiaomi">1. Settings → Apps → Manage apps → Velora → Battery saver → No restrictions.\n2. Turn on “Autostart”.\n3. In Recents, long-press Velora and tap the lock so it isn\'t closed.</string>
+    <string name="help_steps_samsung">1. Settings → Battery → Background usage limits: remove Velora from “Sleeping apps”.\n2. Add it to “Never sleeping apps”.</string>
+    <string name="help_steps_huawei">1. Settings → Battery → App launch → Velora: turn off “Manage automatically” and keep the three permissions on.</string>
+    <string name="help_steps_oppo">1. Settings → Battery → Velora → Allow background activity.\n2. Settings → Apps → Auto launch: turn on Velora.</string>
+    <string name="help_steps_vivo">1. Settings → Battery → High background power consumption: allow Velora.\n2. i Manager → App manager → Autostart: turn on Velora.</string>
+    <string name="help_steps_other">1. Settings → Apps → Velora → Battery → Unrestricted.\n2. If notifications or double tap stop working, turn them on again in Settings → Features.</string>
 </resources>

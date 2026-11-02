@@ -13,6 +13,8 @@ Velora incluye o usa el siguiente software y recursos de terceros.
 | Fuente **Silkscreen** (The Silkscreen Project Authors), sin modificar | SIL OFL 1.1 | [docs/licencias/OFL-Silkscreen.txt](docs/licencias/OFL-Silkscreen.txt) |
 | Fuente **Nunito** (The Nunito Project Authors), recortada a latino | SIL OFL 1.1 | [docs/licencias/OFL-Nunito.txt](docs/licencias/OFL-Nunito.txt) |
 | Fuente **Cinzel** (The Cinzel Project Authors), recortada a latino (sin nombre reservado) | SIL OFL 1.1 | [docs/licencias/OFL-Cinzel.txt](docs/licencias/OFL-Cinzel.txt) |
+| Certificados del proveedor de fuentes de Google Play (`font_certs.xml`, del proyecto android/compose-samples) | Apache-2.0 | encabezado del archivo |
+| Fuentes descargables por Google Play en el teléfono: Playfair Display, Space Grotesk, DM Serif Display, Josefin Sans, Comfortaa, Caveat, Bebas Neue, Righteous (no van en el APK) | SIL OFL 1.1 | Google Fonts |
 | **Tabler Icons** 3.49.0 (Paweł Kuna), ~130 glifos convertidos a datos de trazo en `core/data/src/main/assets/glyphs/tabler.tsv` | MIT | [docs/licencias/MIT-TablerIcons.txt](docs/licencias/MIT-TablerIcons.txt) |
 
 ## Librerías

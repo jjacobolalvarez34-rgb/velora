@@ -63,7 +63,7 @@ internal fun HomeTipsSlot(
     )
 }
 
-private fun pendingTips(theme: ThemeSettings, home: HomeUiState, isDefault: Boolean?): List<HomeTip> {
+internal fun pendingTips(theme: ThemeSettings, home: HomeUiState, isDefault: Boolean?): List<HomeTip> {
     if (!theme.custom.visible.tips) return emptyList()
     val dismissed = theme.custom.dismissedTips
     return buildList {

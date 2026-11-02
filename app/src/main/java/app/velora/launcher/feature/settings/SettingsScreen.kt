@@ -2,7 +2,6 @@ package app.velora.launcher.feature.settings
 
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.fadeIn
@@ -11,61 +10,37 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import app.velora.launcher.R
-import app.velora.launcher.core.designsystem.components.ThemeBackground
 import app.velora.launcher.core.designsystem.motion.VeloraMotion
-import app.velora.launcher.core.designsystem.theme.Shapes
-import app.velora.launcher.core.designsystem.theme.Spacing
 import app.velora.launcher.core.designsystem.theme.VeloraTheme
-import app.velora.launcher.core.designsystem.theme.fontFamilyOf
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.ClockStyle
 import app.velora.launcher.core.model.Customization
@@ -74,8 +49,11 @@ import app.velora.launcher.core.model.IconStyle
 import app.velora.launcher.core.model.TextSize
 import app.velora.launcher.core.model.ThemePreset
 import app.velora.launcher.core.model.ThemeSettings
+import app.velora.launcher.feature.hidden.HiddenLockActions
+import app.velora.launcher.feature.hidden.HiddenUiState
+import app.velora.launcher.feature.hidden.NoHiddenLockActions
+import app.velora.launcher.feature.hidden.hiddenLockSection
 import app.velora.launcher.feature.home.ClockText
-import app.velora.launcher.feature.home.components.ClockHeader
 
 /** Lo que la pantalla de ajustes puede pedir. */
 interface SettingsActions {
@@ -114,7 +92,8 @@ enum class SettingsPage { Main, Personalize, Layout, Lists, Features }
 
 /**
  * Ajustes (ADR-028): arriba "Personalizar" con una vista previa en vivo; debajo, pocas
- * categorías. Cada página entra deslizándose y "atrás" vuelve al menú.
+ * categorías agrupadas. Cada página entra deslizándose y "atrás" vuelve al menú. [theme] es lo
+ * guardado; Personalizar muestra su borrador ([personalize]).
  */
 @Composable
 fun SettingsScreen(
@@ -127,13 +106,21 @@ fun SettingsScreen(
     status: FeatureStatus = FeatureStatus(),
     photo: ImageBitmap? = null,
     iconPacks: List<InstalledIconPack> = emptyList(),
+    personalize: PersonalizeState = PersonalizeState(theme, photo = photo),
+    personalizeActions: PersonalizeActions = PreviewPersonalizeActions,
+    hiddenLock: HiddenUiState = HiddenUiState(loaded = true),
+    hiddenLockActions: HiddenLockActions = NoHiddenLockActions,
+    backup: BackupUiState = BackupUiState(),
+    backupActions: BackupActions = NoBackupActions,
 ) {
     var page by rememberSaveable { mutableStateOf(SettingsPage.Main) }
     BackHandler(enabled = page != SettingsPage.Main) { page = SettingsPage.Main }
+    // Al volver al menú se suelta el borrador de Personalizar: lo que no se guardó, no queda.
+    LaunchedEffect(page) { if (page == SettingsPage.Main) personalizeActions.onDiscard() }
     val motion = VeloraTheme.motion
     AnimatedContent(
         targetState = page,
-        transitionSpec = { pageTransition(initialState, targetState, motion) },
+        transitionSpec = { pageTransition(targetState, motion) },
         label = "settings-page",
         modifier = modifier
             .fillMaxSize()
@@ -141,10 +128,10 @@ fun SettingsScreen(
     ) { current ->
         val back = { page = SettingsPage.Main }
         when (current) {
-            SettingsPage.Main -> MainPage(theme, preview, photo, lists, actions, features, onOpen = { page = it })
+            SettingsPage.Main -> MainPage(theme, preview, photo, lists.favorites, actions, features) { page = it }
 
             SettingsPage.Personalize ->
-                PersonalizeScreen(theme, preview, photo, lists.favorites, actions, features, iconPacks, back)
+                PersonalizeScreen(personalize, preview, lists.favorites, iconPacks, personalizeActions, back)
 
             SettingsPage.Layout -> SettingsListPage(R.string.settings_page_layout, back) {
                 layoutSection(theme, actions)
@@ -153,18 +140,21 @@ fun SettingsScreen(
             SettingsPage.Lists -> SettingsListPage(R.string.settings_page_lists, back) {
                 favoritesSection(lists.favorites, actions)
                 widgetsSection(lists.widgets, actions)
-                hiddenSection(lists.hidden, actions)
+                hiddenLockSection(hiddenLock, hiddenLockActions)
+                if (hiddenLock.contentVisible) hiddenSection(lists.hidden, actions)
+                backupSection(backup, backupActions)
             }
 
             SettingsPage.Features -> SettingsListPage(R.string.settings_page_features, back) {
                 featuresSection(theme, status, features)
+                deviceHelpSection(features::onOpenBattery)
             }
         }
     }
 }
 
 /** Hacia una página: entra desde la derecha; de vuelta al menú, al revés. */
-private fun pageTransition(from: SettingsPage, to: SettingsPage, motion: VeloraMotion): ContentTransform {
+private fun pageTransition(to: SettingsPage, motion: VeloraMotion): ContentTransform {
     val forward = to != SettingsPage.Main
     val sign = if (forward) 1 else -1
     return (
@@ -177,12 +167,13 @@ private fun pageTransition(from: SettingsPage, to: SettingsPage, motion: VeloraM
 
 private const val PAGE_SLIDE = 3
 
+/** El menú: título, la tarjeta de Personalizar y tres grupos (inicio, compartir, general). */
 @Composable
 private fun MainPage(
     theme: ThemeSettings,
     preview: ClockPreview,
     photo: ImageBitmap?,
-    lists: SettingsLists,
+    favorites: List<AppEntry>,
     actions: SettingsActions,
     features: FeatureActions,
     onOpen: (SettingsPage) -> Unit,
@@ -190,77 +181,59 @@ private fun MainPage(
     LazyColumn(contentPadding = WindowInsets.safeDrawing.asPaddingValues(), modifier = Modifier.fillMaxSize()) {
         item(key = "title") { Title(stringResource(R.string.settings_title)) }
         item(key = "personalize") {
-            PersonalizeHero(theme, preview, photo, lists.favorites, onClick = { onOpen(SettingsPage.Personalize) })
+            PersonalizeHero(theme, preview, photo, favorites, onClick = { onOpen(SettingsPage.Personalize) })
         }
-        item(key = "categories") { SectionTitle(R.string.settings_more) }
-        item(key = "layout") {
-            Option(
-                title = stringResource(R.string.settings_page_layout),
-                subtitle = stringResource(R.string.settings_page_layout_summary),
-                onClick = { onOpen(SettingsPage.Layout) },
-                icon = Icons.Outlined.Menu,
-            )
-        }
-        item(key = "lists") {
-            Option(
-                title = stringResource(R.string.settings_page_lists),
-                subtitle = stringResource(R.string.settings_page_lists_summary),
-                onClick = { onOpen(SettingsPage.Lists) },
-                icon = Icons.Outlined.Star,
-            )
-        }
-        item(key = "features") {
-            Option(
-                title = stringResource(R.string.settings_page_features),
-                subtitle = stringResource(R.string.settings_page_features_summary),
-                onClick = { onOpen(SettingsPage.Features) },
-                icon = Icons.Outlined.Notifications,
-            )
-        }
-        shareSection(features)
-        generalSection(actions)
+        item(key = "home-group") { MenuGroup(R.string.settings_more, homeEntries(onOpen)) }
+        item(key = "share-group") { MenuGroup(R.string.settings_share_themes, shareEntries(features)) }
+        item(key = "general-group") { MenuGroup(R.string.settings_general, generalEntries(actions)) }
     }
 }
 
-private fun LazyListScope.generalSection(actions: SettingsActions) {
-    item(key = "general") { SectionTitle(R.string.settings_general) }
-    item(key = "home-app") {
-        Option(
-            title = stringResource(R.string.settings_home_app_title),
-            subtitle = stringResource(R.string.settings_home_app_summary),
-            onClick = actions::onChooseHomeApp,
-            icon = Icons.Outlined.Home,
-        )
-    }
-}
-
-/** Una página de Ajustes con su título, botón atrás y su lista. */
 @Composable
-internal fun SettingsListPage(title: Int, onBack: () -> Unit, content: LazyListScope.() -> Unit) {
-    LazyColumn(contentPadding = WindowInsets.safeDrawing.asPaddingValues(), modifier = Modifier.fillMaxSize()) {
-        item(key = "page-title") { PageTitle(stringResource(title), onBack) }
-        content()
-    }
-}
+private fun homeEntries(onOpen: (SettingsPage) -> Unit) = listOf(
+    MenuEntry(
+        stringResource(R.string.settings_page_layout),
+        stringResource(R.string.settings_page_layout_summary),
+        Icons.Outlined.Menu,
+    ) { onOpen(SettingsPage.Layout) },
+    MenuEntry(
+        stringResource(R.string.settings_page_lists),
+        stringResource(R.string.settings_page_lists_summary),
+        Icons.Outlined.Star,
+    ) { onOpen(SettingsPage.Lists) },
+    MenuEntry(
+        stringResource(R.string.settings_page_features),
+        stringResource(R.string.settings_page_features_summary),
+        Icons.Outlined.Notifications,
+    ) { onOpen(SettingsPage.Features) },
+)
 
-/** Título con flecha atrás, igual en todas las páginas. */
+/** Compartir temas de Velora con otros usuarios de Velora (ADR-027). */
 @Composable
-internal fun PageTitle(text: String, onBack: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(start = Spacing.xs, end = Spacing.m, top = Spacing.m, bottom = Spacing.s),
-    ) {
-        IconButton(onClick = onBack) {
-            Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.settings_back))
-        }
-        Text(
-            text = text,
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.semantics { heading() },
-        )
-    }
-}
+private fun shareEntries(features: FeatureActions) = listOf(
+    MenuEntry(
+        stringResource(R.string.settings_theme_export),
+        stringResource(R.string.settings_theme_export_summary),
+        Icons.Outlined.Share,
+        features::onExportTheme,
+    ),
+    MenuEntry(
+        stringResource(R.string.settings_theme_import),
+        stringResource(R.string.settings_theme_import_summary),
+        Icons.Outlined.Add,
+        features::onImportTheme,
+    ),
+)
+
+@Composable
+private fun generalEntries(actions: SettingsActions) = listOf(
+    MenuEntry(
+        stringResource(R.string.settings_home_app_title),
+        stringResource(R.string.settings_home_app_summary),
+        Icons.Outlined.Home,
+        actions::onChooseHomeApp,
+    ),
+)
 
 internal fun LazyListScope.hiddenSection(hidden: List<AppEntry>, actions: SettingsActions) {
     item(key = "hidden") { SectionTitle(R.string.settings_hidden) }
@@ -284,80 +257,6 @@ internal fun LazyListScope.hiddenSection(hidden: List<AppEntry>, actions: Settin
             modifier = Modifier.settingsCard(),
         )
     }
-}
-
-@Composable
-private fun Title(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.headlineMedium,
-        color = MaterialTheme.colorScheme.onBackground,
-        modifier = Modifier
-            .padding(horizontal = Spacing.m, vertical = Spacing.l)
-            .semantics { heading() },
-    )
-}
-
-/** Tarjeta de ajustes: esquinas redondeadas y un poco de aire entre una y otra. */
-internal fun Modifier.settingsCard() = padding(horizontal = Spacing.m, vertical = 3.dp).clip(SettingsCardShape)
-
-private val SettingsCardShape = RoundedCornerShape(20.dp)
-private val IconCircleSize = 40.dp
-
-@Composable
-internal fun cardColors() = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
-
-/** Ícono de una opción dentro de un círculo suave, a la izquierda de la tarjeta. */
-@Composable
-internal fun IconCircle(icon: ImageVector) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .size(IconCircleSize)
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f), CircleShape),
-    ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
-    }
-}
-
-@Composable
-internal fun SectionTitle(@StringRes title: Int) {
-    Text(
-        text = stringResource(title),
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier
-            .padding(start = Spacing.m, end = Spacing.m, top = Spacing.l, bottom = Spacing.xs)
-            .semantics { heading() },
-    )
-}
-
-@Composable
-internal fun RadioOption(
-    title: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    subtitle: String? = null,
-    titleStyle: TextStyle = MaterialTheme.typography.bodyLarge,
-) {
-    ListItem(
-        headlineContent = { Text(title, style = titleStyle) },
-        supportingContent = subtitle?.let { { Text(it) } },
-        trailingContent = { RadioButton(selected = selected, onClick = null) },
-        colors = cardColors(),
-        modifier = Modifier.settingsCard().selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
-    )
-}
-
-@Composable
-internal fun Option(title: String, subtitle: String, onClick: () -> Unit, icon: ImageVector? = null) {
-    ListItem(
-        headlineContent = { Text(title) },
-        supportingContent = { Text(subtitle) },
-        leadingContent = icon?.let { { IconCircle(it) } },
-        colors = cardColors(),
-        modifier = Modifier.settingsCard().clickable(onClick = onClick),
-    )
 }
 
 private object PreviewSettingsActions : SettingsActions {
@@ -390,6 +289,7 @@ private object PreviewFeatureActions : FeatureActions {
     override fun onUsageTime(enabled: Boolean) = Unit
     override fun onUsageAccess() = Unit
     override fun onContactsSearch(enabled: Boolean) = Unit
+    override fun onOpenBattery() = Unit
 }
 
 @Preview(name = "Claro", heightDp = 1200)

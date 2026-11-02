@@ -39,6 +39,13 @@ class IconRequestTest {
     }
 
     @Test
+    fun `cada diseno de iconos de Velora tiene su propia clave`() {
+        val names = IconPack.entries.map { name(IconStyle.Minimal, IconOptions(pack = it)) }
+
+        assertEquals(IconPack.entries.size, names.toSet().size)
+    }
+
+    @Test
     fun `la clave es estable y empieza por el paquete`() {
         val options = IconOptions(pack = IconPack.Stellar, shape = IconShape.Teardrop)
 

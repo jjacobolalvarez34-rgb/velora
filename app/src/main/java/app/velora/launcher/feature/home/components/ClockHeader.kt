@@ -64,6 +64,16 @@ private fun ClockByStyle(clock: ClockText, style: ClockStyle, battery: Int?, mer
         ClockStyle.Banner -> BannerClock(clock, battery, merged)
 
         ClockStyle.Duo -> DuoClock(clock, merged)
+
+        ClockStyle.Vertical -> VerticalClock(clock, battery, merged)
+
+        ClockStyle.Outline -> OutlineClock(clock, merged)
+
+        ClockStyle.Minimal -> MinimalClock(clock, merged)
+
+        ClockStyle.Analog -> AnalogClock(clock, battery, merged)
+
+        ClockStyle.Words -> WordsClock(clock, merged)
     }
 }
 
@@ -144,7 +154,7 @@ internal fun splitTime(time: String): Pair<String, String> {
 
 /** "Lunes, 26 de octubre · 82 %". Sin batería conocida, se omite. */
 @Composable
-private fun withBattery(text: String, battery: Int?): String =
+internal fun withBattery(text: String, battery: Int?): String =
     battery?.let { if (text.isEmpty()) "" else "$text · ${stringResource(R.string.clock_battery, it)}" } ?: text
 
 @Composable
@@ -206,6 +216,27 @@ private fun BannerPreview() = ClockPreview(ClockStyle.Banner)
 @Preview(name = "Dúo", widthDp = 360)
 @Composable
 private fun DuoPreview() = ClockPreview(ClockStyle.Duo)
+
+@Preview(name = "Vertical", widthDp = 360)
+@Composable
+private fun VerticalPreview() = ClockPreview(ClockStyle.Vertical)
+
+@Preview(name = "Contorno", widthDp = 360)
+@Composable
+private fun OutlinePreview() = ClockPreview(ClockStyle.Outline)
+
+@Preview(name = "Minimal", widthDp = 360)
+@Composable
+private fun MinimalPreview() = ClockPreview(ClockStyle.Minimal)
+
+@Preview(name = "Analógico", widthDp = 360)
+@Preview(name = "Analógico oscuro", widthDp = 360, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun AnalogPreview() = ClockPreview(ClockStyle.Analog)
+
+@Preview(name = "Palabras", widthDp = 360)
+@Composable
+private fun WordsPreview() = ClockPreview(ClockStyle.Words)
 
 @Composable
 private fun ClockPreview(style: ClockStyle) {

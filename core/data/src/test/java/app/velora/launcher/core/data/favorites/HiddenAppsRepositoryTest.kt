@@ -19,6 +19,9 @@ class HiddenAppsRepositoryTest {
         override suspend fun delete(stableId: String) {
             rows.value = rows.value.filterNot { it.stableId == stableId }
         }
+        override suspend fun clear() {
+            rows.value = emptyList()
+        }
     }
 
     private fun app(label: String) = AppEntry(
@@ -48,5 +51,15 @@ class HiddenAppsRepositoryTest {
         repository.unhide(camera.key)
 
         assertEquals(listOf(camera, clock), repository.visibleApps.first())
+    }
+
+    @Test
+    fun `restaurar un respaldo reemplaza las ocultas`() = runTest {
+        repository.hide(camera.key)
+
+        repository.restore(listOf(clock.key))
+
+        assertEquals(listOf(clock), repository.hiddenApps.first())
+        assertEquals(listOf(clock.key), repository.snapshot())
     }
 }

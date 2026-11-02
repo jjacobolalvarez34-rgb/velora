@@ -4,4 +4,6 @@
     <exclude domain="file" path="icons/" />
         <exclude domain="file" path="backgrounds/" />
     <exclude domain="database" path="apps_cache.db" />
+    <!-- PIN de las ocultas (hash): nunca sale del teléfono (ADR-034). -->
+    <exclude domain="file" path="datastore/velora_lock.preferences_pb" />
 </full-backup-content>

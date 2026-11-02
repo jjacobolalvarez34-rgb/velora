@@ -87,6 +87,7 @@ class IconDesignMathTest {
         }
         val veins = IconOrnaments.veins(seed)
         assertTrue(veins.size in 2..3)
-        assertEquals(veins.map { it.points.toList() }, IconOrnaments.veins(seed).map { it.points.toList() })
+        assertEquals(veins, IconOrnaments.veins(seed))
+        veins.forEach { assertTrue(it.startY in 0f..1f && it.endY in 0f..1f) }
     }
 }

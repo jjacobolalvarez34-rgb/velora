@@ -71,6 +71,8 @@ class HomeViewModelTest {
         }
         override suspend fun setPosition(stableId: String, position: Int) {
             rows.value = rows.value.map { if (it.stableId == stableId) it.copy(position = position) else it }
+        } override suspend fun clear() {
+            rows.value = emptyList()
         }
     }
 
@@ -92,6 +94,9 @@ class HomeViewModelTest {
         }
         override suspend fun delete(stableId: String) {
             rows.value = rows.value.filterNot { it.stableId == stableId }
+        }
+        override suspend fun clear() {
+            rows.value = emptyList()
         }
     }
 

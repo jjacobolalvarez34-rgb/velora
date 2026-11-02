@@ -1,7 +1,6 @@
 package app.velora.launcher.feature.settings
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,23 +8,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.velora.launcher.R
@@ -35,13 +27,11 @@ import app.velora.launcher.core.designsystem.theme.VeloraTheme
 import app.velora.launcher.core.model.ThemePreset
 
 private val CardWidth = 96.dp
-private val CardHeight = 168.dp
-private val CardShape = RoundedCornerShape(18.dp)
-private val SelectedBorder = 3.dp
 private const val MINI_ROWS = 3
 private val MiniBarWidth = 44.dp
 private val MiniBarStep = 8.dp
 private val MiniBarHeight = 6.dp
+private const val CARD_ASPECT = 0.56f
 
 /** Temas completos: cada tarjeta es una miniatura real del inicio con su fondo, fuente y colores. */
 @Composable
@@ -52,33 +42,25 @@ fun ThemePresetPicker(selected: ThemePreset, onSelect: (ThemePreset) -> Unit, mo
         modifier = modifier.fillMaxWidth(),
     ) {
         items(ThemePreset.entries, key = { it.name }) { preset ->
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                PresetCard(preset, selected = preset == selected, onClick = { onSelect(preset) })
-                Spacer(Modifier.height(Spacing.s))
-                Text(
-                    text = stringResource(presetName(preset)),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
+            OptionCard(
+                label = stringResource(presetName(preset)),
+                selected = preset == selected,
+                onClick = { onSelect(preset) },
+                aspect = CARD_ASPECT,
+                modifier = Modifier.width(CardWidth),
+            ) {
+                PresetThumb(preset)
             }
         }
     }
 }
 
+/** El fondo del tema con un reloj y tres "apps", con la fuente y los colores de ese tema. */
 @Composable
-internal fun PresetCard(preset: ThemePreset, selected: Boolean, onClick: () -> Unit) {
-    val border = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent
-    val scheme = MaterialTheme.colorScheme
-    Box(
-        modifier = Modifier
-            .size(CardWidth, CardHeight)
-            .clip(CardShape)
-            .background(Brush.verticalGradient(listOf(scheme.primary, scheme.tertiary)))
-            .border(SelectedBorder, border, CardShape)
-            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
-    ) {
-        // Tema anidado: la miniatura usa los colores y la fuente de ese tema.
-        VeloraTheme(font = preset.recommended.font, preset = preset, reducedMotion = true) {
+internal fun PresetThumb(preset: ThemePreset, modifier: Modifier = Modifier) {
+    // Tema anidado: la miniatura usa los colores y la fuente de ese tema.
+    VeloraTheme(font = preset.recommended.font, preset = preset, reducedMotion = true) {
+        Box(modifier.fillMaxSize()) {
             ThemeBackground(preset, Modifier.fillMaxSize())
             MiniHome()
         }

@@ -42,10 +42,11 @@ velora/
 │   │   ├── drawer/     (AppListScreen.kt, WaveAlphabet.kt, AppRow.kt, DrawerViewModel.kt)
 │   │   ├── search/
 │   │   ├── appmenu/    (menú de pulsación larga, atajos)
+│   │   ├── hidden/     (gesto de dos dedos, panel de ocultas, PIN, espacio privado; ADR-033/034)
 │   │   └── settings/
 │   └── services/
 ├── core/model/        (AppEntry, AppKey, Favorite, UserProfileKind, NotificationSummary…)
-├── core/data/         (repositorios, fuentes del sistema, Room, DataStore)
+├── core/data/         (repositorios, fuentes del sistema, Room, DataStore; hidden/: PIN y espacio privado; backup/: `.velora-backup`)
 ├── core/designsystem/ (theme/, motion/, components/)
 ├── baselineprofile/
 ├── macrobenchmark/

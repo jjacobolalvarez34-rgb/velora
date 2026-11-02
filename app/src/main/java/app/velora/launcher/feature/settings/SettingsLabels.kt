@@ -12,13 +12,37 @@ import app.velora.launcher.core.model.IconStyle
 @Composable
 internal fun fontName(font: FontChoice): String = when (font) {
     FontChoice.PlusJakartaSans -> stringResource(R.string.font_plus_jakarta_sans)
+
     FontChoice.Figtree -> stringResource(R.string.font_figtree)
+
     FontChoice.Fraunces -> stringResource(R.string.font_fraunces)
+
     FontChoice.Quicksand -> stringResource(R.string.font_quicksand)
+
     FontChoice.Nunito -> stringResource(R.string.font_nunito)
+
     FontChoice.Pixel -> stringResource(R.string.font_pixel)
+
     FontChoice.Cinzel -> stringResource(R.string.font_cinzel)
+
     FontChoice.System -> stringResource(R.string.font_system)
+
+    // Nombres propios de las fuentes descargables (ADR-031): no se traducen.
+    FontChoice.PlayfairDisplay -> "Playfair Display"
+
+    FontChoice.SpaceGrotesk -> "Space Grotesk"
+
+    FontChoice.DmSerifDisplay -> "DM Serif Display"
+
+    FontChoice.JosefinSans -> "Josefin Sans"
+
+    FontChoice.Comfortaa -> "Comfortaa"
+
+    FontChoice.Caveat -> "Caveat"
+
+    FontChoice.BebasNeue -> "Bebas Neue"
+
+    FontChoice.Righteous -> "Righteous"
 }
 
 internal fun clockLabels(style: ClockStyle): Pair<Int, Int> = when (style) {
@@ -28,6 +52,11 @@ internal fun clockLabels(style: ClockStyle): Pair<Int, Int> = when (style) {
     ClockStyle.Stacked -> R.string.clock_stacked to R.string.clock_stacked_summary
     ClockStyle.Banner -> R.string.clock_banner to R.string.clock_banner_summary
     ClockStyle.Duo -> R.string.clock_duo to R.string.clock_duo_summary
+    ClockStyle.Vertical -> R.string.clock_vertical to R.string.clock_vertical_summary
+    ClockStyle.Outline -> R.string.clock_outline to R.string.clock_outline_summary
+    ClockStyle.Minimal -> R.string.clock_minimal to R.string.clock_minimal_summary
+    ClockStyle.Analog -> R.string.clock_analog to R.string.clock_analog_summary
+    ClockStyle.Words -> R.string.clock_words to R.string.clock_words_summary
 }
 
 internal fun iconLabels(style: IconStyle): Pair<Int, Int> = when (style) {

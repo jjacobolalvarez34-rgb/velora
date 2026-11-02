@@ -25,6 +25,9 @@ class FavoritesRepositoryTest {
         override suspend fun setPosition(stableId: String, position: Int) {
             rows.value = rows.value.map { if (it.stableId == stableId) it.copy(position = position) else it }
         }
+        override suspend fun clear() {
+            rows.value = emptyList()
+        }
     }
 
     private fun app(label: String) = AppEntry(
@@ -60,5 +63,16 @@ class FavoritesRepositoryTest {
         repository.move(apps[2].key, 1)
 
         assertEquals(listOf("A", "B", "C"), order())
+    }
+
+    @Test
+    fun `restaurar un respaldo reemplaza los favoritos en su orden`() = runTest {
+        apps.forEach { repository.add(it.key) }
+        val saved = listOf(apps[2].key, apps[0].key)
+
+        repository.restore(saved + apps[2].key)
+
+        assertEquals(listOf("C", "A"), order())
+        assertEquals(saved, repository.snapshot())
     }
 }

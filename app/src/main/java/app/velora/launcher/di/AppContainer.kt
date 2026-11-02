@@ -8,6 +8,7 @@ import app.velora.launcher.core.data.apps.IconRepository
 import app.velora.launcher.core.data.apps.RoomAppsCache
 import app.velora.launcher.core.data.apps.ShortcutsRepository
 import app.velora.launcher.core.data.apps.SystemAppsRepository
+import app.velora.launcher.core.data.backup.UserBackup
 import app.velora.launcher.core.data.battery.BatteryRepository
 import app.velora.launcher.core.data.battery.SystemBatteryRepository
 import app.velora.launcher.core.data.clock.ClockRepository
@@ -17,6 +18,8 @@ import app.velora.launcher.core.data.favorites.FavoritesRepository
 import app.velora.launcher.core.data.favorites.FoldersRepository
 import app.velora.launcher.core.data.favorites.HiddenAppsRepository
 import app.velora.launcher.core.data.favorites.UserListsStore
+import app.velora.launcher.core.data.hidden.HiddenLock
+import app.velora.launcher.core.data.hidden.PrivateSpaceRepository
 import app.velora.launcher.core.data.home.DefaultHomeRepository
 import app.velora.launcher.core.data.home.SystemDefaultHomeRepository
 import app.velora.launcher.core.data.notifications.NotificationsRepository
@@ -93,6 +96,27 @@ class AppContainer(context: Context) {
 
     /** Notificaciones y música, solo en memoria (ADR-023). */
     val notificationsRepository: NotificationsRepository by lazy { NotificationsRepository() }
+
+    /** PIN opcional de las apps ocultas, en su propio archivo fuera del respaldo (ADR-034). */
+    val hiddenLock: HiddenLock by lazy { HiddenLock(appContext) }
+
+    /** Espacio privado de Android 15+ (ADR-033). */
+    val privateSpaceRepository: PrivateSpaceRepository by lazy {
+        PrivateSpaceRepository(appContext, applicationScope)
+    }
+
+    /** Respaldo completo `.velora-backup` (ADR-035). */
+    val userBackup: UserBackup by lazy {
+        UserBackup(
+            store = userLists,
+            favorites = favoritesRepository,
+            folders = foldersRepository,
+            hidden = hiddenAppsRepository,
+            widgets = userLists.widgets(),
+            prefs = prefsRepository,
+            installed = appsRepository.apps,
+        )
+    }
 
     /** Un único `AppWidgetHost` por proceso (ADR-020). */
     val widgetHost: WidgetHost by lazy { WidgetHost(appContext, userLists.widgets(), applicationScope) }

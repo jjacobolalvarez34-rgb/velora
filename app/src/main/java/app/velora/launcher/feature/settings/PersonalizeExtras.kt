@@ -1,29 +1,23 @@
 package app.velora.launcher.feature.settings
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,13 +27,14 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.velora.launcher.R
-import app.velora.launcher.core.designsystem.theme.Spacing
 import app.velora.launcher.core.model.IconShape
 import app.velora.launcher.core.model.ThemeSettings
 import app.velora.launcher.core.model.VisibleElements
@@ -49,7 +44,7 @@ import kotlin.math.pow
 import kotlin.math.sign
 import kotlin.math.sin
 
-// Pestañas Color y Elementos de Personalizar (ADR-028), y la silueta de las formas de ícono.
+// Secciones Color y Elementos de Personalizar (ADR-028), y la silueta de las formas de ícono.
 
 /** Colores del tema: el del tema elegido o uno de estos, pensados para leerse sobre cualquier fondo. */
 private val Swatches = listOf(
@@ -57,96 +52,111 @@ private val Swatches = listOf(
     0xFF9A8CFF, 0xFF7FB8FF, 0xFF5FE0E8, 0xFF7FF0B0, 0xFFB8E07A, 0xFF1E1E24,
 )
 
-/** "Automático" (el del tema) y los colores fijos, en círculos grandes fáciles de tocar. */
+/** "El del tema" arriba, y los colores fijos en círculos grandes, seis por fila. */
 @Composable
-internal fun ColorTab(theme: ThemeSettings, actions: SettingsActions) {
-    val current = theme.custom.accentColor
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(SwatchCell),
-        contentPadding = PaddingValues(Spacing.m),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
-        verticalArrangement = Arrangement.spacedBy(Spacing.s),
-        modifier = Modifier.fillMaxSize().tabContentPadding(),
-    ) {
-        item(span = { GridItemSpan(maxLineSpan) }) { TabHint(R.string.personalize_color_hint) }
+internal fun ColorTab(look: ThemeSettings, edit: ThemeEdit) {
+    val current = look.custom.accentColor
+    val choose = { argb: Long? -> edit { it.copy(custom = it.custom.copy(accentColor = argb)) } }
+    PanelList {
+        sectionHint(R.string.personalize_hint_color)
+        groupTitle("auto", R.string.personalize_group_auto_color)
         item(key = "auto") {
-            Swatch(null, current == null, stringResource(R.string.personalize_color_auto)) {
-                actions.onCustom { it.copy(accentColor = null) }
-            }
+            RadioOption(
+                title = stringResource(R.string.personalize_color_theme_title),
+                subtitle = stringResource(R.string.personalize_color_theme_summary),
+                selected = current == null,
+                onClick = { choose(null) },
+            )
         }
-        items(Swatches, key = { it }) { argb ->
-            Swatch(Color(argb.toInt()), current == argb, colorName(argb)) {
-                actions.onCustom { it.copy(accentColor = argb) }
-            }
+        groupTitle("colors", R.string.personalize_group_colors)
+        optionGrid("colors", Swatches, columns = SWATCH_COLUMNS) { argb ->
+            Swatch(Color(argb.toInt()), current == argb, colorName(argb)) { choose(argb) }
         }
     }
 }
 
 @Composable
-private fun Swatch(color: Color?, selected: Boolean, label: String, onClick: () -> Unit) {
+private fun Swatch(color: Color, selected: Boolean, label: String, onClick: () -> Unit) {
     val ring = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(SwatchSize)
-                .border(3.dp, ring, CircleShape)
-                .padding(5.dp)
-                .background(color ?: MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape)
-                .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
-                .semantics { contentDescription = label },
-        ) {
-            if (color == null) Text("A", style = MaterialTheme.typography.titleMedium)
-        }
+    // La marca se ve sobre cualquier color: oscura en los claros y clara en los oscuros.
+    val mark = if (color.luminance() > LIGHT_COLOR) Color.Black else Color.White
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1f)
+            .border(SwatchRing, ring, CircleShape)
+            .padding(SwatchGap)
+            .background(color, CircleShape)
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            .semantics { contentDescription = label },
+    ) {
+        if (selected) Icon(Icons.Outlined.Check, contentDescription = null, tint = mark)
     }
 }
 
 @Composable
 private fun colorName(argb: Long): String =
-    stringResource(R.string.personalize_color_swatch, "#%06X".format(argb and 0xFFFFFF))
+    stringResource(R.string.personalize_color_swatch, "#%06X".format(argb and RGB_MASK))
 
-/** Qué se ve en el inicio. */
+/** Un interruptor de "qué se ve en el inicio": su texto, su ícono y qué campo cambia. */
+private class ElementToggle(
+    @StringRes val title: Int,
+    @StringRes val summary: Int,
+    val icon: ImageVector,
+    val read: (VisibleElements) -> Boolean,
+    val write: (VisibleElements, Boolean) -> VisibleElements,
+)
+
+private val ElementToggles = listOf(
+    ElementToggle(
+        R.string.element_clock,
+        R.string.element_clock_summary,
+        Icons.Outlined.DateRange,
+        { it.clock },
+        { v, on -> v.copy(clock = on) },
+    ),
+    ElementToggle(
+        R.string.element_date,
+        R.string.element_date_summary,
+        Icons.Outlined.Info,
+        { it.date },
+        { v, on -> v.copy(date = on) },
+    ),
+    ElementToggle(
+        R.string.element_status_bar,
+        R.string.element_status_bar_summary,
+        Icons.Outlined.Menu,
+        { it.statusBar },
+        { v, on -> v.copy(statusBar = on) },
+    ),
+    ElementToggle(
+        R.string.element_tips,
+        R.string.element_tips_summary,
+        Icons.Outlined.Notifications,
+        { it.tips },
+        { v, on -> v.copy(tips = on) },
+    ),
+)
+
+/** Qué se ve en el inicio: un interruptor por elemento. */
 @Composable
-internal fun ElementsTab(theme: ThemeSettings, actions: SettingsActions) {
-    val visible = theme.custom.visible
-    val set = { change: (
-        VisibleElements,
-    ) -> VisibleElements,
-        ->
-        actions.onCustom { it.copy(visible = change(it.visible)) }
-    }
-    Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = Spacing.m).tabContentPadding(),
-    ) {
-        TabHint(R.string.personalize_elements_hint)
-        SwitchOption(
-            stringResource(R.string.element_clock),
-            stringResource(R.string.element_clock_summary),
-            visible.clock,
-            { on -> set { it.copy(clock = on) } },
-            Icons.Outlined.DateRange,
-        )
-        SwitchOption(
-            stringResource(R.string.element_date),
-            stringResource(R.string.element_date_summary),
-            visible.date,
-            { on -> set { it.copy(date = on) } },
-            Icons.Outlined.Info,
-        )
-        SwitchOption(
-            stringResource(R.string.element_status_bar),
-            stringResource(R.string.element_status_bar_summary),
-            visible.statusBar,
-            { on -> set { it.copy(statusBar = on) } },
-            Icons.Outlined.Menu,
-        )
-        SwitchOption(
-            stringResource(R.string.element_tips),
-            stringResource(R.string.element_tips_summary),
-            visible.tips,
-            { on -> set { it.copy(tips = on) } },
-            Icons.Outlined.Notifications,
-        )
+internal fun ElementsTab(look: ThemeSettings, edit: ThemeEdit) {
+    val visible = look.custom.visible
+    PanelList {
+        sectionHint(R.string.personalize_hint_elements)
+        groupTitle("elements", R.string.personalize_group_elements)
+        items(ElementToggles, key = { it.title }) { toggle ->
+            SwitchOption(
+                title = stringResource(toggle.title),
+                subtitle = stringResource(toggle.summary),
+                checked = toggle.read(visible),
+                onChange = { on ->
+                    edit { it.copy(custom = it.custom.copy(visible = toggle.write(it.custom.visible, on))) }
+                },
+                icon = toggle.icon,
+            )
+        }
     }
 }
 
@@ -187,8 +197,15 @@ private fun squircle(size: Size) = Path().apply {
     close()
 }
 
-private val SwatchCell = 64.dp
-private val SwatchSize = 52.dp
+private const val SWATCH_COLUMNS = 6
+
+/** Luminancia desde la que un color se considera claro. */
+private const val LIGHT_COLOR = 0.5f
+
+/** Solo el color, sin la transparencia, para nombrarlo como #RRGGBB. */
+private const val RGB_MASK = 0xFFFFFFL
+private val SwatchRing = 2.dp
+private val SwatchGap = 4.dp
 private const val ROUNDED = 0.28f
 private const val HALF = 0.5f
 private const val TEAR_CORNER = 0.12f

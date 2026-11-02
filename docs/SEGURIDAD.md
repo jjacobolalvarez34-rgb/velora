@@ -20,7 +20,7 @@
 | `VIBRATE` | 1 | Normal | Háptica del alfabeto (si `performHapticFeedback` no basta) | — |
 | `EXPAND_STATUS_BAR` | 1 | Normal | Gesto bajar = abrir panel de notificaciones | — |
 | Selector de fotos del sistema (`PickVisualMedia`) y `ACTION_SET_WALLPAPER` | 0.6.0 (ADR-022) | **Sin permiso** | Foto propia como fondo del tema; abrir el selector de fondos del sistema | `READ_MEDIA_IMAGES` y `SET_WALLPAPER` (innecesarios) |
-| `ACCESS_HIDDEN_PROFILES` | 2 | Normal (Android 15+) | Mostrar apps del espacio privado | — |
+| `ACCESS_HIDDEN_PROFILES` | 2 (implementado en 0.9.0, ADR-033) | Normal (Android 15+) | Mostrar apps del espacio privado solo desbloqueado; bloquearlo/desbloquearlo desde el panel de ocultas (`requestQuietModeEnabled`, la credencial la pide el sistema) | No declararlo (espacio privado inaccesible desde el inicio) |
 | `BIND_NOTIFICATION_LISTENER_SERVICE` (servicio) | 2 (implementado en 0.6.0, ADR-023) | Acceso especial, el usuario lo concede en Ajustes | Puntos de notificación, último aviso bajo favoritos y reproductor (sesiones de música con el mismo acceso) | — |
 | `AppWidgetHost` + diálogo `ACTION_APPWIDGET_BIND` | 1 (adelantado, ADR-020) | Consentimiento del sistema por proveedor; **sin permiso en el manifiesto** | Widgets | `BIND_APPWIDGET` (solo para apps del sistema) |
 | `BIND_ACCESSIBILITY_SERVICE` (servicio) | 4 (adelantado a 0.6.0) | Acceso especial | **Únicamente** bloquear pantalla con gesto (`GLOBAL_ACTION_LOCK_SCREEN`, API 28+) | Administrador de dispositivo (rompe huella), bajar timeout (altera ajustes) |
@@ -71,14 +71,16 @@ Cualquier otro permiso requiere ADR.
 | Favoritos, ocultos, carpetas | Room | Medio (revela apps instaladas) | Sí, con Android Backup cifrado por el sistema |
 | Preferencias | DataStore | Bajo | Sí |
 | Íconos renderizados | Caché interna | Bajo | No |
-| Foto de fondo elegida (reducida) | `files/backgrounds/` | Medio (foto personal) | **No** (excluida en `backup_rules`/`data_extraction_rules`) |
+| Foto de fondo elegida (reducida) y fondos anteriores (máx. 8; el usuario los borra en Personalizar → Fondo, y se borran con la app) | `files/backgrounds/` | Medio (foto personal) | **No** (excluida en `backup_rules`/`data_extraction_rules`) |
 | Notificaciones | Solo memoria | **Alto** | Nunca |
 | Carpetas (nombre y apps) | Room | Medio | Sí |
 | Contactos y tiempo de uso | No se guardan: se consultan al momento | Alto | Nunca |
 | Contadores de uso por app (para sugerencias / freno de uso) | Room | Medio | Opcional, desactivado por defecto |
+| PIN de las apps ocultas (ADR-034) | DataStore propio `velora_lock`: solo hash PBKDF2 + sal + contador de intentos | Alto | **No** (excluido en `backup_rules`/`data_extraction_rules` y fuera del `.velora-backup`) |
+| Apps del espacio privado (ADR-033) | Solo memoria, y solo desbloqueado | Alto | Nunca (no entran en la caché de apps) |
 
 - `android:allowBackup="true"` con `dataExtractionRules`/`fullBackupContent` que **excluyen** cachés y bases de íconos.
-- Exportación manual de ajustes (Fase 4): archivo JSON elegido por el usuario con el selector del sistema (SAF), sin permisos de almacenamiento.
+- Respaldo manual completo (ADR-035, adelantado a 0.9.0): archivo `.velora-backup` de texto plano elegido por el usuario con el selector del sistema (SAF), sin permisos de almacenamiento. Lleva listas, widgets por re-agregar y preferencias; nunca notificaciones ni el PIN. Al leerlo se valida todo (tamaño, claves conocidas, nombres de paquete) y restaurar pide confirmación.
 
 ## 5. Propiedad intelectual
 

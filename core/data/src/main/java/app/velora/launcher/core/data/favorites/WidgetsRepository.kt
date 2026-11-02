@@ -34,6 +34,9 @@ class WidgetsRepository(private val dao: WidgetsDao) {
         order.forEachIndexed { position, id -> dao.setPosition(id, position) }
     }
 
+    /** Widgets en su orden para el respaldo: solo proveedor y alto sirven al restaurar (ADR-035). */
+    suspend fun snapshot(): List<WidgetEntity> = dao.observe().first()
+
     companion object {
         const val MIN_HEIGHT_DP = 64
         const val MAX_HEIGHT_DP = 360

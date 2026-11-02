@@ -30,6 +30,30 @@ enum class IconPack {
 
     /** Mármol blanco con vetas y glifo oscuro. */
     Marble,
+
+    /** Tubo de neón: glifo luminoso con halo del color sobre una forma casi negra. */
+    Neon,
+
+    /** Duotono: fondo pálido, glifo profundo y su sombra desplazada en el tono medio. */
+    Duotone,
+
+    /** Píxel: el glifo rasterizado a bloques nítidos de 16×16, con sombra de un bloque. */
+    Pixel,
+
+    /** Degradado diagonal vivo del color con brillo arriba y glifo claro. */
+    Gradient,
+
+    /** Contorno: solo el borde de la forma y el glifo, sin relleno. */
+    Outline,
+
+    /** Acuarela: manchas translúcidas de borde irregular (únicas por app) y glifo oscuro. */
+    Watercolor,
+
+    /** Papel recortado: forma crema con sombra suave y el glifo como tira de papel de color. */
+    Paper,
+
+    /** Arcilla: volumen suave con luz arriba, sombra interna y glifo hundido. */
+    Clay,
 }
 
 /** Forma que contiene el ícono (de Velora o el original de la app). */

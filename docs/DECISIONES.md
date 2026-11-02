@@ -160,6 +160,36 @@ _`compileSdk` actualizado a 37 por ADR-013; `minSdk` y `targetSdk` siguen vigent
 **Decisión:** se leen los packs instalados que siguen el formato común de launchers (acciones `org.adw.launcher.THEMES`, `com.novalauncher.THEME`, etc., declaradas en `<queries>`; nunca `QUERY_ALL_PACKAGES`). Se parsea su `appfilter.xml` de forma defensiva; las apps que el pack no cubre usan `iconback`/`iconmask`/`iconupon`/`scale` si el pack los trae, o el ícono original con la forma elegida.
 **Consecuencias:** son recursos del autor de cada pack, instalados por el usuario: Velora solo los muestra, no los copia ni redistribuye.
 
+## ADR-031 · Fuentes descargables con el proveedor de Google Play — Aceptada (2026-11-01)
+**Contexto:** el autor quiere muchas más letras sin que el APK crezca.
+**Opciones:** A) empaquetar cada TTF (cientos de KB por fuente). B) Descargarlas desde Velora (necesita `INTERNET`, prohibido sin ADR). C) El proveedor de fuentes de Google Play (`androidx.compose.ui:ui-text-google-fonts`, de la BOM de Compose): las baja Google Play, no Velora, y las comparte en caché del sistema.
+**Decisión:** C para 8 fuentes nuevas (Playfair Display, Space Grotesk, DM Serif Display, Josefin Sans, Comfortaa, Caveat, Bebas Neue, Righteous; todas OFL de Google Fonts). Las de antes siguen empaquetadas. Certificados del proveedor en `core/designsystem/src/main/res/values/font_certs.xml` (Apache-2.0, del proyecto compose-samples de Google).
+**Por qué:** cero permisos y cero MB; Velora sigue sin usar internet.
+**Consecuencias:** sin Google Play (o sin conexión la primera vez) se ve la fuente del sistema hasta que llegue. Se marcan con `FontChoice.downloadable`.
+
+## ADR-032 · No a fondos sacados de Pinterest — Aceptada (2026-11-01)
+**Contexto:** el autor propuso tomar fondos de Pinterest "como libres" y conectar Pinterest para recomendaciones.
+**Decisión:** no. Lo que hay en Pinterest pertenece a sus autores (estar publicado no da licencia) y sus condiciones prohíben extraerlo y redistribuirlo; conectar una cuenta necesita aprobación de Pinterest, servidor, OAuth e `INTERNET`, y rompería "ningún dato sale del teléfono". Alternativa propuesta, pendiente de decisión del autor: galería opcional de **Unsplash** (licencia libre con crédito al fotógrafo, API oficial con clave gratuita), opt-in, con ADR de `INTERNET` y su entrada en SEGURIDAD. Mientras tanto: fondos procedurales propios, foto del usuario e historial de fondos.
+
+## ADR-033 · Espacio privado de Android 15+ (`ACCESS_HIDDEN_PROFILES`) — Aceptada (2026-11-01)
+**Contexto:** B-016. En Android 15 el espacio privado es un perfil aparte que solo ve el launcher predeterminado con `ACCESS_HIDDEN_PROFILES` (permiso normal, sin diálogo).
+**Opciones:** A) No declararlo: el espacio privado no aparece en Velora y el usuario debe abrirlo desde Ajustes. B) Declararlo y mostrar sus apps solo desbloqueado.
+**Decisión:** B. Se declara `ACCESS_HIDDEN_PROFILES`; `PrivateProfiles` (`core/data/hidden/PrivateSpace.kt`) reconoce el perfil con `LauncherApps.getLauncherUserInfo(user).userType == UserManager.USER_TYPE_PROFILE_PRIVATE` (API 35+, `runCatching`). Bloqueado (`isQuietModeEnabled`) sus apps no existen para Velora: ni en la lista, ni en la búsqueda, ni en la caché de disco (`AppsRepository` nunca guarda las `AppEntry.isPrivate`). Desbloqueado, aparecen marcadas como privadas. El panel de apps ocultas tiene "Espacio privado" para bloquear/desbloquear con `UserManager.requestQuietModeEnabled` (desbloquear pide la credencial del sistema; Velora nunca la ve). La lista se relee con `ACTION_PROFILE_AVAILABLE/UNAVAILABLE` (y los de perfil de trabajo).
+**Por qué:** es lo que hace el launcher de AOSP y lo que espera el usuario; sin el permiso el espacio privado queda inaccesible desde el inicio.
+**Consecuencias:** aún no se respeta `LauncherUserInfo.PRIVATE_SPACE_ENTRYPOINT_HIDDEN` (API 36): el botón está dentro del panel de ocultas, que ya es un acceso discreto. Pendiente: no guardar en la caché de íconos los de apps privadas y no mostrar notificaciones del espacio privado bloqueado (SEGURIDAD §3.2).
+
+## ADR-034 · Apps ocultas con gesto y PIN opcional — Aceptada (2026-11-01)
+**Contexto:** las ocultas solo se recuperaban en Ajustes; se pidió un acceso rápido y una contraseña opcional.
+**Decisión:** en el inicio, **deslizar con dos dedos hacia arriba** o **pellizcar hacia adentro** abre el panel "Apps ocultas" (`feature/hidden`). El detector (`Modifier.hiddenAppsGesture`) mira los toques en el pase `Initial` y solo actúa con dos dedos, consumiéndolos desde el segundo: el arrastre de un dedo, mantener presionado y el doble toque se cancelan en lugar de dispararse. PIN opcional de 4 a 8 dígitos, guardado como hash **PBKDF2WithHmacSHA256** (sal aleatoria de 16 bytes, 120 000 iteraciones, `javax.crypto`, comparación en tiempo constante) en un DataStore propio (`velora_lock`), excluido de los respaldos. 5 intentos libres; luego espera de 30 s que se duplica con cada fallo, con tope de 30 min (y nunca más que eso aunque se atrase el reloj). Con PIN, el panel y la sección de Ajustes no muestran nada hasta escribirlo; se vuelve a pedir al cerrar el panel o salir de Ajustes. No hay huella/rostro: `androidx.biometric` no está en las dependencias.
+**Por qué:** dos dedos no choca con ningún gesto del inicio; PBKDF2 está en todas las versiones desde la API 26 sin librerías.
+**Consecuencias:** es una barrera contra miradas curiosas, no cifrado: las apps siguen instaladas y visibles en los Ajustes del sistema. Pruebas en `PinSecurityTest`. Olvidar el PIN = borrar los datos de Velora (no hay recuperación).
+
+## ADR-035 · Respaldo completo `.velora-backup` — Aceptada (2026-11-01)
+**Contexto:** SEGURIDAD §4 preveía exportar ajustes con el selector del sistema; se pidió un respaldo de todo.
+**Decisión:** archivo de texto plano versionado (`velora-backup 1`), una clave por línea como `.velora-theme` (ADR-027): favoritos en orden, carpetas con sus apps (nombre en Base64 URL), ocultas, widgets (solo proveedor y alto: los ids no se pueden restaurar, se piden "volver a agregar"), preferencias (tema, fuente, reloj, íconos, tamaño de texto, zurdo, lista completa y `Customization` vía `CustomizationCodec`) y, si el usuario lo marca, la foto de fondo activa en Base64. Nunca notificaciones, PIN ni permisos. Se guarda y abre con `CreateDocument`/`OpenDocument` (sin permisos). Al leer: límite de 8 MB, encabezado exacto, solo claves conocidas, paquetes y clases con expresión regular, topes por lista. Restaurar pide confirmación y reemplaza favoritos, carpetas y ocultas en una transacción de Room; si el número de perfil no coincide, se busca la misma app en el perfil personal.
+**Por qué:** el respaldo de Android no siempre funciona entre marcas ni sirve para mover a mano; un archivo propio y legible no puede ejecutar nada.
+**Consecuencias:** sin cambio de esquema (solo consultas `DELETE` nuevas en los DAO). Pruebas en `BackupFileTest` y en las de repositorios. El archivo revela qué apps tiene el usuario: queda donde él lo guarde.
+
 ---
 
 ## Plantilla

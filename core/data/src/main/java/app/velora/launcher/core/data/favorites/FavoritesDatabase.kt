@@ -45,6 +45,10 @@ interface FavoritesDao {
 
     @Query("UPDATE favorites SET position = :position WHERE stableId = :stableId")
     suspend fun setPosition(stableId: String, position: Int)
+
+    /** Para restaurar un respaldo (ADR-035). */
+    @Query("DELETE FROM favorites")
+    suspend fun clear()
 }
 
 /** Una app oculta: no sale en la lista ni en la búsqueda; se recupera en Ajustes. */
@@ -66,6 +70,10 @@ interface HiddenAppsDao {
 
     @Query("DELETE FROM hidden_apps WHERE stableId = :stableId")
     suspend fun delete(stableId: String)
+
+    /** Para restaurar un respaldo (ADR-035). */
+    @Query("DELETE FROM hidden_apps")
+    suspend fun clear()
 }
 
 /** Un widget del inicio: su id del sistema, quién lo provee, su alto y su orden (ADR-020). */

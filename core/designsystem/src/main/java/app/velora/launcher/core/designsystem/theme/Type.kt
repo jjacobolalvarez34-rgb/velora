@@ -9,6 +9,8 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.Font as GoogleFontFace
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.sp
 import app.velora.launcher.core.designsystem.R
 import app.velora.launcher.core.model.FontChoice
@@ -53,6 +55,40 @@ fun fontFamilyOf(choice: FontChoice): FontFamily = when (choice) {
     FontChoice.Pixel -> Pixel
     FontChoice.Cinzel -> Cinzel
     FontChoice.System -> FontFamily.Default
+    else -> downloadableFamily(choice)
+}
+
+/**
+ * Fuentes que no van en el APK (ADR-031): las baja una sola vez el proveedor de fuentes de Google
+ * Play (Velora no usa internet) y quedan en caché del sistema. Mientras llegan, o si el teléfono
+ * no tiene Google Play, se ve la fuente del sistema.
+ */
+private val FontProvider = GoogleFont.Provider(
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
+    certificates = R.array.com_google_android_gms_fonts_certs,
+)
+
+private val downloadableNames = mapOf(
+    FontChoice.PlayfairDisplay to "Playfair Display",
+    FontChoice.SpaceGrotesk to "Space Grotesk",
+    FontChoice.DmSerifDisplay to "DM Serif Display",
+    FontChoice.JosefinSans to "Josefin Sans",
+    FontChoice.Comfortaa to "Comfortaa",
+    FontChoice.Caveat to "Caveat",
+    FontChoice.BebasNeue to "Bebas Neue",
+    FontChoice.Righteous to "Righteous",
+)
+
+private val downloadableFamilies = HashMap<FontChoice, FontFamily>()
+
+private fun downloadableFamily(choice: FontChoice): FontFamily = downloadableFamilies.getOrPut(choice) {
+    val font = GoogleFont(downloadableNames[choice] ?: return@getOrPut FontFamily.Default)
+    FontFamily(
+        usedWeights.map { weight ->
+            GoogleFontFace(googleFont = font, fontProvider = FontProvider, weight = weight)
+        },
+    )
 }
 
 /**

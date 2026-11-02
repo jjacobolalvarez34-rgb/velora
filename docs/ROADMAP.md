@@ -53,14 +53,14 @@
 - [~] Deslizar una app hacia el centro abre su panel con atajos y notificaciones (0.7.0).
 - [~] Carpetas (0.7.0, ADR-026)
 - [~] Widgets con `AppWidgetHost` (B-019, ADR-020), con orden y alto en Ajustes. Desde 0.7.0 se editan en el inicio: quitar, mover y redimensionar arrastrando.
-- [ ] Paquetes de íconos de terceros; formas de ícono
-- [ ] Fuente opcional (descargable)
+- [~] Paquetes de íconos de terceros y formas de ícono (0.8.0, ADR-030)
+- [~] Fuentes descargables (0.9.0, ADR-031)
 
 ## Fase 4 — Bienestar y robustez (3–4 semanas)
 - [~] Bloqueo con doble toque vía accesibilidad opt-in (SEGURIDAD §3.3, adelantado a 0.6.0)
 - [~] Tiempo de uso de hoy por app (0.7.0, ADR-024). Falta el freno.
 - [ ] Respaldo con Android Backup + exportar/importar JSON
-- [ ] Página de ayuda por fabricante
+- [~] Página de ayuda por fabricante (0.9.0)
 
 ## Fase 5 — Publicación y sostenibilidad
 - [ ] Nombre definitivo, ícono, ficha de Play es/en, política de privacidad

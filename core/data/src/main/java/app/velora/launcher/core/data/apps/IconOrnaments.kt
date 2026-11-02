@@ -7,8 +7,18 @@ import kotlin.math.sin
 /** Una estrellita del estilo Stellar: posición y radio en fracción del lado; [alpha] 0–1. */
 internal data class Star(val x: Float, val y: Float, val radius: Float, val alpha: Float)
 
-/** Una veta del mármol: curva cúbica de [points] (8 valores x/y, fracción del lado). */
-internal class Vein(val points: FloatArray, val width: Float, val alpha: Float)
+/**
+ * Una veta del mármol: curva cúbica de lado a lado; los puntos están en x = 0, ⅓, ⅔ y 1 y aquí
+ * van sus alturas ([startY], [bend1Y], [bend2Y], [endY]), en fracción del lado.
+ */
+internal data class Vein(
+    val startY: Float,
+    val bend1Y: Float,
+    val bend2Y: Float,
+    val endY: Float,
+    val width: Float,
+    val alpha: Float,
+)
 
 /**
  * Adornos deterministas por app (semilla = hash del paquete): cada ícono tiene siempre el mismo
@@ -38,8 +48,8 @@ internal object IconOrnaments {
     private const val VEIN_WIDTH_RANGE = 0.016f
     private const val VEIN_MIN_ALPHA = 0.16f
     private const val VEIN_ALPHA_RANGE = 0.14f
-    private const val THIRD = 1f / 3f
-    private const val TWO_THIRDS = 2f / 3f
+    const val THIRD = 1f / 3f
+    const val TWO_THIRDS = 2f / 3f
     private const val HALF = 0.5f
 
     fun stars(seed: Int): List<Star> {
@@ -66,18 +76,11 @@ internal object IconOrnaments {
             val endY = (startY + (random.nextFloat() * 2 - 1) * VEIN_DRIFT).coerceIn(0f, 1f)
             val bend1 = (random.nextFloat() * 2 - 1) * VEIN_BEND
             val bend2 = (random.nextFloat() * 2 - 1) * VEIN_BEND
-            val points = floatArrayOf(
-                0f,
-                startY,
-                THIRD,
-                startY + (endY - startY) * THIRD + bend1,
-                TWO_THIRDS,
-                startY + (endY - startY) * TWO_THIRDS + bend2,
-                1f,
-                endY,
-            )
             Vein(
-                points = points,
+                startY = startY,
+                bend1Y = startY + (endY - startY) * THIRD + bend1,
+                bend2Y = startY + (endY - startY) * TWO_THIRDS + bend2,
+                endY = endY,
                 width = VEIN_MIN_WIDTH + random.nextFloat() * VEIN_WIDTH_RANGE,
                 alpha = VEIN_MIN_ALPHA + random.nextFloat() * VEIN_ALPHA_RANGE,
             )

@@ -12,6 +12,10 @@ import app.velora.launcher.core.model.AppKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+
+/** Una carpeta tal como va en el respaldo: nombre y apps, sin ids de la base. */
+data class FolderSnapshot(val name: String, val apps: List<AppKey>)
 
 /** Una carpeta del inicio ("Trabajo", "Bancos"…). */
 @Entity(tableName = "folders")
@@ -55,6 +59,13 @@ interface FoldersDao {
 
     @Query("DELETE FROM folder_apps WHERE folderId = :folderId AND stableId = :stableId")
     suspend fun deleteApp(folderId: Long, stableId: String)
+
+    /** Para restaurar un respaldo (ADR-035). */
+    @Query("DELETE FROM folders")
+    suspend fun clearFolders()
+
+    @Query("DELETE FROM folder_apps")
+    suspend fun clearApps()
 }
 
 /** Carpetas del inicio con sus apps instaladas, por nombre (Fase 3). */
@@ -88,6 +99,25 @@ class FoldersRepository(private val dao: FoldersDao, apps: StateFlow<List<AppEnt
         dao.insertApp(FolderAppEntity(folderId, key.stableId, key.packageName, key.className, key.userSerial))
 
     suspend fun remove(folderId: Long, key: AppKey) = dao.deleteApp(folderId, key.stableId)
+
+    /** Carpetas en su orden con todas sus apps (instaladas o no), para el respaldo (ADR-035). */
+    suspend fun snapshot(): List<FolderSnapshot> {
+        val members = dao.observeApps().first().groupBy { it.folderId }
+        return dao.observeFolders().first().map { folder ->
+            val apps = members[folder.id].orEmpty().map { AppKey(it.packageName, it.className, it.userSerial) }
+            FolderSnapshot(folder.name, apps)
+        }
+    }
+
+    /** Reemplaza todas las carpetas por [folders]. Llamar dentro de una transacción. */
+    suspend fun restore(folders: List<FolderSnapshot>) {
+        dao.clearApps()
+        dao.clearFolders()
+        folders.forEach { folder ->
+            val id = create(folder.name)
+            folder.apps.distinctBy { it.stableId }.forEach { add(id, it) }
+        }
+    }
 
     companion object {
         const val MAX_NAME = 30

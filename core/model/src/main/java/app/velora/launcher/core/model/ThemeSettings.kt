@@ -3,7 +3,27 @@ package app.velora.launcher.core.model
 import androidx.compose.runtime.Immutable
 
 /** Fuente de toda la interfaz (ADR-016). */
-enum class FontChoice { Nunito, Quicksand, PlusJakartaSans, Figtree, Fraunces, Cinzel, Pixel, System }
+enum class FontChoice(
+    /** Se descarga la primera vez con el proveedor de fuentes de Google Play (ADR-031); no va en el APK. */
+    val downloadable: Boolean = false,
+) {
+    Nunito,
+    Quicksand,
+    PlusJakartaSans,
+    Figtree,
+    Fraunces,
+    Cinzel,
+    Pixel,
+    System,
+    PlayfairDisplay(downloadable = true),
+    SpaceGrotesk(downloadable = true),
+    DmSerifDisplay(downloadable = true),
+    JosefinSans(downloadable = true),
+    Comfortaa(downloadable = true),
+    Caveat(downloadable = true),
+    BebasNeue(downloadable = true),
+    Righteous(downloadable = true),
+}
 
 /** Cómo se dibuja el reloj del inicio. */
 enum class ClockStyle {
@@ -24,6 +44,21 @@ enum class ClockStyle {
 
     /** Horas del color del texto y minutos del acento, gruesos. */
     Duo,
+
+    /** Horas sobre minutos en una columna angosta; a un lado, una línea fina y el día con la fecha. */
+    Vertical,
+
+    /** Dígitos grandes y huecos: solo su contorno, con un trazo fino. */
+    Outline,
+
+    /** Solo la hora, pequeña y muy espaciada; la fecha aún más discreta. */
+    Minimal,
+
+    /** Esfera fina dibujada con agujas, sin números; la fecha a un lado. */
+    Analog,
+
+    /** La hora escrita con palabras ("las siete y media"), en el idioma del teléfono. */
+    Words,
 }
 
 /** Forma de los íconos de las apps. */

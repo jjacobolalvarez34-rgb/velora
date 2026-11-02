@@ -27,7 +27,7 @@ data class IconRequest(
 
     private companion object {
         /** Se sube cuando cambia cómo se dibuja un estilo: los íconos viejos no se reutilizan. */
-        const val CACHE_VERSION = 2
+        const val CACHE_VERSION = 3
         const val HEX = 16
 
         fun Int.toHex() = toUInt().toString(HEX)

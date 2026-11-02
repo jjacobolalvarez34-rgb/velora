@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -51,6 +52,15 @@ class HomeActivity : ComponentActivity() {
             userPresentReceiver,
             IntentFilter(Intent.ACTION_USER_PRESENT),
             ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+        // B-021: "atrás" en el inicio no hace nada. Sin esto Android manda el launcher al fondo y lo
+        // vuelve a traer (ON_STOP → ON_START), y la entrada de los íconos se repetía con cada toque.
+        // Los BackHandler de Compose (lista abierta, buscador) se registran después y ganan.
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() = Unit
+            },
         )
         setContent {
             VeloraApp(container = container, homePresses = homePresses, onOpenSettings = ::openSettings)

@@ -49,7 +49,9 @@ import app.velora.launcher.feature.drawer.AppListScreen
 import app.velora.launcher.feature.drawer.DrawerList
 import app.velora.launcher.feature.drawer.DrawerSearchState
 import app.velora.launcher.feature.drawer.DrawerUiState
+import app.velora.launcher.feature.drawer.SETTINGS_SECTION
 import app.velora.launcher.feature.drawer.WaveAlphabet
+import app.velora.launcher.feature.hidden.hiddenAppsGesture
 import app.velora.launcher.feature.home.HomeScreen
 import app.velora.launcher.feature.home.HomeUiState
 
@@ -87,6 +89,7 @@ fun LauncherScreen(
     folders: List<AppFolder> = emptyList(),
     onOpenFolder: (AppFolder) -> Unit = {},
     tips: @Composable () -> Unit = {},
+    onHiddenApps: () -> Unit = {},
 ) {
     drawerState.spec = VeloraTheme.motion.let { if (it.reduced) null else it.spatialDefault() }
     val drawerVisible by remember(drawerState) { derivedStateOf { drawerState.isOpen } }
@@ -104,6 +107,7 @@ fun LauncherScreen(
             actions = actions,
             modifier = Modifier
                 .homeLayer(drawerState)
+                .hiddenAppsGesture(onHiddenApps)
                 .homeGestures(drawerState, onHomeMenu, onOpenSettings, onDoubleTap),
             widgets = widgets,
             folders = folders,
@@ -116,8 +120,10 @@ fun LauncherScreen(
         // Buscando, el alfabeto sobra: se oculta para dejar la pantalla limpia.
         if (!search.active) {
             AlphabetOverlay(drawer.list, drawerState) { index ->
+                // El engranaje va después de la última letra: soltar el dedo ahí abre Ajustes.
+                if (index == -1 && activeLetter == drawer.list.letters.size) onOpenSettings()
                 activeLetter = index
-                onLetter(drawer.list, index, search, listState, theme.fullList)
+                if (index < drawer.list.letters.size) onLetter(drawer.list, index, search, listState, theme.fullList)
             }
         }
     }
@@ -186,7 +192,7 @@ private fun Modifier.drawerLayer(drawerState: DrawerState) = graphicsLayer {
 @Composable
 private fun BoxScope.AlphabetOverlay(list: DrawerList, drawerState: DrawerState, onLetterChange: (Int) -> Unit) {
     WaveAlphabet(
-        letters = list.letters,
+        letters = list.letters + SETTINGS_SECTION,
         onTouchStart = drawerState::open,
         onLetterChange = onLetterChange,
         modifier = Modifier

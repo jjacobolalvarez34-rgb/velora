@@ -311,4 +311,25 @@
     <string name="usage_limit_reached_body">Hoy llevas %1$d min y tu límite es %2$s. ¿La abres igual?</string>
     <string name="usage_limit_open_anyway">Abrir igual</string>
     <string name="usage_limit_leave">Dejarla</string>
+    <!-- 0.9.0: ayuda por fabricante y favoritos de la primera vez -->
+    <string name="pick_favorites_title">Elige tus favoritos</string>
+    <string name="pick_favorites_body">Van abajo en el inicio, al alcance del pulgar. Elegidos: %1$d de %2$d.</string>
+    <string name="pick_favorites_done">Listo</string>
+    <string name="help_title">Ayuda para tu teléfono</string>
+    <string name="help_your_phone">Tu teléfono</string>
+    <string name="help_other_brands">Otras marcas</string>
+    <string name="help_open_battery">Abrir ajustes de batería</string>
+    <string name="help_open_battery_summary">Busca Velora y elige «Sin restricciones» o «No optimizar».</string>
+    <string name="help_family_xiaomi">Xiaomi, Redmi y POCO</string>
+    <string name="help_family_samsung">Samsung</string>
+    <string name="help_family_huawei">Huawei y Honor</string>
+    <string name="help_family_oppo">OPPO, realme y OnePlus</string>
+    <string name="help_family_vivo">vivo e iQOO</string>
+    <string name="help_family_other">Otros teléfonos</string>
+    <string name="help_steps_xiaomi">1. Ajustes → Apps → Administrar apps → Velora → Ahorro de batería → Sin restricciones.\n2. Activa «Inicio automático».\n3. En Recientes, mantén presionada Velora y toca el candado para que no se cierre.</string>
+    <string name="help_steps_samsung">1. Ajustes → Batería → Límites de uso en segundo plano: saca a Velora de «Apps en suspensión».\n2. Agrégala a «Apps que nunca se suspenden».</string>
+    <string name="help_steps_huawei">1. Ajustes → Batería → Inicio de aplicaciones → Velora: desactiva «Gestionar automáticamente» y deja activados los tres permisos.</string>
+    <string name="help_steps_oppo">1. Ajustes → Batería → Velora → Permitir actividad en segundo plano.\n2. Ajustes → Apps → Inicio automático: activa Velora.</string>
+    <string name="help_steps_vivo">1. Ajustes → Batería → Consumo alto en segundo plano: permite Velora.\n2. i Manager → Administrador de apps → Inicio automático: activa Velora.</string>
+    <string name="help_steps_other">1. Ajustes → Apps → Velora → Batería → Sin restricciones.\n2. Si las notificaciones o el doble toque dejan de funcionar, vuelve a activarlos en Ajustes → Funciones.</string>
 </resources>

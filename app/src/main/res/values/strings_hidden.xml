@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Apps ocultas con gesto, PIN, espacio privado y respaldo completo (ADR-033, ADR-034, ADR-035). -->
+<resources>
+    <!-- Panel de ocultas -->
+    <string name="hidden_sheet_title">Apps ocultas</string>
+    <string name="hidden_sheet_empty">No hay apps ocultas. Mantén presionada una app y elige «Ocultar».</string>
+    <string name="hidden_unhide">Mostrar de nuevo</string>
+    <string name="home_open_hidden_apps">Abrir apps ocultas</string>
+    <string name="hidden_gesture_hint">Desliza con dos dedos hacia arriba (o pellizca) en el inicio para ver tus apps ocultas.</string>
+    <string name="app_private_badge">Privada</string>
+
+    <!-- Espacio privado (Android 15+) -->
+    <string name="private_space_title">Espacio privado</string>
+    <string name="private_space_locked">Bloqueado: sus apps no se muestran</string>
+    <string name="private_space_unlocked">Desbloqueado: sus apps están en la lista</string>
+    <string name="private_space_unlock">Desbloquear</string>
+    <string name="private_space_lock">Bloquear</string>
+
+    <!-- Pantalla de PIN -->
+    <string name="pin_title_unlock">Escribe tu PIN</string>
+    <string name="pin_title_verify">Escribe tu PIN actual</string>
+    <string name="pin_title_new">Elige un PIN de 4 a 8 dígitos</string>
+    <string name="pin_title_confirm">Repite el PIN</string>
+    <string name="pin_wrong">PIN incorrecto</string>
+    <plurals name="pin_wrong_attempts">
+        <item quantity="one">PIN incorrecto. Te queda %d intento</item>
+        <item quantity="many">PIN incorrecto. Te quedan %d intentos</item>
+        <item quantity="other">PIN incorrecto. Te quedan %d intentos</item>
+    </plurals>
+    <string name="pin_mismatch">Los PIN no coinciden. Elígelo otra vez.</string>
+    <string name="pin_wait">Demasiados intentos. Espera %1$s</string>
+    <plurals name="pin_digits_entered">
+        <item quantity="one">%d dígito escrito</item>
+        <item quantity="many">%d dígitos escritos</item>
+        <item quantity="other">%d dígitos escritos</item>
+    </plurals>
+    <string name="pin_ok">Aceptar</string>
+    <string name="pin_delete">Borrar</string>
+    <string name="pin_cancel">Cancelar</string>
+
+    <!-- Ajustes → PIN de las ocultas -->
+    <string name="hidden_lock_section">PIN de las apps ocultas</string>
+    <string name="hidden_lock_set">Poner un PIN</string>
+    <string name="hidden_lock_set_summary">Pide un PIN antes de mostrar las apps ocultas. Se guarda cifrado y nunca va en los respaldos.</string>
+    <string name="hidden_lock_unlock">Ver las apps ocultas</string>
+    <string name="hidden_lock_unlock_summary">Escribe el PIN para verlas y mostrarlas de nuevo</string>
+    <string name="hidden_lock_change">Cambiar el PIN</string>
+    <string name="hidden_lock_on_summary">Las ocultas piden PIN en el inicio y aquí</string>
+    <string name="hidden_lock_remove">Quitar el PIN</string>
+    <string name="hidden_lock_remove_summary">Las ocultas se verán sin pedir nada</string>
+
+    <!-- Ajustes → Respaldo -->
+    <string name="backup_section">Respaldo</string>
+    <string name="backup_export">Guardar un respaldo</string>
+    <string name="backup_export_summary">Favoritos, carpetas, ocultas, widgets y ajustes en un archivo .velora-backup. Sin notificaciones ni PIN.</string>
+    <string name="backup_include_photo">Incluir la foto de fondo</string>
+    <string name="backup_include_photo_summary">El archivo pesará más</string>
+    <string name="backup_import">Restaurar un respaldo</string>
+    <string name="backup_import_summary">Reemplaza tus listas y ajustes por los del archivo</string>
+    <string name="backup_confirm_title">¿Restaurar el respaldo?</string>
+    <string name="backup_confirm_text">Tus favoritos, carpetas, apps ocultas y ajustes se reemplazarán por los del archivo. Los widgets hay que volver a agregarlos.</string>
+    <string name="backup_confirm_ok">Restaurar</string>
+    <string name="backup_exported">Respaldo guardado</string>
+    <string name="backup_export_failed">No se pudo guardar el respaldo</string>
+    <string name="backup_imported">Respaldo restaurado</string>
+    <string name="backup_import_failed">Ese archivo no es un respaldo de Velora</string>
+    <plurals name="backup_widgets_readd">
+        <item quantity="one">Respaldo restaurado. Vuelve a agregar %d widget desde el inicio.</item>
+        <item quantity="many">Respaldo restaurado. Vuelve a agregar %d widgets desde el inicio.</item>
+        <item quantity="other">Respaldo restaurado. Vuelve a agregar %d widgets desde el inicio.</item>
+    </plurals>
+</resources>

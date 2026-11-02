@@ -49,6 +49,17 @@ internal object IconColorMath {
     private const val DEGREES = 360f
     private const val SECTOR_DEGREES = 60f
 
+    /** Dónde empieza el tono de cada canal dominante, en sextos de vuelta (verde 2, azul 4). */
+    private const val GREEN_SECTOR = 2f
+    private const val BLUE_SECTOR = 4f
+
+    /** Sextos del círculo de tono que se reparten cian→azul y azul→magenta. */
+    private const val CYAN_TO_BLUE = 3
+    private const val BLUE_TO_MAGENTA = 4
+
+    /** Canales de color (rojo, verde, azul) que se suman por cubeta. */
+    private const val RGB_CHANNELS = 3
+
     /** "Vivo": saturación y brillo mínimos del estilo Bright. */
     private const val VIVID_SATURATION = 0.62f
     private const val VIVID_VALUE = 0.96f
@@ -100,8 +111,8 @@ internal object IconColorMath {
         val hue = when {
             delta == 0f -> 0f
             maxC == r -> SECTOR_DEGREES * (((g - b) / delta).mod(HUE_SECTORS.toFloat()))
-            maxC == g -> SECTOR_DEGREES * ((b - r) / delta + 2f)
-            else -> SECTOR_DEGREES * ((r - g) / delta + 4f)
+            maxC == g -> SECTOR_DEGREES * ((b - r) / delta + GREEN_SECTOR)
+            else -> SECTOR_DEGREES * ((r - g) / delta + BLUE_SECTOR)
         }
         return floatArrayOf(hue, if (maxC == 0f) 0f else delta / maxC, maxC)
     }
@@ -115,8 +126,8 @@ internal object IconColorMath {
             0 -> Triple(chroma, x, 0f)
             1 -> Triple(x, chroma, 0f)
             2 -> Triple(0f, chroma, x)
-            3 -> Triple(0f, x, chroma)
-            4 -> Triple(x, 0f, chroma)
+            CYAN_TO_BLUE -> Triple(0f, x, chroma)
+            BLUE_TO_MAGENTA -> Triple(x, 0f, chroma)
             else -> Triple(chroma, 0f, x)
         }
         fun channel(c: Float) = ((c + m) * CHANNEL).roundToInt().coerceIn(0, BYTE)
@@ -149,7 +160,7 @@ internal object IconColorMath {
      */
     fun dominant(pixels: IntArray): Int? {
         val weights = FloatArray(HUE_BUCKETS + 1)
-        val sums = Array(HUE_BUCKETS + 1) { FloatArray(3) }
+        val sums = Array(HUE_BUCKETS + 1) { FloatArray(RGB_CHANNELS) }
         for (pixel in pixels) {
             val a = alpha(pixel) / CHANNEL
             if (a < MIN_ALPHA) continue

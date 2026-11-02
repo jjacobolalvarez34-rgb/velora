@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import app.velora.launcher.core.data.notifications.NotificationsRepository
 import app.velora.launcher.core.model.AppEntry
 import app.velora.launcher.core.model.AppFolder
@@ -20,6 +21,9 @@ import app.velora.launcher.feature.drawer.DrawerUiState
 import app.velora.launcher.feature.folders.AddToFolderSheet
 import app.velora.launcher.feature.folders.FolderActions
 import app.velora.launcher.feature.folders.FolderSheet
+import app.velora.launcher.feature.hidden.HiddenAppsSheet
+import app.velora.launcher.feature.hidden.HiddenViewModel
+import app.velora.launcher.feature.home.FavoritesPickerSheet
 import app.velora.launcher.feature.widgets.HomeMenuSheet
 import app.velora.launcher.feature.widgets.WidgetPickerSheet
 import kotlinx.coroutines.launch
@@ -35,6 +39,7 @@ internal class LauncherSheetsState {
     var openFolder by mutableStateOf<Long?>(null)
     var addToFolder by mutableStateOf<AppEntry?>(null)
     var limitHit by mutableStateOf<LimitHit?>(null)
+    var hiddenApps by mutableStateOf(false)
 }
 
 @Composable
@@ -159,3 +164,37 @@ internal fun rememberFolderActions(container: AppContainer, sheets: LauncherShee
             }
         }
     }
+
+/**
+ * La primera vez, con el inicio sin favoritos, un panel para elegirlos (PRODUCTO, MVP). Hecho o
+ * saltado, no vuelve (se guarda como consejo hecho).
+ */
+@Composable
+internal fun FirstFavoritesPicker(
+    container: AppContainer,
+    theme: ThemeSettings,
+    drawer: DrawerUiState,
+    noFavorites: Boolean,
+) {
+    if (!noFavorites || PICK_FAVORITES in theme.custom.dismissedTips) return
+    val apps = drawer.list.byLetter.values.flatten().distinctBy { it.key }.sortedBy { it.searchKey }
+    if (apps.isEmpty()) return
+    val finish = { chosen: List<AppEntry> ->
+        container.applicationScope.launch {
+            chosen.forEach { container.favoritesRepository.add(it.key) }
+            container.prefsRepository.updateCustom { it.copy(dismissedTips = it.dismissedTips + PICK_FAVORITES) }
+        }
+        Unit
+    }
+    FavoritesPickerSheet(apps = apps, onDone = finish, onSkip = { finish(emptyList()) })
+}
+
+private const val PICK_FAVORITES = "pick_favorites"
+
+/** Panel de apps ocultas (ADR-034): se abre con dos dedos hacia arriba en el inicio. */
+@Composable
+internal fun HiddenAppsHost(container: AppContainer, sheets: LauncherSheetsState, actions: AppActions) {
+    if (!sheets.hiddenApps) return
+    val hiddenViewModel: HiddenViewModel = viewModel(factory = HiddenViewModel.factory(container))
+    HiddenAppsSheet(hiddenViewModel, onOpenApp = { actions.open(it, null) }, onDismiss = { sheets.hiddenApps = false })
+}

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Save or discard the draft -->
+    <string name="personalize_save">Save</string>
+    <string name="personalize_discard">Discard</string>
+    <string name="personalize_unsaved_title">Save your changes?</string>
+    <string name="personalize_unsaved_text">They aren\'t on your home screen yet.</string>
+    <string name="personalize_keep_editing">Keep editing</string>
+
+    <!-- One help line per section -->
+    <string name="personalize_hint_theme">One tap changes background, font, clock and icons.</string>
+    <string name="personalize_hint_background">A photo of yours on top of the theme.</string>
+    <string name="personalize_hint_clock">How the time looks at the top of your home.</string>
+    <string name="personalize_hint_icons">The samples are your apps.</string>
+    <string name="personalize_hint_color">For the alphabet, alerts and some clocks.</string>
+    <string name="personalize_hint_font">The font for all of Velora.</string>
+    <string name="personalize_hint_elements">What shows on your home screen.</string>
+
+    <!-- Group titles -->
+    <string name="personalize_group_presets">Themes</string>
+    <string name="personalize_group_background">Background</string>
+    <string name="personalize_group_history">Previous backgrounds</string>
+    <string name="personalize_group_clock">Clock style</string>
+    <string name="personalize_group_text_size">Text size</string>
+    <string name="personalize_group_font">Font</string>
+    <string name="personalize_group_auto_color">Automatic</string>
+    <string name="personalize_group_colors">Colors</string>
+    <string name="personalize_group_elements">On your home</string>
+
+    <!-- Background -->
+    <string name="personalize_bg_theme">Theme\'s</string>
+    <string name="personalize_bg_pick">Pick photo</string>
+    <string name="personalize_bg_system">Phone\'s</string>
+    <string name="personalize_bg_photo">Previous background %1$d</string>
+    <string name="personalize_bg_delete">Delete this photo</string>
+    <string name="personalize_bg_in_use">In use</string>
+
+    <!-- Color -->
+    <string name="personalize_color_theme_title">Theme color</string>
+    <string name="personalize_color_theme_summary">Each theme brings its own.</string>
+
+    <!-- Settings card -->
+    <string name="personalize_hero_short">Theme, background, clock and icons, with a live preview.</string>
+
+    <!-- New clocks -->
+    <string name="clock_vertical">Vertical</string>
+    <string name="clock_vertical_summary">Time in a column, date beside it.</string>
+    <string name="clock_outline">Outline</string>
+    <string name="clock_outline_summary">Hollow digits with a thin stroke.</string>
+    <string name="clock_minimal">Minimal</string>
+    <string name="clock_minimal_summary">Just the time, small and spaced out.</string>
+    <string name="clock_analog">Analog</string>
+    <string name="clock_analog_summary">A thin dial with hands, no numbers.</string>
+    <string name="clock_words">Words</string>
+    <string name="clock_words_summary">The time in words: “half past seven”.</string>
+
+    <!-- Words clock: hour 0 is twelve. From item 7 on, the hour shown is the next one. -->
+    <string-array name="clock_words_hours">
+        <item>twelve</item>
+        <item>one</item>
+        <item>two</item>
+        <item>three</item>
+        <item>four</item>
+        <item>five</item>
+        <item>six</item>
+        <item>seven</item>
+        <item>eight</item>
+        <item>nine</item>
+        <item>ten</item>
+        <item>eleven</item>
+    </string-array>
+    <string-array name="clock_words_patterns">
+        <item>%1$s o\'clock</item>
+        <item>five past %1$s</item>
+        <item>ten past %1$s</item>
+        <item>quarter past %1$s</item>
+        <item>twenty past %1$s</item>
+        <item>twenty-five past %1$s</item>
+        <item>half past %1$s</item>
+        <item>twenty-five to %1$s</item>
+        <item>twenty to %1$s</item>
+        <item>quarter to %1$s</item>
+        <item>ten to %1$s</item>
+        <item>five to %1$s</item>
+    </string-array>
+</resources>

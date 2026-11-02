@@ -169,6 +169,21 @@ Sencillo a propósito: hora **delgada y grande** (64 sp, ExtraLight) y fecha tra
 - **Clásico** (por defecto): "07:58" y "Lunes, 26 de octubre", a la izquierda.
 - **Centrado**: lo mismo al centro, con la batería discreta junto a la fecha.
 - **Día**: "LUNES" en mayúsculas espaciadas y discretas, la hora, y "26 de octubre · 82 %". (El corte con `BlendMode.Clear` de la 0.4.0 se quitó: se veía forzado.)
+- **Apilado**, **Banda** y **Dúo** (ADR-028): horas sobre minutos enormes; el día gigante de lado a lado; minutos del acento.
+- **Vertical**: horas sobre minutos (60 sp) en una columna angosta, una línea fina de 1 dp y, al lado, el día y la fecha con la batería.
+- **Contorno**: la hora a 104 sp, SemiBold, dibujada solo con su trazo (1,5 dp, `DrawStyle` Stroke); la fecha normal debajo.
+- **Minimal**: solo la hora a 30 sp, Light, con 10 sp de espaciado; debajo la fecha en mayúsculas de 11 sp muy espaciadas.
+- **Analógico**: esfera de 120 dp dibujada en `Canvas`: aro fino, 12 marcas (las de 12/3/6/9 más grandes), agujas redondeadas y un punto del acento al centro; sin números. A un lado, el día y la fecha.
+- **Palabras**: "Las siete y media" / "Half past seven", redondeado a 5 minutos (de "y media" en adelante cuenta hacia la hora siguiente: "veinte para las ocho"). Las frases están en `clock_words_hours` / `clock_words_patterns` de cada idioma; la hora va en el color del texto y el resto más suave. 44 sp, Light.
+
+## 7.1b Personalizar (Ajustes → Personalizar)
+
+- **Orden**: barra superior (atrás, título y, solo con cambios, "Descartar" y "Guardar"); la **vista previa** del inicio en un marco de teléfono (bisel negro de 7 dp, esquinas de 30 dp, sombra de 18 dp) ocupa el 45 % del alto; debajo, un **panel** con esquinas superiores de 28 dp (`surfaceContainer`).
+- La vista previa se maqueta a 360×780 dp y se achica con `Modifier.fitInside` (capa con escala desde la esquina): nunca se re-maqueta al cambiar de sección y no deja bordes vacíos. Muestra barra de estado, reloj, favoritos, el alfabeto en reposo y la rayita de gestos.
+- **Secciones** en una sola fila de pastillas con ícono (la elegida llena del primario y siempre a la vista): Tema · Fondo · Reloj · Íconos · Color · Letra · Elementos. Cada sección: una línea de ayuda corta y títulos de grupo iguales (`titleSmall`).
+- **Tarjetas de opción** (`OptionCard`): rejillas con columnas fijas que reparten el ancho (márgenes de 16 dp, 12 dp entre tarjetas); misma proporción en toda la rejilla, nombre en una línea; elegida = aro de 2 dp del primario + marca con check.
+- **Guardar / descartar**: todo lo que se toca va a un borrador (`ThemeDraft`) que solo se ve en la vista previa; "Guardar" lo escribe de una vez. Salir con cambios pregunta: Guardar / Descartar / Seguir editando.
+- **Fondos anteriores**: se guardan las últimas 8 fotos en `files/backgrounds/`; tocar una la vuelve a poner (en el borrador), la ✕ la borra (la que usa el inicio no se puede borrar). "Del tema" deja de usar la foto sin borrar el archivo.
 
 ## 7.2b Buscador
 

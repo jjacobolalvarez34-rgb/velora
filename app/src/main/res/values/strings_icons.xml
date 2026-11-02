@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nombres de los diseños de íconos de Velora agregados en 0.9 (ADR-028). -->
+<resources>
+    <string name="icon_pack_neon">Neón</string>
+    <string name="icon_pack_duotone">Duotono</string>
+    <string name="icon_pack_pixel">Píxel</string>
+    <string name="icon_pack_gradient">Degradado</string>
+    <string name="icon_pack_outline">Contorno</string>
+    <string name="icon_pack_watercolor">Acuarela</string>
+    <string name="icon_pack_paper">Papel</string>
+    <string name="icon_pack_clay">Arcilla</string>
+</resources>
