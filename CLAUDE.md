@@ -37,6 +37,7 @@ Un launcher **no cambia el sistema operativo**: es la app que Android abre cuand
 | `docs/ROADMAP.md` | Para saber en qué fase estamos y qué sigue |
 | `docs/PENDIENTES.md` | **Al empezar cada sesión**: lo próximo a hacer, en orden |
 | `docs/DECISIONES.md` | Para entender por qué algo se hizo así; registrar decisiones nuevas |
+| `docs/PUBLICACION.md` | Antes de un release: firma (clave fuera de git), compilar y subir a Google Play |
 
 ## Comandos
 

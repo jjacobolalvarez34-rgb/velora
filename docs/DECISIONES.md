@@ -201,6 +201,11 @@ _`compileSdk` actualizado a 37 por ADR-013; `minSdk` y `targetSdk` siguen vigent
 **Por qué:** el teléfono debe quedar exactamente como estaba. Si en Xiaomi los íconos del tema de MIUI no se ven, es porque MIUI aplica sus temas solo en su propio launcher: al volver a él (Ajustes → Apps → Apps predeterminadas → Pantalla de inicio) se ven de nuevo.
 **Consecuencias:** para usar Wallpaper Engine: elegir el fondo en Wallpaper Engine y en Velora el tema "Tu fondo".
 
+## ADR-038 · Clave de release propia — Aceptada (2026-11-02)
+**Contexto:** el APK "oficial" se firmaba con la clave `debug` del PC, y en teléfonos nuevos Play Protect no deja instalar desde cero el APK suelto (B-102). La solución es la Play Store, que exige una clave propia.
+**Decisión:** clave PKCS12 RSA 4096 (alias `velora`, 100 años) en `keystore/velora-release.jks` con sus contraseñas en `keystore.properties`; las dos **fuera de git** y respaldadas fuera del PC. Subida a Play con Play App Signing (nuestra clave queda como clave de subida). Guía completa en `docs/PUBLICACION.md`.
+**Consecuencias:** quien tenga una versión firmada con `debug` (0.1.0–0.9.0) desinstala una vez antes de la 0.9.1 (con respaldo `.velora-backup` antes).
+
 ---
 
 ## Plantilla

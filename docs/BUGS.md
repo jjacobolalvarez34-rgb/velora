@@ -138,3 +138,15 @@ Plantilla (copiar al final, numeración continúa desde B-100):
 **Prueba que lo cubre:** manual (VERIFICACIONES §5): atrás en el inicio no anima ni parpadea. No hay pruebas instrumentadas sin teléfono.
 **Commit/PR:** 0.9.0.
 **Lección:** en un launcher, todo lo que dependa de ON_START debe asumir que el sistema puede parar y arrancar la Activity sin que el usuario salga.
+
+### B-102 · En teléfonos nuevos el APK no se instala desde cero ("No se instaló") `[instalación]` `[play-protect]` — Alto — En progreso
+**Dispositivo / Android / capa:** teléfono de un amigo del autor, Play Protect activado; 0.8.0 y 0.9.0.
+**Pasos para reproducir:** pasar el APK por WhatsApp/Drive e instalarlo en un teléfono sin Velora.
+**Esperado:** se instala.
+**Actual:** "No se instaló". Instalando primero la 0.5 y luego actualizando a la 0.8, sí funciona.
+**Causa raíz (probable, por confirmar desactivando el análisis de Play Protect):** desde la 0.6 el manifiesto declara un servicio de accesibilidad y un lector de notificaciones (y luego contactos, tiempo de uso y espacio privado). Play Protect bloquea con más dureza las instalaciones **nuevas** fuera de la Play Store de apps con esos accesos; las actualizaciones de una app ya instalada no pasan por el mismo filtro. El APK está bien: firma v2 válida, librerías para todas las arquitecturas, minSdk 26.
+**Solución:** distribuir por Google Play (prueba interna) con clave de release propia (ADR-038, `docs/PUBLICACION.md`). Mientras tanto: pausar "Analizar apps con Play Protect" para instalar.
+**Prueba que lo cubre:** manual en teléfono nuevo.
+**Commit/PR:** 0.9.1.
+**Lección:** cada permiso o servicio sensible cambia cómo se distribuye la app; medirlo en un teléfono limpio antes de publicar.
+
